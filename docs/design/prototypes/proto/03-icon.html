@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 人物管理</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <!-- Project Assets: Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@100;300;400;500;700;900&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --white-bg: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-sub: #5C5548;
+            --text-muted: #8B7355;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --border-color: #D3C9B0;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; }
+        .font-display { font-family: 'Noto Serif SC', serif; }
+        .font-editor { font-family: 'Courier Prime', 'Noto Sans SC', monospace; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        .nav-item-active {
+            background-color: rgba(201, 169, 98, 0.1);
+            color: var(--brand-gold) !important;
+            border-right: 3px solid var(--brand-gold);
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation-duration: 0.4s;
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-modal-enter {
+            animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .modal-overlay {
+            background: rgba(26, 26, 26, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        iconify-icon {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        iconify-icon:hover {
+            transform: scale(1.05);
+        }
+
+        /* 8px Grid System spacing helpers */
+        .gap-grid { gap: 1rem; } /* 16px */
+        .p-grid { padding: 2rem; } /* 32px */
+    </style>
+</head>
+<body>
+    <div class="h-screen flex flex-col font-ui paper-texture overflow-hidden">
+        
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Left Sidebar: Standard Navigation -->
+            <aside id="sidebar-left" class="hidden lg:flex relative w-64 border-r border-[#D3C9B0] bg-white flex-col">
+                <!-- Brand Logo: Standard Specification -->
+                <div class="p-6 flex items-center gap-3 overflow-hidden whitespace-nowrap">
+                    <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=32&height=32&box=1A1A1A" class="w-8 h-8 rounded-md shadow-sm" alt="剧灵 Logo">
+                    <span class="font-display font-bold text-xl tracking-tight text-[#1A1A1A]">剧灵</span>
+                </div>
+
+                <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+                    <!-- 剧本 Section -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between px-3 py-2 text-[#5C5548] hover:bg-[#FAF7F0] rounded-lg cursor-pointer group transition-all">
+                            <div class="flex items-center gap-3">
+                                <iconify-icon icon="lucide:scroll" class="text-[24px]"></iconify-icon>
+                                <span class="text-sm font-semibold">剧本</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" class="text-xs text-gray-400 group-hover:text-[#1A1A1A]"></iconify-icon>
+                        </div>
+                        <div class="ml-4 pl-4 border-l border-[#D3C9B0] mt-1 space-y-1">
+                            <div class="group">
+                                <div class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#8B7355] cursor-pointer">
+                                    <iconify-icon icon="lucide:chevron-down" class="text-[10px]"></iconify-icon>
+                                    <span>第 1 集</span>
+                                </div>
+                                <div class="ml-4 space-y-1">
+                                    <a id="nav-script-s1" href="https://p.superdesign.dev/draft/8477954d-2c9e-4d18-a896-fd187e825586" class="block px-3 py-1 text-[11px] text-[#5C5548] hover:text-[#C9A962]">第 1 场：湘西山区</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 人物 Section (Active) -->
+                    <a href="#" id="nav-characters-active" class="nav-item-active flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] transition-all">
+                        <iconify-icon icon="lucide:users" class="text-[24px]"></iconify-icon>
+                        <span class="text-sm font-semibold">人物</span>
+                    </a>
+
+                    <!-- 世界观 Section -->
+                    <a href="https://p.superdesign.dev/draft/61f79fc5-11c6-4a07-98e7-0041c61fdf51" id="nav-worldview-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:globe" class="text-[24px]"></iconify-icon>
+                        <span class="text-sm font-semibold">世界观</span>
+                    </a>
+
+                    <!-- 分镜 Section -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between px-3 py-2 text-[#5C5548] hover:bg-[#FAF7F0] rounded-lg cursor-pointer group transition-all">
+                            <div class="flex items-center gap-3">
+                                <iconify-icon icon="lucide:layout" class="text-[24px]"></iconify-icon>
+                                <span class="text-sm font-semibold">分镜</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-right" class="text-xs text-gray-400"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <!-- 场景 Section -->
+                    <a href="https://p.superdesign.dev/draft/9c027724-7510-4fe4-9509-5f87762565b8" id="nav-scenes-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:map-pin" class="text-[24px]"></iconify-icon>
+                        <span class="text-sm font-semibold">场景</span>
+                    </a>
+                </nav>
+
+                <!-- Bottom Export Link -->
+                <div class="p-4 border-t border-[#D3C9B0]">
+                    <a href="https://p.superdesign.dev/draft/ea66de4c-2713-4859-976a-eb946376d8da" id="nav-export-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:file-up" class="text-[24px]"></iconify-icon>
+                        <span class="text-sm font-medium">剧本导出</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main id="main-content" class="flex-1 flex flex-col overflow-hidden relative">
+                
+                <!-- Toolbar Section -->
+                <div class="w-full bg-white/60 backdrop-blur-sm border-b border-[#D3C9B0] py-4 px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 z-10">
+                    <div class="flex items-center gap-6 flex-1">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-xl font-display font-bold text-[#1A1A1A]">人物管理</h2>
+                            <span class="px-2 py-0.5 bg-[#C9A962]/10 border border-[#C9A962]/30 text-[10px] font-bold text-[#C9A962] rounded uppercase tracking-wider">Characters</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white border border-[#D3C9B0] rounded-full px-4 py-1.5 shadow-sm flex-1 max-w-md">
+                            <iconify-icon icon="lucide:search" class="text-[20px] text-[#1A1A1A]"></iconify-icon>
+                            <input type="text" placeholder="搜索角色名称、性格或关键标签..." class="bg-transparent border-none text-sm focus:outline-none w-full placeholder-[#8B7355]/50">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button id="btn-filter" class="px-4 py-2 bg-white border border-[#D3C9B0] text-[#5C5548] rounded-lg text-sm font-medium hover:bg-[#FAF7F0] transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:filter" class="text-[20px]"></iconify-icon>
+                            <span>筛选</span>
+                        </button>
+                        <button id="btn-sort" class="px-4 py-2 bg-white border border-[#D3C9B0] text-[#5C5548] rounded-lg text-sm font-medium hover:bg-[#FAF7F0] transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:sort-desc" class="text-[20px]"></iconify-icon>
+                            <span>排序</span>
+                        </button>
+                        <button id="btn-add-char" class="px-5 py-2 bg-[#C9A962] text-white rounded-lg text-sm font-semibold shadow-md hover:bg-[#A68A45] transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:plus-square" class="text-[20px]"></iconify-icon>
+                            <span>新增角色</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Characters Content Scroll Area -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-8 space-y-10">
+                    
+                    <!-- Protagonists Section -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#C9A962]"></span>
+                            <h3 class="text-xs font-bold text-[#8B7355] uppercase tracking-[0.2em]">主要角色 (PROTAGONISTS)</h3>
+                        </div>
+                        <!-- Standard Grid: Square Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            
+                            <!-- Character Card: 雾姝 -->
+                            <div onclick="openCharacterModal('雾姝', '主角 / 赶尸师', '22岁', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop', '“魂铃一响，哪怕是白骨也要走完最后一段回家的路。” 雾姝是湘西最后一代正统赶尸师，常年行走于阴阳两界。', '清冷孤傲', '墨色/苍白', '驭尸术、阴阳通灵')" 
+                                 class="group relative aspect-square rounded-lg overflow-hidden border border-[#D3C9B0] bg-[#1A1A1A] cursor-pointer hover:shadow-2xl transition-all duration-500">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
+                                
+                                <!-- Actions: Floating Buttons -->
+                                <div class="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                                    <button class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-[#C9A962] transition-colors">
+                                        <iconify-icon icon="lucide:edit-2" class="text-sm"></iconify-icon>
+                                    </button>
+                                    <button class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-[#C9A962] transition-colors" title="AI 生成新形象">
+                                        <iconify-icon icon="lucide:wand-2" class="text-sm"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h4 class="text-lg font-display font-bold text-white tracking-wide">雾姝</h4>
+                                        <span class="text-[10px] text-[#C9A962] font-bold uppercase tracking-widest">主角</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-white/60 mb-2">
+                                        <span>赶尸师</span>
+                                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                                        <span>22岁</span>
+                                    </div>
+                                    <p class="text-[11px] text-white/40 italic line-clamp-1 border-l border-white/20 pl-2">魂铃一响，哪怕是白骨也要走完回家路</p>
+                                </div>
+                            </div>
+
+                            <!-- Character Card: 盛世安 -->
+                            <div onclick="openCharacterModal('盛世安', '主角 / 破落阔少', '20岁', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop', '湘西首富盛家的独子，在灭门惨案中死里逃生。性格感性多情。', '感性多情', '金棕/破碎', '博闻强识、交际手腕')"
+                                 class="group relative aspect-square rounded-lg overflow-hidden border border-[#D3C9B0] bg-[#1A1A1A] cursor-pointer hover:shadow-2xl transition-all duration-500">
+                                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
+                                
+                                <div class="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                                    <button class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-[#C9A962] transition-colors">
+                                        <iconify-icon icon="lucide:edit-2" class="text-sm"></iconify-icon>
+                                    </button>
+                                    <button class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-[#C9A962] transition-colors">
+                                        <iconify-icon icon="lucide:wand-2" class="text-sm"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h4 class="text-lg font-display font-bold text-white tracking-wide">盛世安</h4>
+                                        <span class="text-[10px] text-[#C9A962] font-bold uppercase tracking-widest">主角</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-white/60 mb-2">
+                                        <span>落魄少爷</span>
+                                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                                        <span>20岁</span>
+                                    </div>
+                                    <p class="text-[11px] text-white/40 italic line-clamp-1 border-l border-white/20 pl-2">我最后悔的事，就是在那天走出了家门</p>
+                                </div>
+                            </div>
+
+                            <!-- Empty State: Add Placeholder -->
+                            <div class="aspect-square border-2 border-dashed border-[#D3C9B0] rounded-lg flex flex-col items-center justify-center p-6 text-center hover:bg-[#C9A962]/5 hover:border-[#C9A962] transition-all cursor-pointer group">
+                                <iconify-icon icon="lucide:plus-square" class="text-[32px] text-[#D3C9B0] group-hover:text-[#C9A962] mb-3 transition-colors"></iconify-icon>
+                                <span class="text-sm font-bold text-[#8B7355] group-hover:text-[#C9A962]">点击新增角色</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Supporting Characters Section -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#8B7355]"></span>
+                            <h3 class="text-xs font-bold text-[#8B7355] uppercase tracking-[0.2em]">配角 (SUPPORTING)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            <!-- Character Card: 柳如烟 -->
+                            <div onclick="openCharacterModal('柳如烟', '反派 / 盛家仇敌', '32岁', 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=1964&auto=format&fit=crop', '美艳绝伦，心狠手辣。盛家覆灭的推手，受命于神秘组织。', '心思诡谲', '绛红/冷艳', '情报刺探、迷药配置')"
+                                 class="group relative aspect-square rounded-lg overflow-hidden border border-[#D3C9B0] bg-[#1A1A1A] cursor-pointer hover:shadow-2xl transition-all duration-500">
+                                <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=1964&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-90 grayscale-[0.3] group-hover:grayscale-0">
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90"></div>
+                                
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h4 class="text-lg font-display font-bold text-white tracking-wide">柳如烟</h4>
+                                        <span class="text-[10px] text-red-400 font-bold uppercase tracking-widest">反派</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-white/60 mb-2">
+                                        <span>盛家仇敌</span>
+                                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                                        <span>32岁</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Helpers & Insights -->
+            <aside id="sidebar-right" class="hidden xl:flex w-72 border-l border-[#D3C9B0] bg-white flex-col">
+                <div class="p-6 border-b border-[#D3C9B0]">
+                    <h3 class="text-sm font-bold text-[#1A1A1A] flex items-center gap-2 mb-4">
+                        <iconify-icon icon="lucide:pie-chart" class="text-[#C9A962]"></iconify-icon>
+                        设定健康度
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[11px] font-bold text-[#5C5548]">
+                                <span>性格丰富度</span>
+                                <span class="text-[#C9A962]">85%</span>
+                            </div>
+                            <div class="w-full h-1 bg-gray-100 rounded-full">
+                                <div class="bg-[#C9A962] h-full w-[85%]"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[11px] font-bold text-[#5C5548]">
+                                <span>戏份平衡度</span>
+                                <span class="text-red-400">偏低</span>
+                            </div>
+                            <div class="w-full h-1 bg-gray-100 rounded-full">
+                                <div class="bg-red-400 h-full w-[35%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 p-6">
+                    <h3 class="text-sm font-bold text-[#1A1A1A] flex items-center gap-2 mb-4">
+                        <iconify-icon icon="lucide:sparkles" class="text-[#C9A962]"></iconify-icon>
+                        AI 创作建议
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-[#F5F1E8] border border-[#D3C9B0]/50 p-4 rounded-lg">
+                            <p class="text-[11px] text-[#5C5548] leading-relaxed">
+                                <span class="font-bold">冲突预警：</span>盛世安的感性特征在第3集中可能会拖慢节奏，建议加入一个由于他性格导致的紧急突发状况。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-[#D3C9B0] bg-[#FAF7F0]">
+                    <div class="relative">
+                        <input type="text" placeholder="询问 AI 人物建议..." class="w-full pl-3 pr-10 py-2.5 bg-white border border-[#D3C9B0] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#C9A962]">
+                        <button class="absolute right-2 top-2 p-1 text-[#C9A962]"><iconify-icon icon="lucide:send-horizontal"></iconify-icon></button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer id="status-bar" class="h-8 bg-white border-t border-[#D3C9B0] text-[#8B7355] text-[10px] px-6 flex items-center justify-between z-50 uppercase tracking-widest font-medium">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:users-2" class="text-[#C9A962]"></iconify-icon>
+                    <span>Total: 12 Characters</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:layers" class="text-[#C9A962]"></iconify-icon>
+                    <span>3 Protagonists</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                    <span>Cloud Synced</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Modal Implementation: Integrated Design -->
+        <div id="character-detail-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-0 md:p-10 transition-all duration-500">
+            <div class="absolute inset-0 modal-overlay" onclick="closeCharacterModal()"></div>
+            <div class="relative bg-[#F5F1E8] w-full max-w-6xl h-full md:h-[85vh] rounded-none md:rounded-xl shadow-2xl flex flex-col md:flex-row overflow-hidden border-[#D3C9B0] animate-modal-enter">
+                
+                <!-- Modal Left: Hero Image Section -->
+                <div class="md:w-[40%] h-64 md:h-full relative overflow-hidden flex-shrink-0 bg-[#1A1A1A]">
+                    <img id="modal-image" src="" alt="" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span id="modal-role-badge" class="inline-block px-3 py-1 bg-[#C9A962] text-[10px] font-bold rounded-full tracking-widest uppercase mb-4"></span>
+                        <h2 id="modal-name" class="text-4xl lg:text-5xl font-display font-bold italic tracking-tighter"></h2>
+                    </div>
+                    <!-- AI Wand on Modal Image -->
+                    <button class="absolute top-6 left-6 p-2 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-[#C9A962] transition-colors border border-white/20">
+                        <iconify-icon icon="lucide:sparkles" class="text-[24px] text-[#C9A962]"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Modal Right: Detail Panels -->
+                <div class="flex-1 flex flex-col h-full relative bg-white">
+                    <div class="absolute top-6 right-6 z-20">
+                        <button onclick="closeCharacterModal()" class="w-10 h-10 rounded-full bg-[#FAF7F0] border border-[#D3C9B0] flex items-center justify-center text-[#1A1A1A] hover:bg-[#C9A962] hover:text-white transition-all">
+                            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 space-y-10">
+                        <!-- Profile Intro -->
+                        <section>
+                            <div class="flex items-center gap-4 mb-4">
+                                <span id="modal-age" class="text-sm font-bold text-[#8B7355] border-b border-[#C9A962]"></span>
+                                <span class="text-[10px] text-[#A0A0A0] uppercase tracking-widest font-bold">Creation Status: Drafted</span>
+                            </div>
+                            <p id="modal-description" class="text-[#5C5548] leading-[1.8] font-ui text-[15px] italic border-l-4 border-[#C9A962]/30 pl-6"></p>
+                        </section>
+
+                        <!-- Character Attributes Grid -->
+                        <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="p-4 rounded-lg bg-[#FAF7F0] border border-[#D3C9B0]/50">
+                                <h4 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <iconify-icon icon="lucide:user" class="text-[#C9A962]"></iconify-icon> 性格关键词
+                                </h4>
+                                <p id="modal-personality" class="text-sm font-bold text-[#1A1A1A]"></p>
+                            </div>
+                            <div class="p-4 rounded-lg bg-[#FAF7F0] border border-[#D3C9B0]/50">
+                                <h4 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <iconify-icon icon="lucide:palette" class="text-[#C9A962]"></iconify-icon> 色彩意向
+                                </h4>
+                                <p id="modal-color" class="text-sm font-bold text-[#1A1A1A]"></p>
+                            </div>
+                            <div class="p-4 rounded-lg bg-[#FAF7F0] border border-[#D3C9B0]/50">
+                                <h4 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <iconify-icon icon="lucide:zap" class="text-[#C9A962]"></iconify-icon> 核心技能
+                                </h4>
+                                <p id="modal-ability" class="text-sm font-bold text-[#1A1A1A]"></p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Action Toolbar -->
+                    <div class="p-6 border-t border-[#D3C9B0] bg-[#FAF7F0] flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 flex-1 sm:flex-none">
+                            <button class="flex-1 sm:flex-none px-6 py-2.5 bg-[#1A1A1A] text-white rounded-lg text-sm font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                                <iconify-icon icon="lucide:edit-3" class="text-[20px]"></iconify-icon>
+                                <span>编辑设定</span>
+                            </button>
+                            <button class="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-[#D3C9B0] text-[#5C5548] rounded-lg text-sm font-semibold hover:bg-[#F5F1E8] transition-all flex items-center justify-center gap-2">
+                                <iconify-icon icon="lucide:message-square"></iconify-icon>
+                                <span>添加批注</span>
+                            </button>
+                            <button class="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-[#D3C9B0] text-[#5C5548] rounded-lg text-sm font-semibold hover:bg-[#F5F1E8] transition-all flex items-center justify-center gap-2">
+                                <iconify-icon icon="lucide:share-2" class="text-[20px]"></iconify-icon>
+                                <span>分享设定</span>
+                            </button>
+                        </div>
+                        <button class="px-6 py-2.5 text-[#C96262] hover:bg-red-50 rounded-lg text-sm font-bold transition-all flex items-center gap-2 border border-transparent hover:border-red-100">
+                            <iconify-icon icon="lucide:trash-2" class="text-[20px]"></iconify-icon>
+                            <span>移除角色</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openCharacterModal(name, role, age, image, description, personality, color, ability) {
+            const modal = document.getElementById('character-detail-modal');
+            document.getElementById('modal-name').innerText = name;
+            document.getElementById('modal-role-badge').innerText = role;
+            document.getElementById('modal-age').innerText = age;
+            document.getElementById('modal-image').src = image;
+            document.getElementById('modal-description').innerText = description;
+            document.getElementById('modal-personality').innerText = personality;
+            document.getElementById('modal-color').innerText = color;
+            document.getElementById('modal-ability').innerText = ability;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCharacterModal() {
+            const modal = document.getElementById('character-detail-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCharacterModal();
+        });
+    </script>
+</body>
+</html>

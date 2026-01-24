@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 分镜设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Ma+Shan+Zheng&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #0D0D0D;
+            --paper-cream: #F2EDE5;
+            --paper-warm: #E8DFD4;
+            --gold-primary: #C9A962;
+            --gold-dark: #8B7355;
+            --cinnabar: #C8553D;
+            --jade: #5B7F6F;
+            --text-muted: #8B7355;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+        }
+
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-calligraphy {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-cream);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gold-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        .sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--gold-dark);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+        }
+
+        .nav-item.active {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+            font-weight: 600;
+            border-right: 3px solid var(--gold-primary);
+            border-radius: 0;
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--gold-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edge-toggle:hover {
+            background: var(--paper-warm);
+            border-color: var(--gold-primary);
+        }
+
+        .toggle-left {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        /* Storyboard Four-Column Layout */
+        .storyboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .storyboard-table thead {
+            background: var(--paper-warm);
+        }
+
+        .storyboard-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--gold-dark);
+        }
+
+        .storyboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gold-dark);
+            vertical-align: top;
+        }
+
+        .storyboard-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .storyboard-table tr:hover {
+            background: rgba(201, 169, 98, 0.03);
+        }
+
+        .col-shot {
+            width: 10%;
+            text-align: center;
+        }
+
+        .col-visual {
+            width: 30%;
+        }
+
+        .col-action {
+            width: 35%;
+        }
+
+        .col-camera {
+            width: 25%;
+        }
+
+        .shot-number {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            color: var(--gold-primary);
+            font-size: 1.125rem;
+        }
+
+        .shot-frame {
+            aspect-ratio: 16/9;
+            background: var(--paper-warm);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--gold-dark);
+        }
+
+        .shot-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .shot-frame-placeholder {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .shot-frame-placeholder iconify-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .action-text {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--ink-black);
+        }
+
+        .camera-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .camera-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--paper-warm);
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .tag-wide { color: var(--jade); }
+        .tag-close { color: var(--gold-primary); }
+        .tag-pan { color: var(--cinnabar); }
+        .tag-tilt { color: var(--gold-dark); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-primary);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden">
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left">
+        <iconify-icon id="icon-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right">
+        <iconify-icon id="icon-right" icon="lucide:chevron-right" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar-left" class="sidebar w-64 shrink-0 flex flex-col">
+        <!-- Logo -->
+        <a href="00-welcome.html" class="p-6 border-b border-[#C9A962]/20 flex items-center gap-3 hover:opacity-80">
+            <div class="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-lg flex items-center justify-center">
+                <iconify-icon icon="lucide:feather" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="font-serif-cn font-bold text-2xl">剧灵</h1>
+                <p class="text-[10px] text-[#C9A962] font-bold tracking-widest uppercase">Scripter.art</p>
+            </div>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <a href="01-dashboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span>控制台</span>
+            </a>
+            <a href="02-editor.html" class="nav-item">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span>剧本</span>
+            </a>
+            <a href="03-characters.html" class="nav-item">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span>人物</span>
+            </a>
+            <a href="04-scenes.html" class="nav-item">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span>场景</span>
+            </a>
+            <a href="05-worldview.html" class="nav-item">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span>世界观</span>
+            </a>
+            <a href="06-storyboard.html" class="nav-item active">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span>分镜</span>
+            </a>
+        </nav>
+
+        <!-- Version -->
+        <div class="p-4 border-t border-[#C9A962]/20 text-center">
+            <p class="text-[10px] text-[#8B7355] font-bold uppercase tracking-widest">v5.0 Spirit Edition</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <!-- Header -->
+        <header class="h-16 bg-white/90 border-b border-[#C9A962]/20 flex items-center justify-between px-8 shrink-0">
+            <div>
+                <h1 class="font-serif-cn font-bold text-lg">分镜设计</h1>
+                <p class="text-xs text-[#8B7355]">第 1 场：湘西山区·夜·外</p>
+            </div>
+            <button class="px-5 py-2 bg-gradient-to-r from-[#C9A962] to-[#8B7355] text-white rounded-lg font-semibold hover:shadow-lg transition-all">
+                <iconify-icon icon="lucide:plus" class="inline mr-2"></iconify-icon>
+                添加镜头
+            </button>
+        </header>
+
+        <!-- Storyboard Content -->
+        <div class="flex-1 overflow-auto p-8">
+            <div class="max-w-5xl mx-auto">
+                <table class="storyboard-table">
+                    <thead>
+                        <tr>
+                            <th class="col-shot">镜号</th>
+                            <th class="col-visual">画面</th>
+                            <th class="col-action">动作描述</th>
+                            <th class="col-camera">运镜建议</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="col-shot">
+                                <div class="shot-number">1</div>
+                            </td>
+                            <td class="col-visual">
+                                <div class="shot-frame">
+                                    <img src="https://images.unsplash.com/photo-1518173946687-a4c036bc6a67?auto=format&fit=crop&q=80&w=400"
+                                        alt="Scene 1">
+                                </div>
+                            </td>
+                            <td class="col-action">
+                                <p class="action-text">
+                                    △ 空镜。月黑风高，雾气如潮水般在密林中翻涌。山路崎岖蜿蜒，
+                                    两侧古树参天，枝桠在夜色中如怪兽伸出的爪牙。
+                                </p>
+                            </td>
+                            <td class="col-camera">
+                                <div class="camera-info">
+                                    <span class="camera-tag tag-wide">全景</span>
+                                    <span class="camera-tag tag-pan">缓慢横移</span>
+                                    <p>营造神秘氛围</p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-shot">
+                                <div class="shot-number">2</div>
+                            </td>
+                            <td class="col-visual">
+                                <div class="shot-frame">
+                                    <img src="https://images.unsplash.com/photo-1509248961725-9d3c0c8a00e6?auto=format&fit=crop&q=80&w=400"
+                                        alt="Scene 2">
+                                </div>
+                            </td>
+                            <td class="col-action">
+                                <p class="action-text">
+                                    △ 远处，隐约传来阵阵低沉的铃声，回荡在空旷的山谷。
+                                    雾气中一个身影缓缓出现。
+                                </p>
+                            </td>
+                            <td class="col-camera">
+                                <div class="camera-info">
+                                    <span class="camera-tag tag-wide">远景</span>
+                                    <span class="camera-tag tag-tilt">俯拍</span>
+                                    <p>突出孤寂感</p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-shot">
+                                <div class="shot-number">3</div>
+                            </td>
+                            <td class="col-visual">
+                                <div class="shot-frame">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+                                        alt="Scene 3">
+                                </div>
+                            </td>
+                            <td class="col-action">
+                                <p class="action-text">
+                                    △ 雾姝手持摄魂铃，缓缓从迷雾中走出。
+                                    她目光如炬，望着深林尽头，神情凝重。
+                                </p>
+                            </td>
+                            <td class="col-camera">
+                                <div class="camera-info">
+                                    <span class="camera-tag tag-close">特写</span>
+                                    <span class="camera-tag tag-pan">跟随镜头</span>
+                                    <p>聚焦人物神态</p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-shot">
+                                <div class="shot-number">4</div>
+                            </td>
+                            <td class="col-visual">
+                                <div class="shot-frame">
+                                    <div class="shot-frame-placeholder">
+                                        <iconify-icon icon="lucide:image"></iconify-icon>
+                                        暂无画面
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-action">
+                                <p class="action-text">
+                                    △ 雾姝猛地摇动铜铃。铃声清脆却透着一股肃杀之气。
+                                    四周的浓雾似乎在铃声干扰下，竟然开始有规律地退散。
+                                </p>
+                            </td>
+                            <td class="col-camera">
+                                <div class="camera-info">
+                                    <span class="camera-tag tag-close">近景</span>
+                                    <span class="camera-tag tag-tilt">仰拍</span>
+                                    <p>突出力量感</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar - AI Assistant -->
+    <aside id="sidebar-right" class="sidebar sidebar-right w-80 shrink-0 flex flex-col">
+        <!-- Spirit Status -->
+        <div class="p-4 border-b border-[#C9A962]/20">
+            <div class="text-center p-4 bg-gradient-to-br from-[#F2EDE5] to-[#E8DFD4] rounded-lg border border-[#C9A962]/30">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center">
+                    <span class="font-calligraphy text-2xl text-white">灵</span>
+                </div>
+                <h4 class="font-serif-cn font-bold">墨韵</h4>
+                <p class="text-xs text-[#8B7355]">木火通明 · 静默观察中</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- AI Message -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center shrink-0">
+                    <span class="font-calligraphy text-sm text-white">灵</span>
+                </div>
+                <div class="flex-1 bg-white rounded-lg p-3 border border-[#C9A962]/20">
+                    <p class="text-sm">你的分镜设计很有层次！从全景到特写的切换很好地营造了紧张氛围。需要我建议第 4 镜的画面吗？</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-[#C9A962]/20">
+            <div class="flex gap-2">
+                <input type="text" placeholder="与墨韵对话..."
+                    class="flex-1 px-4 py-2 rounded-lg border border-[#C9A962]/30 focus:outline-none focus:border-[#C9A962] text-sm">
+                <button class="p-2 bg-[#C9A962] text-white rounded-lg hover:bg-[#8B7355] transition-colors">
+                    <iconify-icon icon="lucide:send"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-${side}`);
+            const isCollapsed = side === 'right'
+                ? sidebar.classList.toggle('sidebar-right-collapsed')
+                : sidebar.classList.toggle('sidebar-collapsed');
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+    </script>
+</body>
+
+</html>

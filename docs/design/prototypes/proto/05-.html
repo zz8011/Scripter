@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 社交认证确认</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Prefetch neighboring pages -->
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/08a00f2a-59f6-4413-9046-0bb937971ea1" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/80076394-5172-4ff2-a758-e9d5a400781e" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--ink-black);
+        }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+        .font-display { font-family: 'Noto Serif SC', serif; letter-spacing: -0.02em; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            position: relative;
+        }
+
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather {
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
+        .stagger-in {
+            animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fade-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes breathing-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .animate-breathing-glow {
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+
+        .logo-box {
+            background-color: var(--ink-black);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        /* View Transitions */
+        @view-transition { navigation: auto; }
+
+        ::view-transition-old(brand-side),
+        ::view-transition-new(brand-side),
+        ::view-transition-old(logo-corner),
+        ::view-transition-new(logo-corner),
+        ::view-transition-old(footer-copyright),
+        ::view-transition-new(footer-copyright) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-old(main-content) {
+            animation: 0.25s ease-out both fade-out;
+        }
+        ::view-transition-new(main-content) {
+            animation: 0.25s ease-in 0.1s both fade-in;
+        }
+
+        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        ::view-transition-old(root), ::view-transition-new(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+    </style>
+</head>
+<body class="font-ui">
+    <div class="min-h-screen flex flex-col md:flex-row bg-white">
+        
+        <!-- PERSISTENT: 左侧品牌故事区域 -->
+        <div style="view-transition-name: brand-side" class="hidden md:flex md:w-[38.2%] bg-[#1A1A1A] flex-col justify-between p-12 lg:p-24 overflow-hidden relative border-r border-[#2A2A2A]">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="absolute w-[70rem] h-[70rem] bg-[radial-gradient(circle,rgba(201,169,98,0.12)_0%,transparent_70%)] animate-breathing-glow"></div>
+                <iconify-icon icon="lucide:feather" class="text-[45rem] text-[#C9A962] opacity-15 animate-brand-feather"></iconify-icon>
+            </div>
+
+            <div class="relative z-10">
+                <div class="w-16 h-[2px] bg-[#C9A962] mb-12 stagger-in"></div>
+                <h1 class="font-display text-2xl lg:text-3xl xl:text-4xl text-white leading-relaxed stagger-in delay-1">
+                    像作家一样思考，<br/><br/>像艺术家一样感受
+                </h1>
+            </div>
+
+            <div class="relative z-10">
+                <div class="mb-6 stagger-in delay-2">
+                    <p class="text-xl lg:text-2xl text-[#C9A962] font-medium mb-5 tracking-wide">灵感，在剧本中苏醒</p>
+                    <p class="text-[#A0A0A0] italic text-lg opacity-80 font-light">“创作路上，你不孤单”</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERSISTENT: 移动端顶部 -->
+        <div class="md:hidden paper-texture py-12 px-8 flex flex-col items-center text-center border-b border-[#D3C9B0]">
+             <div class="logo-box w-12 h-12 mb-6">
+                <iconify-icon icon="lucide:feather" class="text-2xl text-[#C9A962] "></iconify-icon>
+            </div>
+            <h1 class="font-display text-3xl text-[#1A1A1A] tracking-tight">剧灵</h1>
+            <p class="text-sm text-[#5C5548] mt-3 font-medium tracking-[0.2em]">一支懂你的笔</p>
+        </div>
+
+        <!-- 右侧区域 -->
+        <div class="flex-1 bg-white flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 relative">
+            
+            <!-- PERSISTENT: 右上角导航 (Desktop) -->
+            <div style="view-transition-name: logo-corner" class="absolute top-12 left-12 md:left-auto md:right-12 flex flex-col items-start md:items-end z-20">
+                <div class="hidden md:flex flex-col items-end">
+                    <div class="flex items-center gap-3">
+                        <div class="logo-box w-10 h-10">
+                            <iconify-icon icon="lucide:feather" class="text-xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <span class="font-display text-2xl text-[#1A1A1A] font-semibold">剧灵</span>
+                    </div>
+                    <p class="text-xs text-[#5C5548] font-medium mt-2 tracking-widest uppercase">一支懂你的笔</p>
+                </div>
+            </div>
+
+            <!-- DYNAMIC: 社交认证确认内容 -->
+            <main style="view-transition-name: main-content" class="w-full max-w-sm lg:max-w-md flex flex-col items-center">
+                
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-50 text-green-600 mb-6">
+                        <iconify-icon icon="lucide:check-circle-2" class="text-5xl"></iconify-icon>
+                    </div>
+                    <h2 class="font-display text-3xl text-[#1A1A1A] mb-2">认证成功</h2>
+                    <p class="text-[#5C5548]">已通过第三方社交账号安全登录</p>
+                </div>
+
+                <!-- 用户卡片 -->
+                <div class="w-full bg-[#FAF7F0] border border-[#D3C9B0] rounded-2xl p-6 flex items-center gap-5 mb-10 shadow-sm">
+                    <div class="relative">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" class="w-20 h-20 rounded-xl object-cover bg-white p-1 border border-[#D3C9B0]">
+                        <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md">
+                             <iconify-icon icon="ic:baseline-wechat" class="text-lg text-[#09B81A]"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold uppercase tracking-widest text-[#A0A0A0]">当前登录</span>
+                            <span class="px-2 py-0.5 bg-[#C9A962]/10 text-[#C9A962] text-[10px] font-bold rounded">已绑定</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#1A1A1A]">灵感捕手_Aria</h3>
+                        <p class="text-sm text-[#8B7355]">账号 ID: sc_8902143</p>
+                    </div>
+                </div>
+
+                <div class="w-full space-y-4">
+                    <a id="cta-continue-to-dashboard" href="https://p.superdesign.dev/draft/80076394-5172-4ff2-a758-e9d5a400781e" class="w-full flex items-center justify-center py-4 bg-[#C9A962] hover:bg-[#A68A45] text-white rounded-xl font-bold text-xl shadow-xl shadow-amber-900/15 transition-all active:scale-[0.98] group">
+                        <span>进入创作空间</span>
+                        <iconify-icon icon="lucide:arrow-right" class="ml-2 group-hover:translate-x-1 transition-transform"></iconify-icon>
+                    </a>
+                    
+                    <div class="flex gap-4">
+                        <a id="switch-account-link" href="https://p.superdesign.dev/draft/08a00f2a-59f6-4413-9046-0bb937971ea1" class="flex-1 flex items-center justify-center gap-2 py-3.5 border border-[#D3C9B0] rounded-xl hover:bg-[#FAF7F0] transition-all text-[#5C5548] font-semibold text-sm">
+                            <iconify-icon icon="lucide:user-minus" class="text-lg"></iconify-icon>
+                            切换账号
+                        </a>
+                        <button id="profile-settings-btn" class="flex-1 flex items-center justify-center gap-2 py-3.5 border border-[#D3C9B0] rounded-xl hover:bg-[#FAF7F0] transition-all text-[#5C5548] font-semibold text-sm">
+                            <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon>
+                            账号设置
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-4 bg-amber-50 rounded-lg border border-amber-100/50 flex gap-3 items-start">
+                    <iconify-icon icon="lucide:info" class="text-amber-500 mt-0.5"></iconify-icon>
+                    <p class="text-xs text-amber-800 leading-relaxed">
+                        温馨提示：您的社交账号已与剧灵账号成功关联。下次登录时可直接点击社交图标，无需重复验证。
+                    </p>
+                </div>
+
+            </main>
+
+            <!-- PERSISTENT: 底部版权 -->
+            <div style="view-transition-name: footer-copyright" class="mt-auto pt-24 pb-4 text-[10px] text-[#A0A0A0] text-center tracking-wider uppercase opacity-80">
+                © 2024 SCRIPTER · 剧灵. 版权所有
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟加载逻辑或交互效果
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Social Auth Confirmation Loaded');
+        });
+    </script>
+</body>
+</html>

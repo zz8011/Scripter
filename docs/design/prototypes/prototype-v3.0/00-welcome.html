@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 欢迎使用一支懂你的笔</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            color: var(--ink-black);
+            overflow: hidden;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-mono-script {
+            font-family: 'Courier Prime', 'Noto Sans SC', monospace;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(211, 201, 176, 0.4);
+            box-shadow: 0 10px 30px -5px rgba(26, 26, 26, 0.05);
+        }
+
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(201, 169, 98, 0.2);
+        }
+
+        .logo-box {
+            background-color: var(--ink-black);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo-box:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .stipple-bg {
+            background-image: radial-gradient(var(--border-beige) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .input-gold:focus {
+            border-color: var(--brand-gold);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center relative stipple-bg">
+
+    <!-- Decorative Elements -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#C9A962]/10 rounded-full blur-[100px] pointer-events-none">
+    </div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#C9A962]/10 rounded-full blur-[100px] pointer-events-none">
+    </div>
+
+    <div
+        class="w-full max-w-4xl grid md:grid-cols-2 gap-0 relative z-10 glass-card rounded-3xl overflow-hidden shadow-2xl">
+
+        <!-- Left Side: Brand & Visuals -->
+        <div class="bg-[#1A1A1A] p-12 flex flex-col justify-between relative overflow-hidden">
+            <!-- Background Texture -->
+            <div class="absolute inset-0 opacity-5 pointer-events-none">
+                <iconify-icon icon="lucide:feather"
+                    class="text-[400px] text-[#C9A962] absolute -top-20 -left-20 rotate-12"></iconify-icon>
+            </div>
+
+            <div class="relative z-10">
+                <div class="logo-box mb-8">
+                    <iconify-icon icon="lucide:feather" class="text-3xl text-[#C9A962]"></iconify-icon>
+                </div>
+                <h1 class="text-white font-display text-4xl font-bold leading-tight mb-4">
+                    剧灵 <br />
+                    <span class="text-[#C9A962]">让灵感，在剧本中苏醒</span>
+                </h1>
+                <p class="text-gray-400 font-ui text-sm max-w-xs leading-relaxed">
+                    一支懂你的笔 — AI 驱动的短剧剧本创作管理平台，帮助你高效完成从世界观构建到制作准备。
+                </p>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 py-4 border-t border-white/5">
+                    <div class="flex -space-x-2">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                            class="w-8 h-8 rounded-full border-2 border-[#1A1A1A]" alt="User" />
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+                            class="w-8 h-8 rounded-full border-2 border-[#1A1A1A]" alt="User" />
+                        <div
+                            class="w-8 h-8 rounded-full border-2 border-[#1A1A1A] bg-[#C9A962] flex items-center justify-center text-[10px] font-bold text-[#1A1A1A]">
+                            +2k
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400 font-ui">已有多位编剧在使用</span>
+                </div>
+                <p class="text-[10px] text-gray-600 font-ui uppercase tracking-widest mt-4">
+                    © 2026 SCRIPTER · 品牌金句：创作路上，你不孤单
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side: Auth Form -->
+        <div class="p-12 bg-white/40 flex flex-col justify-center">
+            <div id="login-form" class="fade-in">
+                <h2 class="font-display text-2xl font-bold mb-2">欢迎回来</h2>
+                <p class="text-[#8B7355] text-sm mb-10">请登录您的账户以继续创作</p>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-[#1A1A1A] uppercase tracking-wider mb-2">邮箱地址</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#A0A0A0]">
+                                <iconify-icon icon="lucide:mail" class="text-xl"></iconify-icon>
+                            </span>
+                            <input type="email" placeholder="example@email.com"
+                                class="w-full pl-12 pr-4 py-3 bg-white border border-[#D3C9B0] rounded-xl font-ui text-sm input-gold transition-all" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-[#1A1A1A] uppercase tracking-wider mb-2">密码</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#A0A0A0]">
+                                <iconify-icon icon="lucide:lock" class="text-xl"></iconify-icon>
+                            </span>
+                            <input type="password" placeholder="••••••••"
+                                class="w-full pl-12 pr-4 py-3 bg-white border border-[#D3C9B0] rounded-xl font-ui text-sm input-gold transition-all" />
+                            <button
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-[#C9A962] hover:text-[#A68A45] transition-colors">
+                                <iconify-icon icon="lucide:eye" class="text-xl"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox"
+                                class="w-4 h-4 rounded border-[#D3C9B0] text-[#C9A962] focus:ring-[#C9A962]" />
+                            <span class="text-xs text-[#5C5548] group-hover:text-[#1A1A1A] transition-colors">记住我</span>
+                        </label>
+                        <a href="#" class="text-xs text-[#C9A962] font-bold hover:underline">忘记密码?</a>
+                    </div>
+
+                    <button onclick="window.location.href='01-dashboard.html'"
+                        class="w-full py-4 bg-[#C9A962] hover:bg-[#D4B978] active:bg-[#B89A5A] text-[#1A1A1A] font-bold rounded-xl transition-all shadow-xl shadow-[#C9A962]/20 flex items-center justify-center gap-2">
+                        <span>登录剧灵</span>
+                        <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+                    </button>
+
+                    <div class="relative flex items-center py-2">
+                        <div class="flex-grow border-t border-[#D3C9B0]/50"></div>
+                        <span class="flex-shrink mx-4 text-xs text-[#A0A0A0]">或者</span>
+                        <div class="flex-grow border-t border-[#D3C9B0]/50"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button
+                            class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-[#D3C9B0] rounded-xl hover:bg-gray-50 transition-all font-ui text-xs font-medium">
+                            <iconify-icon icon="lucide:chrome" class="text-lg text-blue-500"></iconify-icon>
+                            <span>Google</span>
+                        </button>
+                        <button
+                            class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-[#D3C9B0] rounded-xl hover:bg-gray-50 transition-all font-ui text-xs font-medium">
+                            <iconify-icon icon="lucide:github" class="text-lg text-[#1A1A1A]"></iconify-icon>
+                            <span>Github</span>
+                        </button>
+                    </div>
+
+                    <p class="text-center text-xs text-[#5C5548] mt-8">
+                        还没有账户? <a href="#" class="text-[#C9A962] font-bold hover:underline">免费注册</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

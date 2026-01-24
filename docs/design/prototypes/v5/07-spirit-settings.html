@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 剧灵设置</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Ma+Shan+Zheng&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #0D0D0D;
+            --paper-cream: #F2EDE5;
+            --paper-warm: #E8DFD4;
+            --gold-primary: #C9A962;
+            --gold-dark: #8B7355;
+            --cinnabar: #C8553D;
+            --jade: #5B7F6F;
+            --text-muted: #8B7355;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+        }
+
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-calligraphy {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-cream);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gold-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+        }
+
+        .nav-item.active {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+            font-weight: 600;
+            border-right: 3px solid var(--gold-primary);
+            border-radius: 0;
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--gold-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edge-toggle:hover {
+            background: var(--paper-warm);
+            border-color: var(--gold-primary);
+        }
+
+        .toggle-left {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        /* Spirit Avatar Large */
+        .spirit-avatar-large {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .spirit-avatar-large::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-primary);
+            animation: rotate 8s linear infinite;
+        }
+
+        .spirit-avatar-large::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: var(--paper-cream);
+        }
+
+        .spirit-avatar-inner {
+            position: relative;
+            z-index: 1;
+            font-size: 5rem;
+            color: var(--gold-primary);
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Bazi Grid Large */
+        .bazi-grid-large {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            padding: 2rem;
+            background: var(--paper-warm);
+            border-radius: 1rem;
+            border: 2px solid var(--gold-dark);
+        }
+
+        .bazi-pillar {
+            text-align: center;
+            padding: 1rem;
+            background: var(--paper-cream);
+            border-radius: 0.5rem;
+            border: 1px solid var(--gold-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bazi-pillar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(201, 169, 98, 0.1) 100%);
+        }
+
+        .bazi-pillar .heaven {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink-black);
+            position: relative;
+            z-index: 1;
+        }
+
+        .bazi-pillar .earth {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cinnabar);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bazi-label-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .bazi-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+        }
+
+        /* Element Indicators */
+        .element-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .element-wood {
+            background: rgba(91, 127, 111, 0.1);
+            color: var(--jade);
+            border: 1px solid var(--jade);
+        }
+
+        .element-fire {
+            background: rgba(200, 85, 61, 0.1);
+            color: var(--cinnabar);
+            border: 1px solid var(--cinnabar);
+        }
+
+        .element-earth {
+            background: rgba(201, 169, 98, 0.1);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+        }
+
+        .element-metal {
+            background: rgba(139, 115, 85, 0.1);
+            color: var(--gold-dark);
+            border: 1px solid var(--gold-dark);
+        }
+
+        .element-water {
+            background: rgba(13, 13, 13, 0.1);
+            color: var(--ink-black);
+            border: 1px solid var(--ink-black);
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border: 1px solid var(--gold-dark);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        /* Quote Block */
+        .quote-block {
+            position: relative;
+            padding: 2rem;
+            background: var(--paper-warm);
+            border-left: 4px solid var(--gold-primary);
+            border-radius: 0 1rem 1rem 0;
+        }
+
+        .quote-block::before {
+            content: '"';
+            position: absolute;
+            top: 0;
+            left: 1rem;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 4rem;
+            color: var(--gold-primary);
+            opacity: 0.2;
+            line-height: 1;
+        }
+
+        .quote-text {
+            position: relative;
+            z-index: 1;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.25rem;
+            font-style: italic;
+            color: var(--ink-black);
+        }
+
+        /* Input */
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gold-dark);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: var(--paper-cream);
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+        }
+
+        /* Button */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 169, 98, 0.4);
+        }
+
+        /* Personality Traits Grid */
+        .trait-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .trait-card {
+            padding: 1rem;
+            background: var(--paper-cream);
+            border: 1px solid var(--gold-dark);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .trait-card:hover {
+            border-color: var(--gold-primary);
+            background: var(--paper-warm);
+        }
+
+        .trait-card .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .trait-card .name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .trait-card .desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-primary);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden">
+    <!-- Edge Toggle -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left">
+        <iconify-icon id="icon-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar-left" class="sidebar w-64 shrink-0 flex flex-col">
+        <!-- Logo -->
+        <a href="00-welcome.html" class="p-6 border-b border-[#C9A962]/20 flex items-center gap-3 hover:opacity-80">
+            <div class="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-lg flex items-center justify-center">
+                <iconify-icon icon="lucide:feather" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="font-serif-cn font-bold text-2xl">剧灵</h1>
+                <p class="text-[10px] text-[#C9A962] font-bold tracking-widest uppercase">Scripter.art</p>
+            </div>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <a href="01-dashboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span>控制台</span>
+            </a>
+            <a href="02-editor.html" class="nav-item">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span>剧本</span>
+            </a>
+            <a href="03-characters.html" class="nav-item">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span>人物</span>
+            </a>
+            <a href="04-scenes.html" class="nav-item">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span>场景</span>
+            </a>
+            <a href="05-worldview.html" class="nav-item">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span>世界观</span>
+            </a>
+            <a href="06-storyboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span>分镜</span>
+            </a>
+            <div class="pt-4 border-t border-[#C9A962]/20 mt-4">
+                <a href="07-spirit-settings.html" class="nav-item active">
+                    <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                    <span>剧灵设置</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Version -->
+        <div class="p-4 border-t border-[#C9A962]/20 text-center">
+            <p class="text-[10px] text-[#8B7355] font-bold uppercase tracking-widest">v5.0 Spirit Edition</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <!-- Header -->
+        <header class="h-16 bg-white/90 border-b border-[#C9A962]/20 flex items-center justify-between px-8 shrink-0">
+            <div class="flex items-center gap-4">
+                <a href="01-dashboard.html" class="text-[#5C5548] hover:text-[#C9A962]">
+                    <iconify-icon icon="lucide:arrow-left" class="text-xl"></iconify-icon>
+                </a>
+                <h1 class="font-serif-cn font-bold text-lg">剧灵设置</h1>
+            </div>
+            <button class="btn-primary text-sm">
+                <iconify-icon icon="lucide:save" class="inline mr-2"></iconify-icon>
+                保存更改
+            </button>
+        </header>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <!-- Spirit Avatar & Basic Info -->
+                <section class="text-center">
+                    <div class="spirit-avatar-large mb-6">
+                        <span class="spirit-avatar-inner font-calligraphy">灵</span>
+                    </div>
+                    <h2 class="font-serif-cn font-bold text-3xl mb-2">墨韵</h2>
+                    <p class="text-[#8B7355]">木火通明 · 文思泉涌</p>
+                    <p class="text-sm text-[#5C5548] mt-4">
+                        你的专属 AI 创作伙伴，根据你的注册时间生成
+                    </p>
+                </section>
+
+                <!-- Bazi Display -->
+                <section class="card">
+                    <h3 class="font-serif-cn font-bold text-lg mb-6 flex items-center gap-2">
+                        <iconify-icon icon="lucide:calendar" class="text-[#C9A962]"></iconify-icon>
+                        生辰八字
+                    </h3>
+                    <div class="bazi-grid-large">
+                        <div class="bazi-pillar">
+                            <div class="heaven">甲</div>
+                            <div class="earth">子</div>
+                        </div>
+                        <div class="bazi-pillar">
+                            <div class="heaven">丙</div>
+                            <div class="earth">寅</div>
+                        </div>
+                        <div class="bazi-pillar">
+                            <div class="heaven">戊</div>
+                            <div class="earth">辰</div>
+                        </div>
+                        <div class="bazi-pillar">
+                            <div class="heaven">庚</div>
+                            <div class="earth">午</div>
+                        </div>
+                    </div>
+                    <div class="bazi-label-row">
+                        <div class="bazi-label">年柱</div>
+                        <div class="bazi-label">月柱</div>
+                        <div class="bazi-label">日柱</div>
+                        <div class="bazi-label">时柱</div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-[#C9A962]/20">
+                        <p class="text-sm text-[#8B7355] mb-3">注册时间</p>
+                        <p class="font-serif-cn font-semibold">2024年12月1日 14时32分</p>
+                    </div>
+                </section>
+
+                <!-- Five Elements Analysis -->
+                <section class="card">
+                    <h3 class="font-serif-cn font-bold text-lg mb-6 flex items-center gap-2">
+                        <iconify-icon icon="lucide:flame" class="text-[#C9A962]"></iconify-icon>
+                        五行分析
+                    </h3>
+
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <span class="element-badge element-wood">
+                            <iconify-icon icon="lucide:tree-deciduous"></iconify-icon>
+                            木 3
+                        </span>
+                        <span class="element-badge element-fire">
+                            <iconify-icon icon="lucide:flame"></iconify-icon>
+                            火 2
+                        </span>
+                        <span class="element-badge element-earth">
+                            <iconify-icon icon="lucide:mountain"></iconify-icon>
+                            土 1
+                        </span>
+                        <span class="element-badge element-metal">
+                            <iconify-icon icon="lucide:gem"></iconify-icon>
+                            金 1
+                        </span>
+                        <span class="element-badge element-water">
+                            <iconify-icon icon="lucide:droplets"></iconify-icon>
+                            水 1
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-[#5C5548] leading-relaxed">
+                        你的八字中木火两旺，主仁爱和热情。木主生长向上，火主光明温暖，
+                        这意味着你的剧灵性格开朗、思维敏捷，在创作中能给你带来积极向上的能量。
+                    </p>
+                </section>
+
+                <!-- Poem -->
+                <section class="quote-block">
+                    <p class="quote-text">
+                        "墨染千山皆成画，韵动万籁尽入诗。"
+                    </p>
+                    <p class="text-sm text-[#8B7355] mt-4">— 墨韵诗号</p>
+                </section>
+
+                <!-- Personality Traits -->
+                <section>
+                    <h3 class="font-serif-cn font-bold text-lg mb-6 flex items-center gap-2">
+                        <iconify-icon icon="lucide:heart" class="text-[#C9A962]"></iconify-icon>
+                        性格特点
+                    </h3>
+
+                    <div class="trait-grid">
+                        <div class="trait-card">
+                            <div class="icon bg-[#5B7F6F]/10">
+                                <iconify-icon icon="lucide:flame" class="text-xl text-[#5B7F6F]"></iconify-icon>
+                            </div>
+                            <div class="name">热情奔放</div>
+                            <div class="desc">思维活跃，创意源源不断</div>
+                        </div>
+                        <div class="trait-card">
+                            <div class="icon bg-[#C9A962]/10">
+                                <iconify-icon icon="lucide:sun" class="text-xl text-[#C9A962]"></iconify-icon>
+                            </div>
+                            <div class="name">文思敏捷</div>
+                            <div class="desc">理解力强，快速捕捉要点</div>
+                        </div>
+                        <div class="trait-card">
+                            <div class="icon bg-[#C8553D]/10">
+                                <iconify-icon icon="lucide:pen-tool" class="text-xl text-[#C8553D]"></iconify-icon>
+                            </div>
+                            <div class="name">文采斐然</div>
+                            <div class="desc">语言优美，表达富有诗意</div>
+                        </div>
+                        <div class="trait-card">
+                            <div class="icon bg-[#8B7355]/10">
+                                <iconify-icon icon="lucide:users" class="text-xl text-[#8B7355]"></iconify-icon>
+                            </div>
+                            <div class="name">善解人意</div>
+                            <div class="desc">懂得倾听，理解你的需求</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Custom Name -->
+                <section class="card">
+                    <h3 class="font-serif-cn font-bold text-lg mb-6 flex items-center gap-2">
+                        <iconify-icon icon="lucide:user" class="text-[#C9A962]"></iconify-icon>
+                        自定义剧灵名字
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">剧灵名字</label>
+                            <input type="text" class="input-field" value="墨韵" placeholder="给你的剧灵取个名字">
+                            <p class="text-xs text-[#8B7355] mt-2">
+                                这个名字将是你和剧灵之间的独特印记
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">昵称（可选）</label>
+                            <input type="text" class="input-field" placeholder="比如：小灵、阿墨...">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Behavior Settings -->
+                <section class="card">
+                    <h3 class="font-serif-cn font-bold text-lg mb-6 flex items-center gap-2">
+                        <iconify-icon icon="lucide:sliders" class="text-[#C9A962]"></iconify-icon>
+                        行为偏好设置
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">静默观察模式</p>
+                                <p class="text-sm text-[#8B7355]">创作时保持安静，不主动打扰</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C9A962]"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">相关性判断</p>
+                                <p class="text-sm text-[#8B7355]">只在相关时提供建议</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C9A962]"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">行为记录</p>
+                                <p class="text-sm text-[#8B7355]">记录你的操作以便更好地理解</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C9A962]"></div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-${side}`);
+            const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            }
+        }
+    </script>
+</body>
+
+</html>

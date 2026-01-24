@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 社交认证确认</title>
+    <meta name="view-transition" content="same-origin">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="prefetch" href="01-login.html" as="document">
+    <link rel="prefetch" href="04-dashboard.html" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --border-beige: #D3C9B0;
+        }
+
+        html { background-color: var(--ink-black); }
+        body { margin: 0; padding: 0; overflow-x: hidden; }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+        .font-display { font-family: 'Noto Serif SC', serif; letter-spacing: -0.02em; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        @keyframes float-glow {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2)); opacity: 0.15; }
+            50% { transform: translateY(-40px) rotate(8deg) scale(1.05); filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4)); opacity: 0.25; }
+        }
+
+        .animate-brand-feather { animation: float-glow 15s ease-in-out infinite; }
+
+        @keyframes breathing-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .animate-breathing-glow { animation: breathing-glow 12s ease-in-out infinite; }
+
+        .stagger-in { animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fade-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @view-transition { navigation: auto; }
+        ::view-transition-old(sidebar), ::view-transition-new(sidebar) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(brand), ::view-transition-new(brand) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(main-content) { animation: 0.3s ease-out both fade-out; }
+        ::view-transition-new(main-content) { animation: 0.3s ease-in 0.1s both fade-in; }
+        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            background-blend-mode: soft-light;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-beige);
+            box-shadow: 0 4px 15px -5px rgba(26, 26, 26, 0.05);
+        }
+    </style>
+</head>
+<body class="font-ui">
+    <div class="min-h-screen flex flex-col md:flex-row bg-white relative">
+
+        <!-- UNIFIED LEFT SIDEBAR -->
+        <aside style="view-transition-name: sidebar" class="hidden md:flex md:w-72 lg:w-[20%] xl:w-1/5 bg-[#1A1A1A] flex-col justify-between overflow-hidden relative border-r border-[#2A2A2A]">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="absolute w-[40rem] h-[40rem] bg-[radial-gradient(circle,rgba(201,169,98,0.1)_0%,transparent_70%)] animate-breathing-glow"></div>
+                <iconify-icon icon="lucide:feather" class="text-[30rem] text-[#C9A962] opacity-10 animate-brand-feather"></iconify-icon>
+            </div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="p-6 lg:p-10" style="view-transition-name: brand">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#C9A962] rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A962]/20">
+                            <iconify-icon icon="lucide:feather" class="text-2xl text-[#1A1A1A]"></iconify-icon>
+                        </div>
+                        <span class="font-display text-3xl text-white font-bold tracking-tight">剧灵</span>
+                    </div>
+                    <p class="text-[10px] text-[#A0A0A0] font-medium mt-3 tracking-[0.4em] uppercase opacity-60">让灵感在剧本中苏醒</p>
+                </div>
+
+                <nav class="mt-4 flex-1">
+                    <div class="px-4 space-y-1.5">
+                        <a href="04-dashboard.html" class="flex items-center gap-4 px-6 py-4 rounded-xl text-white/90 hover:text-white transition-all">
+                            <iconify-icon icon="lucide:layout-grid" class="text-xl"></iconify-icon>
+                            <span class="font-medium">我的剧本</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all">
+                            <iconify-icon icon="lucide:book-open" class="text-xl"></iconify-icon>
+                            <span class="font-medium">作品文库</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all">
+                            <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                            <span class="font-medium">灵感工坊</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all">
+                            <iconify-icon icon="lucide:database" class="text-xl"></iconify-icon>
+                            <span class="font-medium">素材管理</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="p-6 lg:p-10 border-t border-white/5 bg-gradient-to-t from-black/40 to-transparent">
+                    <h2 class="font-display text-sm text-white/50 leading-relaxed italic">
+                        "像作家一样思考，<br/>像艺术家一样感受。"
+                    </h2>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT: SOCIAL AUTH CONFIRMATION AREA -->
+        <main style="view-transition-name: main-content" class="flex-1 paper-texture flex flex-col min-h-screen relative overflow-hidden">
+
+            <div class="md:hidden p-6 flex items-center gap-4 border-b border-[#D3C9B0]/50 bg-white/30">
+                <div class="w-10 h-10 bg-[#C9A962] rounded-xl flex items-center justify-center">
+                    <iconify-icon icon="lucide:feather" class="text-xl text-[#1A1A1A]"></iconify-icon>
+                </div>
+                <span class="font-display text-2xl text-white font-bold">剧灵</span>
+            </div>
+
+            <div class="flex-1 flex items-center justify-center p-8 md:p-16">
+                <div class="w-full max-w-md">
+                    <div class="text-center mb-10 stagger-in">
+                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-50 text-green-600 mb-6">
+                            <iconify-icon icon="lucide:check-circle-2" class="text-5xl"></iconify-icon>
+                        </div>
+                        <h1 class="font-display text-3xl font-bold text-[#1A1A1A] mb-2">认证成功</h1>
+                        <p class="text-[#5C5548]">已通过第三方社交账号安全登录</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 stagger-in shadow-xl">
+                        <div class="flex items-center gap-5 mb-8">
+                            <div class="relative">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" class="w-20 h-20 rounded-xl object-cover bg-white p-1 border border-[#D3C9B0]">
+                                <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md">
+                                    <iconify-icon icon="ic:baseline-wechat" class="text-lg text-[#09B81A]"></iconify-icon>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-bold uppercase tracking-widest text-[#A0A0A0]">当前登录</span>
+                                    <span class="px-2 py-0.5 bg-[#C9A962]/10 text-[#C9A962] text-[10px] font-bold rounded">已绑定</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-[#1A1A1A]">灵感捕手_Aria</h3>
+                                <p class="text-sm text-[#8B7355]">账号 ID: sc_8902143</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <a href="04-dashboard.html" class="w-full flex items-center justify-center gap-2 py-4 bg-[#C9A962] hover:bg-[#A68A45] text-white rounded-xl font-bold text-lg shadow-xl shadow-amber-900/15 transition-all active:scale-[0.98] group">
+                                <span>进入创作空间</span>
+                                <iconify-icon icon="lucide:arrow-right" class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+                            </a>
+
+                            <div class="flex gap-3">
+                                <a href="01-login.html" class="flex-1 flex items-center justify-center gap-2 py-3 border border-[#D3C9B0] rounded-xl hover:bg-[#FAF7F0] transition-all text-[#5C5548] font-semibold text-sm">
+                                    <iconify-icon icon="lucide:user-minus" class="text-lg"></iconify-icon>
+                                    切换账号
+                                </a>
+                                <button class="flex-1 flex items-center justify-center gap-2 py-3 border border-[#D3C9B0] rounded-xl hover:bg-[#FAF7F0] transition-all text-[#5C5548] font-semibold text-sm">
+                                    <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon>
+                                    账号设置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-100/50 flex gap-3 items-start">
+                        <iconify-icon icon="lucide:info" class="text-amber-500 mt-0.5 flex-shrink-0"></iconify-icon>
+                        <p class="text-xs text-amber-800 leading-relaxed">
+                            温馨提示：您的社交账号已与剧灵账号成功关联。下次登录时可直接点击社交图标，无需重复验证。
+                        </p>
+                    </div>
+
+                    <div class="mt-16 text-center text-[10px] text-[#8B7355] opacity-60">
+                        © 2024 SCRIPTER · 剧灵. 版权所有
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

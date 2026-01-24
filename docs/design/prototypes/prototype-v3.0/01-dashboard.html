@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 仪表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            color: var(--ink-black);
+            overflow: hidden;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .sidebar-item-active {
+            background: linear-gradient(90deg, rgba(201, 169, 98, 0.1) 0%, rgba(201, 169, 98, 0) 100%);
+            border-left: 3px solid var(--brand-gold);
+            color: var(--brand-gold) !important;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(211, 201, 176, 0.4);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-beige);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen antialiased">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#1A1A1A] flex flex-col shrink-0 z-50 relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute -top-20 -left-20 w-64 h-64 bg-[#C9A962]/5 rounded-full blur-[100px] pointer-events-none">
+        </div>
+
+        <div class="p-8 pb-4 relative z-10">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-[#C9A962] flex items-center justify-center shrink-0 shadow-lg shadow-[#C9A962]/20">
+                    <iconify-icon icon="lucide:feather" class="text-xl text-[#1A1A1A]"></iconify-icon>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display text-2xl font-bold text-white leading-none tracking-tight">剧灵</span>
+                    <span
+                        class="font-display text-[8px] font-bold tracking-[0.3em] text-[#A0A0A0]/60 uppercase mt-0.5">SCRIPTER</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1 mt-10 relative z-10 custom-scrollbar overflow-y-auto">
+            <a href="#"
+                class="sidebar-item-active flex items-center gap-3 px-4 py-3 text-white transition-all duration-300">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span class="font-semibold">仪表板</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-300">
+                <iconify-icon icon="lucide:file-text" class="text-xl"></iconify-icon>
+                <span class="font-medium">我的剧本</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-300">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span class="font-medium">人物小传</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-300">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span class="font-medium">世界观</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-300">
+                <iconify-icon icon="lucide:video" class="text-xl"></iconify-icon>
+                <span class="font-medium">分镜面板</span>
+            </a>
+
+            <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">实验室</div>
+
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-300">
+                <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                <span class="font-medium">AI 灵感库</span>
+            </a>
+        </nav>
+
+        <div class="p-6 mt-auto border-t border-white/5 relative z-10">
+            <button
+                class="w-full py-3.5 flex items-center justify-center gap-2 bg-[#C9A962] hover:bg-[#D4B978] active:bg-[#B89A5A] text-[#1A1A1A] font-bold rounded-xl transition-all shadow-xl shadow-[#C9A962]/10">
+                <iconify-icon icon="lucide:plus"></iconify-icon>
+                <span>开启新灵感</span>
+            </button>
+            <div class="mt-6 flex items-center gap-3">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Vincent"
+                    class="w-10 h-10 rounded-full border border-white/20" alt="Avatar" />
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-white">李墨然</span>
+                    <span class="text-[10px] text-gray-500">专业编剧</span>
+                </div>
+                <button class="ml-auto text-gray-500 hover:text-white transition-colors">
+                    <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-[#C9A962]/5 blur-[120px] pointer-events-none rounded-full">
+        </div>
+
+        <!-- Top Header -->
+        <header
+            class="h-20 flex items-center justify-between px-10 border-b border-[#D3C9B0]/30 relative z-10 bg-[#F5F1E8]/60 backdrop-blur-md">
+            <div>
+                <h2 class="font-display text-2xl font-bold">我的工作室</h2>
+                <p class="text-[10px] text-[#8B7355] font-bold uppercase tracking-[0.1em] mt-0.5">早上好, 墨然。灵感在等待着你。</p>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="relative">
+                    <iconify-icon icon="lucide:search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-[#A0A0A0]"></iconify-icon>
+                    <input type="text" placeholder="搜索剧本或角色..."
+                        class="pl-10 pr-4 py-2 bg-white/40 border border-[#D3C9B0] rounded-full text-xs font-ui focus:bg-white focus:outline-none focus:border-[#C9A962] transition-all w-64" />
+                </div>
+                <button class="relative p-2 text-[#5C5548] hover:text-[#1A1A1A] transition-colors">
+                    <iconify-icon icon="lucide:bell" class="text-xl"></iconify-icon>
+                    <span
+                        class="absolute top-2 right-2 w-2 h-2 bg-[#C9A962] rounded-full border-2 border-[#F5F1E8]"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 p-10 overflow-y-auto custom-scrollbar relative z-10">
+
+            <!-- Welcome Alert -->
+            <div
+                class="mb-10 p-6 glass-card rounded-2xl flex items-center justify-between border-l-4 border-l-[#C9A962] animate-slide-in">
+                <div class="flex items-center gap-6">
+                    <div class="w-14 h-14 rounded-full bg-[#C9A962]/10 flex items-center justify-center text-[#C9A962]">
+                        <iconify-icon icon="lucide:sparkles" class="text-2xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-lg font-bold">新功能上线：AI 封面生成</h3>
+                        <p class="text-sm text-[#5C5548]">现在你可以为每个剧本生成精美的氛围感封面图，只需一键点击。</p>
+                    </div>
+                </div>
+                <button
+                    class="px-6 py-2.5 bg-[#1A1A1A] text-white text-xs font-bold rounded-lg hover:bg-black transition-all">立即体验</button>
+            </div>
+
+            <!-- Dashboard Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-bold text-[#8B7355] uppercase tracking-wider mb-1">正在进行项目</p>
+                    <div class="text-3xl font-display font-bold">04</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-bold text-[#8B7355] uppercase tracking-wider mb-1">本周创作量</p>
+                    <div class="text-3xl font-display font-bold">1.2W <span
+                            class="text-xs font-ui text-[#7FA870]">字</span></div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-bold text-[#8B7355] uppercase tracking-wider mb-1">AI 建议采纳量</p>
+                    <div class="text-3xl font-display font-bold">156</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-bold text-[#8B7355] uppercase tracking-wider mb-1">剧本平均得分</p>
+                    <div class="text-3xl font-display font-bold">8.9</div>
+                </div>
+            </div>
+
+            <!-- Project Section -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-display text-xl font-bold flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-[#C9A962] rounded-full"></span>
+                    近期剧本项目
+                </h3>
+                <div class="flex gap-2">
+                    <button
+                        class="p-2 border border-[#D3C9B0] rounded-lg text-[#5C5548] hover:bg-white hover:text-[#C9A962] hover:border-[#C9A962] transition-all">
+                        <iconify-icon icon="lucide:layout-grid"></iconify-icon>
+                    </button>
+                    <button class="p-2 border border-[#D3C9B0] rounded-lg text-[#5C5548] hover:bg-white transition-all">
+                        <iconify-icon icon="lucide:list"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- Project Card 1 (Active) -->
+                <div class="group relative">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-br from-[#C9A962]/20 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="glass-card rounded-2xl overflow-hidden relative transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl shadow-black/5"
+                        onclick="window.location.href='02-script-editor.html'">
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1547127796-06bb04e4b315?q=80&w=2574&auto=format&fit=crop"
+                                class="w-full h-full object-cover grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-105"
+                                alt="Cover" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-6 h-[1px] bg-[#C9A962]"></span>
+                                    <span
+                                        class="text-[10px] text-[#C9A962] font-bold uppercase tracking-widest">武侠悬疑</span>
+                                </div>
+                                <h4 class="text-white font-display text-2xl font-bold">大漠孤烟</h4>
+                            </div>
+                            <div
+                                class="absolute top-4 right-4 px-2 py-0.5 bg-[#C9A962] text-[#1A1A1A] text-[10px] font-bold rounded uppercase">
+                                V1.2.4</div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-xs text-[#5C5548] line-clamp-2 leading-relaxed mb-6 italic">
+                                大漠孤烟直，长河落日圆。塞外荒漠之中，一座名为“龙门”的客栈，实则是各方势力角力的中心...</p>
+                            <div class="space-y-4">
+                                <div
+                                    class="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                    <span class="text-[#8B7355]">创作进度</span>
+                                    <span class="text-[#1A1A1A]">65%</span>
+                                </div>
+                                <div class="w-full h-1 bg-[#D3C9B0]/30 rounded-full overflow-hidden">
+                                    <div class="w-[65%] h-full bg-[#C9A962] rounded-full"></div>
+                                </div>
+                                <div class="flex items-center justify-between mt-6">
+                                    <div class="flex -space-x-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                                            class="w-6 h-6 rounded-full border border-white" alt="U1" />
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+                                            class="w-6 h-6 rounded-full border border-white" alt="U2" />
+                                    </div>
+                                    <span class="text-[9px] text-[#A0A0A0] font-bold">最后更新: 15分钟前</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Card 2 -->
+                <div class="group relative">
+                    <div
+                        class="glass-card rounded-2xl overflow-hidden relative transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-sm hover:shadow-xl shadow-black/5">
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1598462047020-d94ca6dc7da2?q=80&w=2574&auto=format&fit=crop"
+                                class="w-full h-full object-cover grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-105"
+                                alt="Cover" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-6 h-[1px] bg-[#C9A962]"></span>
+                                    <span
+                                        class="text-[10px] text-[#C9A962] font-bold uppercase tracking-widest">都市爱情</span>
+                                </div>
+                                <h4 class="text-white font-display text-2xl font-bold">偏偏喜欢你</h4>
+                            </div>
+                            <div
+                                class="absolute top-4 right-4 px-2 py-0.5 bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-bold rounded uppercase">
+                                V0.8</div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-xs text-[#5C5548] line-clamp-2 leading-relaxed mb-6 italic">
+                                在繁忙的上海，两个本不该相遇的灵魂，因为一场意外的咖啡雨而产生了奇妙的交集...</p>
+                            <div class="space-y-4">
+                                <div
+                                    class="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                    <span class="text-[#8B7355]">创作进度</span>
+                                    <span class="text-[#1A1A1A]">82%</span>
+                                </div>
+                                <div class="w-full h-1 bg-[#D3C9B0]/30 rounded-full overflow-hidden">
+                                    <div class="w-[82%] h-full bg-[#C9A962] rounded-full"></div>
+                                </div>
+                                <div class="flex items-center justify-between mt-6">
+                                    <div class="flex -space-x-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tom"
+                                            class="w-6 h-6 rounded-full border border-white" alt="U1" />
+                                    </div>
+                                    <span class="text-[9px] text-[#A0A0A0] font-bold">最后更新: 昨天 22:45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create New Project Card -->
+                <div
+                    class="group border-2 border-dashed border-[#D3C9B0] rounded-2xl flex flex-col items-center justify-center p-10 hover:border-[#C9A962] hover:bg-[#C9A962]/5 transition-all duration-500 cursor-pointer min-h-[400px]">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-[#C9A962]/20 transition-all duration-500 relative overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-[#C9A962]/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <iconify-icon icon="lucide:plus" class="text-3xl text-[#C9A962]"></iconify-icon>
+                    </div>
+                    <h4 class="font-display text-xl font-bold mt-6">开启新灵感</h4>
+                    <p class="text-xs text-[#8B7355] mt-2 text-center px-4 leading-relaxed">
+                        每一个伟大的剧本都始于一次简单的点击。今天你想写什么样的故事？</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer
+            class="h-12 px-10 flex items-center justify-between border-t border-[#D3C9B0]/20 text-[10px] text-[#A0A0A0] font-bold uppercase tracking-[0.2em] relative z-10 bg-[#F5F1E8]/60 backdrop-blur-md">
+            <span>© 2026 Scripter · 让灵感，在剧本中苏醒</span>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-[#C9A962] transition-colors">隐私政策</a>
+                <a href="#" class="hover:text-[#C9A962] transition-colors">服务条款</a>
+                <a href="#" class="hover:text-[#C9A962] transition-colors">联系支持</a>
+            </div>
+        </footer>
+
+    </main>
+
+</body>
+
+</html>

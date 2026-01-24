@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 剧本编辑器 (A4 标准)</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="js/ai-chat.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --white-bg: #FFFFFF;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --text-main: #1A1A1A;
+            --text-sub: #5C5548;
+            --text-muted: #8B7355;
+            --border-color: #D3C9B0;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-editor {
+            font-family: 'Courier Prime', 'Noto Sans SC', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-left-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-20px);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(20px);
+        }
+
+        .integrated-sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 30;
+            height: 100vh;
+        }
+
+        .integrated-sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edge-toggle:hover {
+            background: var(--hover-bg);
+            color: var(--brand-gold);
+            border-color: var(--brand-gold);
+        }
+
+        .toggle-left-edge {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right-edge {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        /* V4.7 A4 Paper Styling */
+        .editor-workspace {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 50px 20px;
+        }
+
+        .editor-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+            padding: 25.4mm;
+            /* Standard 1 inch margins */
+            margin-bottom: 200px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Draggable Paragraph Styles */
+        .script-paragraph {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .script-paragraph:hover {
+            background: rgba(201, 169, 98, 0.03);
+        }
+
+        .script-paragraph.dragging {
+            opacity: 0.5;
+            background: rgba(201, 169, 98, 0.08);
+        }
+
+        .paragraph-drag-handle {
+            position: absolute;
+            left: -40px;
+            top: 0;
+            width: 32px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            color: var(--border-color);
+        }
+
+        .script-paragraph:hover .paragraph-drag-handle {
+            opacity: 1;
+        }
+
+        .paragraph-drag-handle:hover {
+            color: var(--brand-gold);
+        }
+
+        .script-paragraph.drag-over {
+            border-top: 3px solid var(--brand-gold);
+            margin-top: -3px;
+        }
+
+        /* Elements inside A4 */
+        .script-scene-header {
+            background: #F0F0F0;
+            padding: 8px 15px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #1A1A1A;
+            text-transform: uppercase;
+        }
+
+        .script-dialogue-wrap {
+            width: 80%;
+            margin: 0 auto 30px;
+            text-align: center;
+        }
+
+        .script-char-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+            display: block;
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .integrated-sidebar,
+            .edge-toggle,
+            header {
+                display: none;
+            }
+
+            .editor-workspace {
+                padding: 0;
+                display: block;
+            }
+
+            .editor-paper {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                width: 100%;
+                min-height: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden font-ui">
+
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left-edge">
+        <iconify-icon id="icon-toggle-left" icon="lucide:chevron-left" class="text-xs"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right-edge">
+        <iconify-icon id="icon-toggle-right" icon="lucide:chevron-right" class="text-xs"></iconify-icon>
+    </button>
+
+    <!-- Left Project Nav: Unified -->
+    <aside id="sidebar-left"
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <a href="00-welcome.html"
+            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
+                <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
+                    class="w-5 h-5" alt="Logo">
+            </div>
+            <div class="flex flex-col -gap-1">
+                <span class="font-display font-bold text-2xl tracking-tighter text-[#1A1A1A]">剧灵</span>
+                <span
+                    class="text-[8px] font-bold text-[#C9A962] tracking-widest uppercase -mt-1 opacity-70">scripter.art</span>
+            </div>
+        </a>
+
+        <nav class="flex-1 py-4 px-3 space-y-4 overflow-y-auto custom-scrollbar">
+            <div class="space-y-1">
+                <a href="01-dashboard.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                    <span class="text-sm font-medium">控制台</span>
+                </a>
+                <a href="02-editor.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded bg-[#FAF7F0] text-[#C9A962] font-semibold border-r-4 border-[#C9A962] rounded-r-none">
+                    <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                    <span class="text-sm">剧本</span>
+                </a>
+                <a href="03-characters.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                    <span class="text-sm font-medium">人物</span>
+                </a>
+                <a href="05-scenes.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                    <span class="text-sm font-medium">场景</span>
+                </a>
+                <a href="04-worldview.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                    <span class="text-sm font-medium">世界观</span>
+                </a>
+                <a href="06-storyboard.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                    <span class="text-sm font-medium">分镜</span>
+                </a>
+            </div>
+
+            <div class="pt-4 border-t border-[#D3C9B0]/30 space-y-1">
+                <div class="px-3 mb-2 text-[10px] font-bold text-[#8B7355] uppercase tracking-widest">章节结构</div>
+                <div
+                    class="bg-[#FAF7F0] p-2 rounded border border-[#D3C9B0]/40 text-xs font-bold text-[#1A1A1A] flex items-center gap-2">
+                    <iconify-icon icon="lucide:book-open" class="text-[#C9A962]"></iconify-icon>
+                    第一集：入阵
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Editor Workspace -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <header class="h-16 bg-white/90 border-b border-[#D3C9B0] flex items-center justify-between px-8 z-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <a href="01-dashboard.html"
+                    class="p-1 text-[#5C5548] hover:text-[#C9A962] transition-colors"><iconify-icon
+                        icon="lucide:arrow-left" class="text-xl"></iconify-icon></a>
+                <div class="flex flex-col">
+                    <h2 class="text-sm font-bold text-[#1A1A1A]">我送君归去 (A4 校对模式)</h2>
+                    <p class="text-[9px] text-[#8B7355] font-bold uppercase tracking-widest">S1 · E1 · 场景 1</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="checkFormatViaAI()" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors"
+                    title="格式检查">
+                    <iconify-icon icon="lucide:file-check" class="text-xl"></iconify-icon>
+                </button>
+                <button onclick="window.print()" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors"
+                    title="打印/导出 PDF">
+                    <iconify-icon icon="lucide:printer" class="text-xl"></iconify-icon>
+                </button>
+                <button
+                    class="px-5 py-1.5 bg-[#C9A962] text-white rounded text-xs font-bold hover:bg-[#A68A45] shadow-sm">保存草稿</button>
+            </div>
+        </header>
+
+        <div class="editor-workspace custom-scrollbar">
+            <!-- Professional A4 Paper Container -->
+            <div class="editor-paper font-editor text-[#1A1A1A]" data-script-content>
+                <!-- Title - Not Draggable -->
+                <div class="text-center font-display font-bold text-2xl mb-16 uppercase tracking-[0.3em]">【 第 一 集 】
+                </div>
+
+                <!-- Scene Header - Draggable -->
+                <div class="script-paragraph" data-paragraph-item>
+                    <div class="paragraph-drag-handle" data-paragraph-handle>
+                        <iconify-icon icon="lucide:grip-vertical"></iconify-icon>
+                    </div>
+                    <div class="script-scene-header">第 1 场：湘西山区·夜·外</div>
+                </div>
+
+                <!-- Action Paragraph - Draggable -->
+                <div class="script-paragraph" data-paragraph-item>
+                    <div class="paragraph-drag-handle" data-paragraph-handle>
+                        <iconify-icon icon="lucide:grip-vertical"></iconify-icon>
+                    </div>
+                    <p class="mb-10 leading-relaxed indent-10">△
+                        月黑风高，雾气如潮水般在密林中翻涌。山路崎岖蜿蜒，两侧古树参天，枝桠在夜色中如怪兽伸出的爪牙。远处，隐约传来阵阵低沉的铃声，回荡在空旷的山谷。</p>
+                </div>
+
+                <!-- Dialogue Block - Draggable -->
+                <div class="script-paragraph" data-paragraph-item>
+                    <div class="paragraph-drag-handle" data-paragraph-handle>
+                        <iconify-icon icon="lucide:grip-vertical"></iconify-icon>
+                    </div>
+                    <div class="script-dialogue-wrap">
+                        <span class="script-char-name">雾姝</span>
+                        <p class="italic text-sm text-gray-500 mb-2">（手持摄魂铃，目光如炬，望着深林尽头）</p>
+                        <div class="leading-relaxed">魂兮归来，引灵还乡。莫听风吟，莫看月光，唯我铃音是汝故乡。</div>
+                    </div>
+                </div>
+
+                <!-- Action Paragraph - Draggable -->
+                <div class="script-paragraph" data-paragraph-item>
+                    <div class="paragraph-drag-handle" data-paragraph-handle>
+                        <iconify-icon icon="lucide:grip-vertical"></iconify-icon>
+                    </div>
+                    <p class="mb-10 leading-relaxed indent-10">△ 雾姝猛地摇动铜铃。铃声清脆却透着一股肃杀之气。四周的浓雾似乎在铃声干扰下，竟然开始有规律地退散。</p>
+                </div>
+
+                <!-- Cursor -->
+                <div class="inline-block w-[3px] h-6 bg-[#C9A962] animate-pulse ml-1 align-middle"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar: Unified AI Assistant -->
+    <aside id="sidebar-right"
+        class="integrated-sidebar integrated-sidebar-right w-80 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <!-- User Profile Header -->
+        <div class="p-6 border-b border-[#D3C9B0]/50 bg-white">
+            <div
+                class="flex items-center justify-between p-2 rounded hover:bg-[#FAF7F0] transition-colors cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100"
+                            class="w-9 h-9 rounded-full object-cover border border-[#D3C9B0]">
+                        <div
+                            class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-[#1A1A1A]">Felix Vincent</span>
+                        <div class="flex items-center gap-1.5">
+                            <span
+                                class="text-[9px] text-[#C9A962] font-black uppercase tracking-widest bg-[#C9A962]/10 px-1 rounded">Pro</span>
+                            <span class="text-[9px] text-[#8B7355]">编剧资深会员</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openSettingsModal()" class="text-gray-300 group-hover:text-[#1A1A1A] transition-colors">
+                    <iconify-icon icon="lucide:settings"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Chat Container -->
+        <div id="ai-chat-container" class="flex flex-col flex-1 overflow-hidden">
+            <!-- AI chat will be rendered here by ai-chat.js -->
+        </div>
+    </aside>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-toggle-${side}`);
+            const isCollapsed = sidebar.classList.toggle(`sidebar-${side}-collapsed`);
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+
+        // Check format via AI chat
+        function checkFormatViaAI() {
+            // Ensure right sidebar is open
+            const rightSidebar = document.getElementById('sidebar-right');
+            if (rightSidebar.classList.contains('sidebar-right-collapsed')) {
+                toggleSidebar('right');
+            }
+
+            // Trigger AI format check
+            if (window.editorAiChat) {
+                window.editorAiChat.checkFormat();
+            }
+        }
+
+        // Initialize components on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize paragraph drag and drop
+            const scriptContent = document.querySelector('[data-script-content]');
+            if (scriptContent) {
+                const paragraphDragDrop = new ParagraphDragDrop({
+                    container: scriptContent,
+                    onReorder: (fromIndex, toIndex) => {
+                        console.log(`Paragraph moved from ${fromIndex} to ${toIndex}`);
+                        // 这里可以添加保存到后端的逻辑
+                    }
+                });
+            }
+
+            // Initialize AI Chat
+            const aiChat = new ScripterAIChat({
+                container: document.getElementById('ai-chat-container')
+            });
+            window.editorAiChat = aiChat;
+        });
+    </script>
+</body>
+
+</html>

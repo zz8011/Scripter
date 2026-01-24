@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 找回灵感的钥匙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+    
+    <meta name="view-transition" content="same-origin">
+    
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/08a00f2a-59f6-4413-9046-0bb937971ea1" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/207b0118-d77a-4b72-9c1a-78218dcf5bfe" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/5e464ab4-5671-434a-a2d0-cb7251fb658b" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/80076394-5172-4ff2-a758-e9d5a400781e" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/375dca0e-6ed1-45b8-a291-f7ecaa20f6d5" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        html {
+            background-color: var(--paper-bg);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+        .font-display { font-family: 'Noto Serif SC', serif; letter-spacing: -0.02em; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            position: relative;
+        }
+
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather {
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
+        .stagger-in {
+            animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fade-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes breathing-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .animate-breathing-glow {
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+
+        .input-focus:focus {
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.08);
+            outline: none;
+        }
+
+        .logo-box {
+            background-color: var(--ink-black);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-box:hover {
+            transform: scale(1.05);
+        }
+
+        /* View Transitions API Setup */
+        @view-transition {
+            navigation: auto;
+        }
+
+        ::view-transition-old(brand-sidebar),
+        ::view-transition-new(brand-sidebar) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-old(brand-logo),
+        ::view-transition-new(brand-logo) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-old(main-content) {
+            animation: 0.25s ease-out both fade-out;
+        }
+        ::view-transition-new(main-content) {
+            animation: 0.25s ease-in 0.1s both fade-in;
+        }
+
+        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        ::view-transition-old(root), ::view-transition-new(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+    </style>
+</head>
+<body class="font-ui">
+    <div class="min-h-screen flex flex-col md:flex-row">
+        
+        <!-- 左侧：品牌故事区域 (Persistent) -->
+        <div style="view-transition-name: brand-sidebar;" class="hidden md:flex md:w-[38.2%] bg-[#1A1A1A] flex-col justify-between p-12 lg:p-24 overflow-hidden relative border-r border-[#2A2A2A]">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="absolute w-[70rem] h-[70rem] bg-[radial-gradient(circle,rgba(201,169,98,0.12)_0%,transparent_70%)] animate-breathing-glow"></div>
+                <iconify-icon icon="lucide:feather" class="text-[45rem] text-[#C9A962] opacity-15 animate-brand-feather"></iconify-icon>
+            </div>
+
+            <div class="relative z-10">
+                <div class="w-16 h-[2px] bg-[#C9A962] mb-12 stagger-in"></div>
+                <h1 class="font-display text-2xl lg:text-3xl xl:text-4xl text-white leading-relaxed stagger-in delay-1">
+                    像作家一样思考，<br/><br/>像艺术家一样感受
+                </h1>
+            </div>
+
+            <div class="relative z-10">
+                <div class="mb-6 stagger-in delay-2">
+                    <p class="text-xl lg:text-2xl text-[#C9A962] font-medium mb-5 tracking-wide">灵感，在剧本中苏醒</p>
+                    <p class="text-[#A0A0A0] italic text-lg opacity-80 font-light">“创作路上，你不孤单”</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端顶部 (Persistent-like) -->
+        <div class="md:hidden paper-texture py-12 px-8 flex flex-col items-center text-center border-b border-[#D3C9B0]">
+             <div class="logo-box w-12 h-12 mb-6">
+                <iconify-icon icon="lucide:feather" class="text-2xl text-[#C9A962]"></iconify-icon>
+            </div>
+            <h1 class="font-display text-3xl text-[#1A1A1A] tracking-tight">剧灵</h1>
+            <p class="text-sm text-[#5C5548] mt-3 font-medium tracking-[0.2em]">一支懂你的笔</p>
+        </div>
+
+        <!-- 右侧：动态内容区域 (Dynamic) -->
+        <div class="flex-1 bg-white flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 relative">
+            
+            <!-- 右上角导航 (Persistent) -->
+            <div style="view-transition-name: brand-logo;" class="absolute top-12 left-12 md:left-auto md:right-12 flex flex-col items-start md:items-end z-20">
+                <div class="hidden md:flex flex-col items-end">
+                    <div class="flex items-center gap-3">
+                        <div class="logo-box w-10 h-10">
+                            <iconify-icon icon="lucide:feather" class="text-xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <span class="font-display text-2xl text-[#1A1A1A] font-semibold">剧灵</span>
+                    </div>
+                    <p class="text-xs text-[#5C5548] font-medium mt-2 tracking-widest">一支懂你的笔</p>
+                </div>
+            </div>
+
+            <!-- 核心表单区 (Dynamic Area) -->
+            <div style="view-transition-name: main-content;" class="w-full max-w-sm lg:max-w-md flex flex-col">
+                
+                <div class="mb-10">
+                    <h2 class="font-display text-3xl text-[#1A1A1A] mb-4">找回账号</h2>
+                    <p class="text-[#5C5548] text-sm leading-relaxed">别担心，创作的火种从未熄灭。请输入您的账号信息以重置密码。</p>
+                </div>
+
+                <form class="space-y-6">
+                    <!-- 账号输入 -->
+                    <div>
+                        <label for="account" class="block text-xs font-bold uppercase tracking-[0.2em] text-[#1A1A1A] mb-3">邮箱或手机号</label>
+                        <input type="text" id="account" placeholder="example@scripter.com" 
+                            class="w-full px-5 py-4 bg-[#FAF7F0] border border-[#D3C9B0] rounded-xl text-lg text-[#1A1A1A] placeholder-[#A0A0A0] transition-all input-focus">
+                    </div>
+
+                    <!-- 验证码 -->
+                    <div>
+                        <label for="verify-code" class="block text-xs font-bold uppercase tracking-[0.2em] text-[#1A1A1A] mb-3">验证码</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="verify-code" placeholder="6位验证码" 
+                                class="flex-1 px-5 py-4 bg-[#FAF7F0] border border-[#D3C9B0] rounded-xl text-lg text-[#1A1A1A] placeholder-[#A0A0A0] transition-all input-focus">
+                            <button type="button" id="send-code-btn" class="px-6 bg-white border border-[#D3C9B0] text-[#8B7355] rounded-xl font-semibold text-sm hover:border-[#C9A962] hover:text-[#C9A962] transition-all whitespace-nowrap active:scale-[0.98]">
+                                获取验证码
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 新密码 -->
+                    <div>
+                        <label for="new-password" class="block text-xs font-bold uppercase tracking-[0.2em] text-[#1A1A1A] mb-3">设置新密码</label>
+                        <div class="relative">
+                            <input type="password" id="new-password" placeholder="至少8位字符" 
+                                class="w-full px-5 py-4 bg-[#FAF7F0] border border-[#D3C9B0] rounded-xl text-lg text-[#1A1A1A] placeholder-[#A0A0A0] transition-all input-focus">
+                            <button type="button" id="toggle-password-btn" class="absolute right-5 top-1/2 -translate-y-1/2 text-[#8B7355] hover:text-[#C9A962] transition-colors">
+                                <iconify-icon icon="lucide:eye-off" class="text-xl"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <button id="cta-reset-btn" type="submit" class="w-full py-4 bg-[#C9A962] hover:bg-[#A68A45] text-white rounded-xl font-bold text-xl shadow-xl shadow-amber-900/15 transition-all active:scale-[0.98] mt-4">
+                        重 置 密 码
+                    </button>
+                </form>
+
+                <div class="mt-10 flex items-center justify-center gap-6">
+                    <a id="back-to-login" href="https://p.superdesign.dev/draft/08a00f2a-59f6-4413-9046-0bb937971ea1" class="text-sm text-[#8B7355] hover:text-[#C9A962] transition-colors flex items-center gap-2">
+                        <iconify-icon icon="lucide:arrow-left" class="text-base"></iconify-icon>
+                        返回登录
+                    </a>
+                    <div class="w-1 h-1 bg-[#D3C9B0] rounded-full"></div>
+                    <a id="contact-support" href="#contact" class="text-sm text-[#8B7355] hover:text-[#C9A962] transition-colors">
+                        寻求帮助
+                    </a>
+                </div>
+            </div>
+
+            <!-- 底部版权 (Persistent) -->
+            <div class="mt-auto pt-24 pb-4 text-[10px] text-[#A0A0A0] text-center tracking-wider uppercase opacity-80">
+                © 2024 SCRIPTER · 剧灵. 版权所有
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 验证码倒计时逻辑
+        const sendCodeBtn = document.getElementById('send-code-btn');
+        let countdown = 0;
+        let timer = null;
+
+        sendCodeBtn.addEventListener('click', () => {
+            if (countdown > 0) return;
+            
+            // 模拟发送成功
+            countdown = 60;
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            updateTimer();
+            timer = setInterval(updateTimer, 1000);
+        });
+
+        function updateTimer() {
+            if (countdown <= 0) {
+                clearInterval(timer);
+                sendCodeBtn.innerText = '获取验证码';
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+            sendCodeBtn.innerText = countdown + 's 后重试';
+            countdown--;
+        }
+
+        // 密码显示/隐藏切换
+        const togglePasswordBtn = document.getElementById('toggle-password-btn');
+        const passwordInput = document.getElementById('new-password');
+        const eyeIcon = togglePasswordBtn.querySelector('iconify-icon');
+
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.setAttribute('icon', isPassword ? 'lucide:eye' : 'lucide:eye-off');
+        });
+
+        // 模拟提交成功跳转
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('cta-reset-btn');
+            btn.innerText = '正在重置...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                window.location.href = 'https://p.superdesign.dev/draft/08a00f2a-59f6-4413-9046-0bb937971ea1';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

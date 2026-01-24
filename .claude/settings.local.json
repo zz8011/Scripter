@@ -1,0 +1,20 @@
+{
+  "enabledPlugins": {
+    "typescript-lsp@claude-code-lsps": true,
+    "everything-claude-code@everything-claude-code": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-code-lsps": {
+      "source": {
+        "source": "github",
+        "repo": "Piebald-AI/claude-code-lsps"
+      }
+    },
+    "everything-claude-code": {
+      "source": {
+        "source": "github",
+        "repo": "affaan-m/everything-claude-code"
+      }
+    }
+  }
+}

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 导出中心</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="js/modal.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --white-bg: #FFFFFF;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --text-main: #1A1A1A;
+            --text-sub: #5C5548;
+            --text-muted: #8B7355;
+            --border-color: #D3C9B0;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-left-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-20px);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(20px);
+        }
+
+        .integrated-sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 30;
+            height: 100vh;
+        }
+
+        .integrated-sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .edge-toggle:hover {
+            background: var(--hover-bg);
+            color: var(--brand-gold);
+            border-color: var(--brand-gold);
+        }
+
+        .toggle-left-edge {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right-edge {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+
+        /* Export Page Styles */
+        .export-option-card {
+            transition: all 0.3s ease;
+        }
+
+        .export-option-card:hover {
+            border-color: var(--brand-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 169, 98, 0.1);
+        }
+
+        .export-option-card.selected {
+            border-color: var(--brand-gold);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        .export-option-card.selected .radio-indicator {
+            background: var(--brand-gold);
+            border-color: var(--brand-gold);
+        }
+
+        .radio-indicator {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .preview-page {
+            width: 100%;
+            aspect-ratio: 210 / 297;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden font-ui">
+
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left-edge">
+        <iconify-icon id="icon-toggle-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right-edge">
+        <iconify-icon id="icon-toggle-right" icon="lucide:chevron-right" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar: Navigation -->
+    <aside id="sidebar-left"
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <a href="00-welcome.html"
+            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
+                <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
+                    class="w-5 h-5" alt="Logo">
+            </div>
+            <div class="flex flex-col -gap-1">
+                <span class="font-display font-bold text-2xl tracking-tighter text-[#1A1A1A]">剧灵</span>
+                <span
+                    class="text-[8px] font-bold text-[#C9A962] tracking-widest uppercase -mt-1 opacity-70">scripter.art</span>
+            </div>
+        </a>
+
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+            <a href="01-dashboard.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">控制台</span>
+            </a>
+            <a href="02-editor.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">剧本</span>
+            </a>
+            <a href="03-characters.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">人物</span>
+            </a>
+            <a href="05-scenes.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">场景</span>
+            </a>
+            <a href="04-worldview.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">世界观</span>
+            </a>
+            <a href="06-storyboard.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">分镜</span>
+            </a>
+        </nav>
+
+        <div
+            class="p-4 border-t border-[#D3C9B0]/40 text-[10px] text-[#8B7355] font-bold text-center uppercase tracking-widest">
+            v4.6 UNIFIED EDITION
+        </div>
+    </aside>
+
+    <!-- Main Content: Export Center -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <header class="h-16 bg-white/80 border-b border-[#D3C9B0] flex items-center justify-between px-8 z-10">
+            <div class="flex items-center gap-4">
+                <a href="02-editor.html"
+                    class="p-1 text-[#5C5548] hover:text-[#C9A962] transition-colors"><iconify-icon
+                        icon="lucide:arrow-left" class="text-xl"></iconify-icon></a>
+                <div>
+                    <h1 class="font-display font-bold text-lg text-[#1A1A1A]">导出中心</h1>
+                    <p class="text-[10px] text-[#8B7355]">将剧本导出为多种格式</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            <div class="max-w-5xl mx-auto">
+                <!-- Export Format Selection -->
+                <section class="mb-10">
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-5">
+                        选择导出格式</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="export-option-card selected bg-white rounded-lg p-5 border border-[#D3C9B0] cursor-pointer"
+                            onclick="selectExportFormat(this, 'pdf')">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="w-10 h-10 bg-[#C9A962]/10 rounded flex items-center justify-center">
+                                    <iconify-icon icon="lucide:file-text" class="text-xl text-[#C9A962]"></iconify-icon>
+                                </div>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <h3 class="font-semibold text-sm text-[#1A1A1A] mb-1">PDF</h3>
+                            <p class="text-xs text-[#8B7355]">适合打印和分享</p>
+                        </div>
+
+                        <div class="export-option-card bg-white rounded-lg p-5 border border-[#D3C9B0] cursor-pointer"
+                            onclick="selectExportFormat(this, 'word')">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="w-10 h-10 bg-[#1A1A1A]/5 rounded flex items-center justify-center">
+                                    <iconify-icon icon="lucide:file" class="text-xl text-[#5C5548]"></iconify-icon>
+                                </div>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <h3 class="font-semibold text-sm text-[#1A1A1A] mb-1">Word</h3>
+                            <p class="text-xs text-[#8B7355]">可编辑的文档</p>
+                        </div>
+
+                        <div class="export-option-card bg-white rounded-lg p-5 border border-[#D3C9B0] cursor-pointer"
+                            onclick="selectExportFormat(this, 'txt')">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="w-10 h-10 bg-[#1A1A1A]/5 rounded flex items-center justify-center">
+                                    <iconify-icon icon="lucide:file-code" class="text-xl text-[#5C5548]"></iconify-icon>
+                                </div>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <h3 class="font-semibold text-sm text-[#1A1A1A] mb-1">纯文本</h3>
+                            <p class="text-xs text-[#8B7355]">简单纯文本格式</p>
+                        </div>
+
+                        <div class="export-option-card bg-white rounded-lg p-5 border border-[#D3C9B0] cursor-pointer"
+                            onclick="selectExportFormat(this, 'finaldraft')">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="w-10 h-10 bg-[#1A1A1A]/5 rounded flex items-center justify-center">
+                                    <iconify-icon icon="lucide:clapperboard" class="text-xl text-[#5C5548]"></iconify-icon>
+                                </div>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <h3 class="font-semibold text-sm text-[#1A1A1A] mb-1">Final Draft</h3>
+                            <p class="text-xs text-[#8B7355]">行业标准格式</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Export Options -->
+                <section class="mb-10">
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-5">
+                        导出选项</h2>
+                    <div class="bg-white rounded-lg border border-[#D3C9B0] p-6 space-y-5">
+                        <!-- Content Range -->
+                        <div>
+                            <label class="block text-xs font-semibold text-[#1A1A1A] mb-3">
+                                <iconify-icon icon="lucide:layers" class="text-[#C9A962] mr-1"></iconify-icon>
+                                内容范围
+                            </label>
+                            <div class="flex gap-3">
+                                <label class="flex items-center gap-2 px-4 py-2 bg-[#FAF7F0] rounded cursor-pointer border-2 border-[#C9A962]">
+                                    <input type="radio" name="range" checked class="accent-[#C9A962]">
+                                    <span class="text-sm">全部场景</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-white rounded cursor-pointer border border-[#D3C9B0] hover:border-[#C9A962]">
+                                    <input type="radio" name="range" class="accent-[#C9A962]">
+                                    <span class="text-sm">当前集</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-white rounded cursor-pointer border border-[#D3C9B0] hover:border-[#C9A962]">
+                                    <input type="radio" name="range" class="accent-[#C9A962]">
+                                    <span class="text-sm">选中场景</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Page Size -->
+                        <div>
+                            <label class="block text-xs font-semibold text-[#1A1A1A] mb-3">
+                                <iconify-icon icon="lucide:file-text" class="text-[#C9A962] mr-1"></iconify-icon>
+                                页面尺寸
+                            </label>
+                            <select class="w-full px-4 py-2.5 text-sm border border-[#D3C9B0] rounded focus:border-[#C9A962] outline-none">
+                                <option value="a4">A4 (210 × 297 mm) - 国际标准</option>
+                                <option value="letter">Letter (8.5 × 11 in) - 美国标准</option>
+                                <option value="legal">Legal (8.5 × 14 in)</option>
+                            </select>
+                        </div>
+
+                        <!-- Include Options -->
+                        <div>
+                            <label class="block text-xs font-semibold text-[#1A1A1A] mb-3">
+                                <iconify-icon icon="lucide:check-square" class="text-[#C9A962] mr-1"></iconify-icon>
+                                包含内容
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">场景标题</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">角色名</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">对白</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">动作描述</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">场景编号</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 accent-[#C9A962]">
+                                    <span class="text-sm">页码</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Preview Section -->
+                <section class="mb-10">
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-5">
+                        预览</h2>
+                    <div class="flex gap-8">
+                        <div class="flex-1">
+                            <div class="preview-page p-6 bg-[#F5F1E8]">
+                                <div class="text-center font-display font-bold text-sm mb-4">【 第 一 集 】</div>
+                                <div class="text-[8px] font-bold bg-[#E0E0E0] px-2 py-1 mb-3">第 1 场：湘西山区·夜·外</div>
+                                <p class="text-[8px] leading-relaxed mb-2">月黑风高，雾气如潮水般在密林中翻涌...</p>
+                                <div class="text-center mb-2">
+                                    <div class="font-bold text-[8px]">雾姝</div>
+                                    <p class="text-[8px] italic text-gray-500">（手持摄魂铃）</p>
+                                </div>
+                                <p class="text-[8px] leading-relaxed text-center">魂兮归来，引灵还乡。</p>
+                            </div>
+                        </div>
+                        <div class="w-64 space-y-3">
+                            <div class="bg-white rounded-lg border border-[#D3C9B0] p-4">
+                                <h4 class="text-xs font-semibold text-[#1A1A1A] mb-2">导出统计</h4>
+                                <div class="space-y-2 text-xs text-[#5C5548]">
+                                    <div class="flex justify-between">
+                                        <span>总场景数</span>
+                                        <span class="font-bold">24</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>总字数</span>
+                                        <span class="font-bold">8,432</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>预计页数</span>
+                                        <span class="font-bold">~12 页</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="startExport()"
+                                class="w-full px-5 py-3 bg-[#C9A962] text-white rounded font-semibold text-sm hover:bg-[#A68A45] transition-colors flex items-center justify-center gap-2">
+                                <iconify-icon icon="lucide:download"></iconify-icon>
+                                开始导出
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Export History -->
+                <section>
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-5">
+                        导出历史</h2>
+                    <div class="bg-white rounded-lg border border-[#D3C9B0] overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead class="bg-[#FAF7F0] border-b border-[#D3C9B0]">
+                                <tr>
+                                    <th class="text-left px-5 py-3 text-xs font-semibold text-[#1A1A1A]">文件名</th>
+                                    <th class="text-left px-5 py-3 text-xs font-semibold text-[#1A1A1A]">格式</th>
+                                    <th class="text-left px-5 py-3 text-xs font-semibold text-[#1A1A1A]">时间</th>
+                                    <th class="text-right px-5 py-3 text-xs font-semibold text-[#1A1A1A]">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#D3C9B0]">
+                                <tr class="hover:bg-[#FAF7F0]">
+                                    <td class="px-5 py-3 text-[#1A1A1A]">
+                                        <div class="flex items-center gap-2">
+                                            <iconify-icon icon="lucide:file-text" class="text-[#C9A962]"></iconify-icon>
+                                            我送君归去_第一集.pdf
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3 text-[#8B7355]">PDF</td>
+                                    <td class="px-5 py-3 text-[#8B7355]">2026-01-22 14:30</td>
+                                    <td class="px-5 py-3 text-right">
+                                        <button class="text-[#C9A962] hover:text-[#A68A45]">
+                                            <iconify-icon icon="lucide:download"></iconify-icon>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-[#FAF7F0]">
+                                    <td class="px-5 py-3 text-[#1A1A1A]">
+                                        <div class="flex items-center gap-2">
+                                            <iconify-icon icon="lucide:file" class="text-[#5C5548]"></iconify-icon>
+                                            我送君归去_完整剧本.docx
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3 text-[#8B7355]">Word</td>
+                                    <td class="px-5 py-3 text-[#8B7355]">2026-01-21 09:15</td>
+                                    <td class="px-5 py-3 text-right">
+                                        <button class="text-[#C9A962] hover:text-[#A68A45]">
+                                            <iconify-icon icon="lucide:download"></iconify-icon>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar: Settings -->
+    <aside id="sidebar-right"
+        class="integrated-sidebar integrated-sidebar-right w-80 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <!-- User Profile Header -->
+        <div class="p-6 border-b border-[#D3C9B0]/50 bg-white">
+            <div
+                class="flex items-center justify-between p-2 rounded hover:bg-[#FAF7F0] transition-colors cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100"
+                            class="w-9 h-9 rounded-full object-cover border border-[#D3C9B0]">
+                        <div
+                            class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-[#1A1A1A]">Felix Vincent</span>
+                        <div class="flex items-center gap-1.5">
+                            <span
+                                class="text-[9px] text-[#C9A962] font-black uppercase tracking-widest bg-[#C9A962]/10 px-1 rounded">Pro</span>
+                            <span class="text-[9px] text-[#8B7355]">编剧资深会员</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openSettingsModal()" class="text-gray-300 group-hover:text-[#1A1A1A] transition-colors">
+                    <iconify-icon icon="lucide:settings"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white">
+            <div class="space-y-4">
+                <div class="bg-[#FAF7F0] p-4 rounded text-xs text-[#5C5548] leading-relaxed border border-[#D3C9B0]/40">
+                    <div class="flex items-center gap-2 mb-2">
+                        <iconify-icon icon="lucide:lightbulb" class="text-[#C9A962]"></iconify-icon>
+                        <span class="font-bold text-[#1A1A1A]">导出提示</span>
+                    </div>
+                    <p>导出的文件将保持标准剧本格式。PDF 格式适合打印，Word 格式便于后续编辑。</p>
+                </div>
+
+                <div class="bg-gradient-to-r from-[#C9A962]/10 to-[#A68A45]/10 rounded-lg p-4 border border-[#C9A962]/30">
+                    <div class="flex items-center gap-2 mb-2">
+                        <iconify-icon icon="lucide:sparkles" class="text-[#C9A962]"></iconify-icon>
+                        <span class="font-bold text-sm text-[#1A1A1A]">Pro 会员特权</span>
+                    </div>
+                    <p class="text-xs text-[#8B7355] mb-3">解锁更多导出格式和高级选项</p>
+                    <button class="w-full px-3 py-1.5 bg-[#C9A962] text-white text-xs font-semibold rounded hover:bg-[#A68A45]">
+                        了解更多
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        let selectedFormat = 'pdf';
+
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-toggle-${side}`);
+            const isCollapsed = sidebar.classList.toggle(`sidebar-${side}-collapsed`);
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+
+        function selectExportFormat(element, format) {
+            // Remove selected from all
+            document.querySelectorAll('.export-option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selected to clicked
+            element.classList.add('selected');
+            selectedFormat = format;
+        }
+
+        function startExport() {
+            const btn = event.target.closest('button');
+            const originalContent = btn.innerHTML;
+
+            btn.innerHTML = `
+                <iconify-icon icon="lucide:loader-2" class="animate-spin"></iconify-icon>
+                正在导出...
+            `;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = `
+                    <iconify-icon icon="lucide:check"></iconify-icon>
+                    导出成功
+                `;
+
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>

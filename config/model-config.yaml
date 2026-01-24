@@ -1,0 +1,194 @@
+# =============================================================================
+# Scripter - 模型配置文件
+# =============================================================================
+# 用途：控制LLM模型调用、Token使用、上下文管理
+# 重要：35%安全阈值，避免LLM模型在长上下文下的性能衰减
+# =============================================================================
+
+model:
+  # 模型提供商
+  provider: "anthropic"
+
+  # 主模型（用于复杂任务）
+  primary_model: "claude-opus-4-5"
+
+  # 备用模型（用于简单任务）
+  fallback_model: "claude-sonnet-4-5"
+
+  # 上下文窗口配置
+  context_window: 200000        # 最大上下文：200k tokens
+  max_output: 128000            # 最大输出：128k tokens
+  usage_threshold: 0.35         # 使用阈值：35%（安全范围）
+  safety_margin: 0.30           # 安全边际：30%（保守使用）
+
+# =============================================================================
+# 上下文管理策略
+# =============================================================================
+
+context_management:
+  # Token预算配置
+  max_input_tokens: 60000       # 实际最大输入：60k (30% of 200k)
+  min_input_tokens: 10000       # 最小输入：10k
+  optimal_tokens: 40000         # 最佳使用：40k
+
+  # 分块处理配置
+  chunk_size: 50000             # 分块大小：50k tokens
+  overlap_size: 2000            # 重叠大小：2k tokens（保持连贯性）
+
+  # 优先级策略（按优先级排序）
+  priority_strategies:
+    1: "user_instructions"       # 用户指令（最高优先级）
+    2: "active_scene"            # 当前场景内容
+    3: "character_context"       # 角色信息
+    4: "recent_history"          # 最近操作历史
+    5: "plot_outline"            # 剧情大纲
+    6: "global_metadata"         # 全局元数据
+
+  # 上下文分层配置
+  layers:
+    global:
+      description: "全局层 - 始终加载"
+      components:
+        - name: "剧本元数据"
+          estimated_tokens: 500
+        - name: "人物小传（核心）"
+          estimated_tokens: 5000
+        - name: "故事大纲"
+          estimated_tokens: 3000
+        - name: "创作规则"
+          estimated_tokens: 1000
+      total_tokens: 9500
+
+    session:
+      description: "会话层 - 会话期间保持"
+      components:
+        - name: "当前工作集数"
+          estimated_tokens: 1000
+        - name: "最近操作历史"
+          estimated_tokens: 2000
+        - name: "用户偏好"
+          estimated_tokens: 1000
+      total_tokens: 4500
+
+    task:
+      description: "任务层 - 动态加载，任务完成后释放"
+      components:
+        - name: "当前场景内容"
+          estimated_tokens: 8000
+        - name: "前后场景"
+          estimated_tokens: 3000
+        - name: "相关角色信息"
+          estimated_tokens: 4000
+        - name: "剧情线索"
+          estimated_tokens: 3000
+      total_tokens: 18000
+      # 任务层可动态调整
+
+# =============================================================================
+# Token监控
+# =============================================================================
+
+token_monitoring:
+  # 是否启用Token计数
+  enable_counting: true
+
+  # 警告阈值（占预算的百分比）
+  warning_threshold: 0.80       # 80%时发出警告
+  critical_threshold: 0.95      # 95%时发出严重警告
+
+  # Token计算方法
+  estimation_method: "cl100k_base"  # 使用OpenAI的token计算标准
+
+  # 统计和报告
+  statistics:
+    track_usage: true           # 跟踪使用情况
+    log_file: "logs/token-usage.log"
+    report_frequency: "daily"   # 报告频率：daily/weekly/monthly
+
+# =============================================================================
+# 性能优化
+# =============================================================================
+
+performance:
+  # 并行处理配置
+  parallel_workers: 3           # 最大并行任务数
+  parallel_token_budget: 40000  # 每个并行任务的Token预算
+
+  # 缓存配置
+  cache_enabled: true
+  cache_ttl: 3600              # 缓存有效期（秒）
+  cache_max_size: 1000         # 最大缓存条目数
+
+  # 流式输出
+  streaming: true              # 启用流式输出
+  stream_chunk_size: 1000      # 每次流式输出的token数
+
+  # 重试机制
+  retry:
+    max_attempts: 3            # 最大重试次数
+    backoff_factor: 2          # 退避因子
+    initial_delay: 1           # 初始延迟（秒）
+
+# =============================================================================
+# 成本控制
+# =============================================================================
+
+cost_control:
+  # 每日Token限制
+  daily_token_limit: 1000000   # 每日最大100万tokens
+
+  # 每月Token限制
+  monthly_token_limit: 25000000 # 每月最大2500万tokens
+
+  # 告警配置
+  alerts:
+    daily_usage_threshold: 0.80    # 每日使用80%时告警
+    monthly_usage_threshold: 0.85  # 每月使用85%时告警
+
+# =============================================================================
+# 模型特定配置
+# =============================================================================
+
+model_settings:
+  claude-opus-4-5:
+    max_tokens: 128000
+    temperature: 0.7
+    top_p: 0.9
+    use_cases:
+      - "复杂任务"
+      - "创意生成"
+      - "深度分析"
+
+  claude-sonnet-4-5:
+    max_tokens: 128000
+    temperature: 0.7
+    top_p: 0.9
+    use_cases:
+      - "场景创作"
+      - "内容优化"
+      - "格式检查"
+
+# =============================================================================
+# 调试和日志
+# =============================================================================
+
+debug:
+  # 调试模式
+  enabled: false
+
+  # 日志级别：DEBUG/INFO/WARNING/ERROR
+  log_level: "INFO"
+
+  # Token使用详细日志
+  log_token_usage: true
+
+  # 上下文加载详细日志
+  log_context_loading: true
+
+# =============================================================================
+# 版本信息
+# =============================================================================
+
+config_version: "1.0.0"
+last_updated: "2026-01-16"
+maintainer: "Claude Code"

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 沉浸式编辑器: 大漠孤烟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            color: var(--ink-black);
+            overflow: hidden;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-editor {
+            font-family: 'Courier Prime', 'Noto Sans SC', monospace;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-beige);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        /* Script Formatting Styles */
+        .scene-heading {
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 12px 0;
+            border-bottom: 2px solid var(--border-beige);
+            margin-bottom: 16px;
+            color: var(--ink-black);
+        }
+
+        .action-desc {
+            padding: 8px 0;
+            line-height: 1.6;
+            color: var(--ink-secondary);
+        }
+
+        .character-name {
+            text-align: center;
+            font-weight: 700;
+            margin-top: 16px;
+            color: var(--ink-black);
+        }
+
+        .dialogue {
+            text-align: center;
+            padding: 4px 15%;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .parenthetical {
+            text-align: center;
+            font-style: italic;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .inner-monologue {
+            font-style: italic;
+            color: #7EA0C9;
+            padding: 8px 10%;
+            border-left: 3px solid #7EA0C9;
+            margin: 8px 0;
+        }
+
+        .editor-focused {
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .ai-suggestion-card {
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid var(--brand-gold);
+            color: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes gold-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(201, 169, 98, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 0 rgba(201, 169, 98, 0.6);
+            }
+        }
+
+        .pulse-gold {
+            animation: gold-pulse 2s infinite;
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            border-right: 2px solid var(--brand-gold);
+            white-space: normal;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--brand-gold);
+            }
+        }
+    </style>
+</head>
+
+<body class="flex h-screen antialiased overflow-hidden">
+
+    <!-- Top Toolbar -->
+    <header
+        class="h-16 fixed top-0 left-0 right-0 z-50 bg-[#F5F1E8]/90 backdrop-blur-md border-b border-[#D3C9B0]/50 flex items-center justify-between px-6">
+        <div class="flex items-center gap-6">
+            <button onclick="window.location.href='01-dashboard.html'"
+                class="p-2 hover:bg-white/50 rounded-lg transition-all group">
+                <iconify-icon icon="lucide:arrow-left"
+                    class="text-xl text-[#8B7355] group-hover:text-[#1A1A1A] transition-colors"></iconify-icon>
+            </button>
+            <div class="h-6 w-px bg-[#D3C9B0]/50"></div>
+            <div class="flex flex-col">
+                <h1 class="font-display font-bold text-sm tracking-wide">大漠孤烟</h1>
+                <div class="flex items-center gap-2 text-[10px] text-[#A0A0A0] font-bold">
+                    <span>V1.2.4</span>
+                    <span class="w-1 h-1 rounded-full bg-[#D3C9B0]"></span>
+                    <span>最后保存: 1分钟前</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="flex items-center -space-x-2">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                    class="w-8 h-8 rounded-full border-2 border-[#F5F1E8]" alt="U1" />
+                <div
+                    class="w-8 h-8 rounded-full border-2 border-[#F5F1E8] bg-[#C9A962] flex items-center justify-center text-[10px] font-bold text-[#1A1A1A]">
+                    ML</div>
+            </div>
+            <div class="h-6 w-px bg-[#D3C9B0]/50 mx-2"></div>
+            <button
+                class="px-4 py-2 bg-[#1A1A1A] text-white text-[11px] font-bold rounded-lg hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-black/10">
+                <iconify-icon icon="lucide:share"></iconify-icon>
+                <span>分享协作</span>
+            </button>
+            <button
+                class="px-4 py-2 border border-[#C9A962] text-[#C9A962] text-[11px] font-bold rounded-lg hover:bg-[#C9A962] hover:text-[#1A1A1A] transition-all flex items-center gap-2">
+                <iconify-icon icon="lucide:download"></iconify-icon>
+                <span>导出剧本</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex pt-16 h-full overflow-hidden">
+
+        <!-- Left Column: Scene Navigator -->
+        <aside class="w-64 border-r border-[#D3C9B0]/30 flex flex-col bg-[#F5F1E8]/40 overflow-hidden">
+            <div class="p-5 border-b border-[#D3C9B0]/20 flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest">场景大纲 (24)</span>
+                <button class="text-[#C9A962] hover:scale-110 transition-transform">
+                    <iconify-icon icon="lucide:plus-circle" class="text-lg"></iconify-icon>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+                <div class="p-3 bg-white/60 border border-[#C9A962] rounded-xl shadow-sm cursor-pointer group">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-[9px] font-bold text-[#C9A962] uppercase">Scene 01</span>
+                        <iconify-icon icon="lucide:check-circle" class="text-[#7FA870] text-xs"></iconify-icon>
+                    </div>
+                    <div class="text-xs font-bold truncate">日/塞外荒漠/龙门外</div>
+                    <div class="mt-2 text-[9px] text-[#A0A0A0] line-clamp-1 italic">黄沙漫卷，枯枝在风中摇曳...</div>
+                </div>
+                <div
+                    class="p-3 hover:bg-white/40 border border-transparent hover:border-[#D3C9B0] rounded-xl cursor-pointer transition-all">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-[9px] font-bold text-[#8B7355] uppercase">Scene 02</span>
+                    </div>
+                    <div class="text-xs font-bold truncate text-[#5C5548]">夜/龙门客栈/一楼大厅</div>
+                </div>
+                <!-- More scenes -->
+                <div class="p-3 hover:bg-white/40 border border-transparent rounded-xl cursor-not-allowed opacity-40">
+                    <div class="text-[9px] font-bold text-[#8B7355] uppercase">Scene 03</div>
+                    <div class="text-xs font-bold truncate">日/龙门客栈/客房</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Column: Main Editor -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar px-10 py-12 flex flex-col items-center">
+            <div
+                class="w-full max-w-3xl bg-white p-20 shadow-2xl rounded-sm min-h-[1200px] flex flex-col font-editor relative">
+
+                <!-- Scene Heading -->
+                <div class="scene-heading group relative">
+                    1. 塞外/龙门客栈/外/日
+                    <button
+                        class="absolute -left-12 top-3 opacity-0 group-hover:opacity-100 p-2 text-[#D3C9B0] hover:text-[#C9A962] transition-all">
+                        <iconify-icon icon="lucide:grip-vertical"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Action Description -->
+                <div class="action-desc group relative">
+                    烈日无情地嘲笑着大地的干渴。狂风裹挟着细碎的黄沙，在这片荒芜的领地肆虐。
+                    龙门客栈那破旧的招牌在风中吱呀作响，仿佛在低声诉说着被风沙掩埋的往事。
+                </div>
+
+                <!-- Character & Dialogue -->
+                <div class="mt-12 group relative">
+                    <div class="character-name">风十三</div>
+                    <div class="parenthetical">(冷冷地望向远方)</div>
+                    <div class="dialogue">
+                        魂兮归来，路引在此。你们找的，不就是这串引魂铃吗？
+                    </div>
+                </div>
+
+                <!-- Action -->
+                <div class="action-desc mt-8">
+                    风十三伸出枯瘦的手，一颗泛着幽幽冷光的引魂铃在他掌心缓缓旋转。
+                </div>
+
+                <!-- Inner Monologue -->
+                <div class="inner-monologue mt-8">
+                    ( OS: 若非此时相见，谁能料到这大漠深处，竟藏着这般杀机... )
+                </div>
+
+                <!-- Floating Cursor / AI Trigger -->
+                <div class="absolute left-1/2 -translate-x-1/2 bottom-32">
+                    <button
+                        class="px-6 py-3 bg-[#1A1A1A] text-white rounded-full flex items-center gap-3 shadow-2xl hover:scale-105 transition-all pulse-gold group">
+                        <iconify-icon icon="lucide:sparkles"
+                            class="text-[#C9A962] group-hover:rotate-12 transition-transform"></iconify-icon>
+                        <span class="text-xs font-bold tracking-widest">让 AI 接续创作...</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Column: AI Assistant & Reference -->
+        <aside class="w-80 border-l border-[#D3C9B0]/30 flex flex-col bg-[#F5F1E8]/40 overflow-hidden">
+
+            <!-- AI Suggestion Tab -->
+            <div class="p-5 border-b border-[#D3C9B0]/20 flex items-center gap-2">
+                <iconify-icon icon="lucide:sparkles" class="text-[#C9A962]"></iconify-icon>
+                <span class="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest">剧灵 AI 实时助手</span>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
+
+                <!-- Typing Suggestion -->
+                <div class="ai-suggestion-card p-4 rounded-xl space-y-3 relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-[#C9A962]/10 rounded-full blur-2xl"></div>
+                    <div class="text-[9px] font-bold text-[#C9A962] uppercase mb-2 flex items-center gap-1">
+                        <iconify-icon icon="lucide:brain-circuit"></iconify-icon>
+                        动态接续建议
+                    </div>
+                    <p class="text-xs italic leading-relaxed text-gray-300 typing-effect">
+                        忽然，风沙凝固了。一道黑影从沙脊后缓缓升起，伴随着刺耳的笛声。那是——西厂的追兵已经到了。
+                    </p>
+                    <div class="flex gap-2 pt-2">
+                        <button
+                            class="flex-1 py-1.5 bg-[#C9A962] text-[#1A1A1A] text-[9px] font-bold rounded hover:bg-white transition-all uppercase">采纳并插入</button>
+                        <button class="p-1.5 border border-white/20 rounded hover:bg-white/10 transition-all">
+                            <iconify-icon icon="lucide:refresh-cw" class="text-xs"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Context Check -->
+                <div class="bg-white/60 border border-[#D3C9B0] rounded-xl p-4 space-y-3">
+                    <div class="text-[9px] font-bold text-[#8B7355] uppercase flex items-center gap-1">
+                        <iconify-icon icon="lucide:user-check"></iconify-icon>
+                        人物一致性检查
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Feng"
+                            class="w-8 h-8 rounded-full border border-[#D3C9B0]" alt="Feng" />
+                        <div>
+                            <p class="text-[10px] font-bold">风十三 (核心主角)</p>
+                            <p class="text-[9px] text-[#A0A0A0]">语气匹配度: <span class="text-[#7FA870]">98%</span></p>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-[#5C5548] leading-relaxed border-t border-[#D3C9B0]/20 pt-2">
+                        目前的对白符合角色“孤傲冷静”的设定。AI 建议在下一句加入关于“过去誓言”的隐喻。
+                    </p>
+                </div>
+
+                <!-- Environment Ref -->
+                <div class="rounded-xl overflow-hidden glass-card">
+                    <div class="relative h-24">
+                        <img src="https://images.unsplash.com/photo-1547127796-06bb04e4b315?q=80&w=2574&auto=format&fit=crop"
+                            class="w-full h-full object-cover grayscale opacity-50" alt="Ref" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-3 flex items-end">
+                            <span class="text-[9px] font-bold text-white uppercase">环境视觉参考</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-[9px] text-[#5C5548] leading-relaxed">
+                            龙门客栈外景：主色调#8B7355，对比强烈的阴影，空气中可见的尘埃。
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Editor Status Bar -->
+            <div class="mt-auto bg-[#1A1A1A] p-4 flex items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-[8px] text-gray-500 font-bold uppercase">当前模式</span>
+                    <span class="text-[10px] text-[#C9A962] font-bold">沉浸式写作</span>
+                </div>
+                <div class="flex gap-4">
+                    <button class="text-gray-400 hover:text-white transition-colors"><iconify-icon
+                            icon="lucide:settings"></iconify-icon></button>
+                    <button class="text-gray-400 hover:text-white transition-colors"><iconify-icon
+                            icon="lucide:maximize"></iconify-icon></button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Floating Tooltip (Mock) -->
+    <div
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-300 z-[100]">
+        <div class="bg-black/90 text-white px-4 py-2 rounded-lg text-xs font-bold border border-white/20">
+            Ctrl + Enter 快速调用 AI
+        </div>
+    </div>
+
+</body>
+
+</html>

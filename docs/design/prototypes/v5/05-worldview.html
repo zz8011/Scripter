@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 世界观设定</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Ma+Shan+Zheng&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #0D0D0D;
+            --paper-cream: #F2EDE5;
+            --paper-warm: #E8DFD4;
+            --gold-primary: #C9A962;
+            --gold-dark: #8B7355;
+            --cinnabar: #C8553D;
+            --jade: #5B7F6F;
+            --text-muted: #8B7355;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+        }
+
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-calligraphy {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-cream);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gold-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        .sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--gold-dark);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+        }
+
+        .nav-item.active {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+            font-weight: 600;
+            border-right: 3px solid var(--gold-primary);
+            border-radius: 0;
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--gold-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edge-toggle:hover {
+            background: var(--paper-warm);
+            border-color: var(--gold-primary);
+        }
+
+        .toggle-left {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        /* Worldview Category Nav */
+        .category-nav {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--paper-warm);
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .category-item {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            color: var(--text-muted);
+        }
+
+        .category-item:hover {
+            background: white;
+            color: var(--gold-primary);
+        }
+
+        .category-item.active {
+            background: white;
+            color: var(--gold-primary);
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Setting Card */
+        .setting-card {
+            background: white;
+            border: 1px solid var(--gold-dark);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .setting-card:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 4px 20px rgba(201, 169, 98, 0.15);
+        }
+
+        .setting-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-primary);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden">
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left">
+        <iconify-icon id="icon-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right">
+        <iconify-icon id="icon-right" icon="lucide:chevron-right" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar-left" class="sidebar w-64 shrink-0 flex flex-col">
+        <!-- Logo -->
+        <a href="00-welcome.html" class="p-6 border-b border-[#C9A962]/20 flex items-center gap-3 hover:opacity-80">
+            <div class="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-lg flex items-center justify-center">
+                <iconify-icon icon="lucide:feather" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="font-serif-cn font-bold text-2xl">剧灵</h1>
+                <p class="text-[10px] text-[#C9A962] font-bold tracking-widest uppercase">Scripter.art</p>
+            </div>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <a href="01-dashboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span>控制台</span>
+            </a>
+            <a href="02-editor.html" class="nav-item">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span>剧本</span>
+            </a>
+            <a href="03-characters.html" class="nav-item">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span>人物</span>
+            </a>
+            <a href="04-scenes.html" class="nav-item">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span>场景</span>
+            </a>
+            <a href="05-worldview.html" class="nav-item active">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span>世界观</span>
+            </a>
+            <a href="06-storyboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span>分镜</span>
+            </a>
+        </nav>
+
+        <!-- Version -->
+        <div class="p-4 border-t border-[#C9A962]/20 text-center">
+            <p class="text-[10px] text-[#8B7355] font-bold uppercase tracking-widest">v5.0 Spirit Edition</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <!-- Header -->
+        <header class="h-16 bg-white/90 border-b border-[#C9A962]/20 flex items-center justify-between px-8 shrink-0">
+            <h1 class="font-serif-cn font-bold text-lg">世界观设定</h1>
+            <button class="px-5 py-2 bg-gradient-to-r from-[#C9A962] to-[#8B7355] text-white rounded-lg font-semibold hover:shadow-lg transition-all">
+                <iconify-icon icon="lucide:plus" class="inline mr-2"></iconify-icon>
+                新增设定
+            </button>
+        </header>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-4xl mx-auto">
+                <!-- Category Navigation -->
+                <div class="category-nav">
+                    <div class="category-item active">全部</div>
+                    <div class="category-item">时代背景</div>
+                    <div class="category-item">地理环境</div>
+                    <div class="category-item">社会阶层</div>
+                    <div class="category-item">蛊术体系</div>
+                    <div class="category-item">民俗传说</div>
+                </div>
+
+                <!-- Setting Cards -->
+                <div class="setting-card">
+                    <div class="flex gap-4">
+                        <div class="setting-icon bg-[#5B7F6F]/10">
+                            <iconify-icon icon="lucide:calendar" class="text-2xl text-[#5B7F6F]"></iconify-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-serif-cn font-bold text-lg mb-2">时代背景</h3>
+                            <p class="text-sm text-[#5C5548] leading-relaxed">
+                                民国初年，军阀混战，湘西地区处于各方势力争夺之中。苗疆山寨因地理位置偏僻，
+                                相对独立，但也不可避免地被卷入时代的洪流。
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-1 bg-[#5B7F6F]/10 text-[#5B7F6F] text-xs rounded">历史</span>
+                                <span class="px-2 py-1 bg-[#C9A962]/10 text-[#C9A962] text-xs rounded">背景设定</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="flex gap-4">
+                        <div class="setting-icon bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:mountain" class="text-2xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-serif-cn font-bold text-lg mb-2">地理环境</h3>
+                            <p class="text-sm text-[#5C5548] leading-relaxed">
+                                湘西山区，群山环绕，雾气终年不散。苗寨依山而建，吊脚楼层层叠叠。
+                                密林深处隐藏着许多不为人知的秘密，古老的蛊术传说在这里流传。
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-1 bg-[#C9A962]/10 text-[#C9A962] text-xs rounded">地理</span>
+                                <span class="px-2 py-1 bg-[#8B7355]/10 text-[#8B7355] text-xs rounded">场景设定</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="flex gap-4">
+                        <div class="setting-icon bg-[#C8553D]/10">
+                            <iconify-icon icon="lucide:flame" class="text-2xl text-[#C8553D]"></iconify-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-serif-cn font-bold text-lg mb-2">蛊术体系</h3>
+                            <p class="text-sm text-[#5C5548] leading-relaxed">
+                                苗疆蛊术，神秘莫测。蛊女世代传承，掌握着蛊毒的秘密。
+                                蛊毒可杀人于无形，也可救人于危难。善与恶，只在一念之间。
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-1 bg-[#C8553D]/10 text-[#C8553D] text-xs rounded">蛊术</span>
+                                <span class="px-2 py-1 bg-[#5B7F6F]/10 text-[#5B7F6F] text-xs rounded">魔法体系</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="flex gap-4">
+                        <div class="setting-icon bg-[#8B7355]/10">
+                            <iconify-icon icon="lucide:users" class="text-2xl text-[#8B7355]"></iconify-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-serif-cn font-bold text-lg mb-2">社会阶层</h3>
+                            <p class="text-sm text-[#5C5548] leading-relaxed">
+                                苗疆山寨内部有着严格的等级制度。蛊女地位崇高，受人敬仰。
+                                寨主统领全寨，负责对外事务。普通族人各司其职，守护着山寨的秘密。
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-1 bg-[#8B7355]/10 text-[#8B7355] text-xs rounded">社会</span>
+                                <span class="px-2 py-1 bg-[#C9A962]/10 text-[#C9A962] text-xs rounded">等级制度</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="flex gap-4">
+                        <div class="setting-icon bg-[#5B7F6F]/10">
+                            <iconify-icon icon="lucide:book" class="text-2xl text-[#5B7F6F]"></iconify-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-serif-cn font-bold text-lg mb-2">民俗传说</h3>
+                            <p class="text-sm text-[#5C5548] leading-relaxed">
+                                湘西山区流传着许多古老的传说。摄魂铃能够引渡亡灵，
+                                蛊咒可以让人产生幻觉。据说，只有心怀善念的人才能驾驭蛊毒之力。
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-1 bg-[#5B7F6F]/10 text-[#5B7F6F] text-xs rounded">传说</span>
+                                <span class="px-2 py-1 bg-[#C8553D]/10 text-[#C8553D] text-xs rounded">神秘元素</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar - AI Assistant -->
+    <aside id="sidebar-right" class="sidebar sidebar-right w-80 shrink-0 flex flex-col">
+        <!-- Spirit Status -->
+        <div class="p-4 border-b border-[#C9A962]/20">
+            <div class="text-center p-4 bg-gradient-to-br from-[#F2EDE5] to-[#E8DFD4] rounded-lg border border-[#C9A962]/30">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center">
+                    <span class="font-calligraphy text-2xl text-white">灵</span>
+                </div>
+                <h4 class="font-serif-cn font-bold">墨韵</h4>
+                <p class="text-xs text-[#8B7355]">木火通明 · 静默观察中</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- AI Message -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center shrink-0">
+                    <span class="font-calligraphy text-sm text-white">灵</span>
+                </div>
+                <div class="flex-1 bg-white rounded-lg p-3 border border-[#C9A962]/20">
+                    <p class="text-sm">你的世界观设定很完整，蛊术体系和地理环境都有独特的韵味。需要我帮你补充更多细节吗？比如蛊毒的具体种类...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-[#C9A962]/20">
+            <div class="flex gap-2">
+                <input type="text" placeholder="与墨韵对话..."
+                    class="flex-1 px-4 py-2 rounded-lg border border-[#C9A962]/30 focus:outline-none focus:border-[#C9A962] text-sm">
+                <button class="p-2 bg-[#C9A962] text-white rounded-lg hover:bg-[#8B7355] transition-colors">
+                    <iconify-icon icon="lucide:send"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-${side}`);
+            const isCollapsed = side === 'right'
+                ? sidebar.classList.toggle('sidebar-right-collapsed')
+                : sidebar.classList.toggle('sidebar-collapsed');
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+
+        // Category selection
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+
+</html>

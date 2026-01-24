@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 人物管理与关系图谱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            color: var(--ink-black);
+            overflow: hidden;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(211, 201, 176, 0.4);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-beige);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        /* Character Node Styles */
+        .char-node {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .char-node:hover {
+            transform: scale(1.1);
+            z-index: 50;
+        }
+
+        .node-primary {
+            width: 80px;
+            height: 80px;
+            border: 4px solid var(--brand-gold);
+        }
+
+        .node-secondary {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--border-beige);
+        }
+
+        /* Relationship Line Styles */
+        .rel-line {
+            position: absolute;
+            height: 2px;
+            background: var(--border-beige);
+            transform-origin: left center;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .rel-label {
+            position: absolute;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 8px;
+            color: var(--ink-secondary);
+            font-weight: 700;
+            border: 1px solid var(--border-beige);
+            z-index: 10;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(5px, -10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .animate-float-reverse {
+            animation: float 12s ease-in-out infinite reverse;
+        }
+
+        .sidebar-active {
+            color: var(--brand-gold);
+            background: linear-gradient(90deg, rgba(201, 169, 98, 0.1) 0%, rgba(201, 169, 98, 0) 100%);
+            border-right: 3px solid var(--brand-gold);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen antialiased overflow-hidden">
+
+    <!-- Sidebar (Shared with Dashboard) -->
+    <aside class="w-20 lg:w-64 bg-[#1A1A1A] flex flex-col shrink-0 z-50 relative overflow-hidden transition-all">
+        <div class="p-8 lg:p-10 pb-4 relative z-10">
+            <div class="flex items-center gap-4" onclick="window.location.href='01-dashboard.html'"
+                class="cursor-pointer">
+                <div
+                    class="w-10 h-10 rounded-xl bg-[#C9A962] flex items-center justify-center shrink-0 shadow-lg shadow-[#C9A962]/20">
+                    <iconify-icon icon="lucide:feather" class="text-xl text-[#1A1A1A]"></iconify-icon>
+                </div>
+                <div class="hidden lg:flex flex-col">
+                    <span class="font-display text-2xl font-bold text-white leading-none tracking-tight">剧灵</span>
+                    <span
+                        class="font-display text-[8px] font-bold tracking-[0.3em] text-[#A0A0A0]/60 uppercase mt-0.5">SCRIPTER</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1 mt-10 relative z-10 flex flex-col items-center lg:items-stretch">
+            <a href="01-dashboard.html"
+                class="flex items-center gap-3 px-4 py-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span class="hidden lg:inline font-medium">仪表板</span>
+            </a>
+            <a href="02-script-editor.html"
+                class="flex items-center gap-3 px-4 py-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                <iconify-icon icon="lucide:file-text" class="text-xl"></iconify-icon>
+                <span class="hidden lg:inline font-medium">我的剧本</span>
+            </a>
+            <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-4 text-white transition-all">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span class="hidden lg:inline font-semibold">人物小传</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span class="hidden lg:inline font-medium">世界观</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+                <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                <span class="hidden lg:inline font-medium">AI 灵感库</span>
+            </a>
+        </nav>
+
+        <div class="p-6 mt-auto">
+            <button
+                class="w-10 h-10 lg:w-full lg:h-auto lg:py-3.5 flex items-center justify-center gap-2 bg-[#C9A962] hover:bg-[#D4B978] text-[#1A1A1A] font-bold rounded-xl transition-all shadow-xl shadow-[#C9A962]/10 mb-6">
+                <iconify-icon icon="lucide:plus"></iconify-icon>
+                <span class="hidden lg:inline">新人物</span>
+            </button>
+            <div class="flex items-center gap-3 border-t border-white/5 pt-6">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Vincent"
+                    class="w-10 h-10 rounded-full border border-white/20" alt="Avatar" />
+                <div class="hidden lg:flex flex-col">
+                    <span class="text-xs font-bold text-white">李墨然</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content: Graph & Editor -->
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+
+        <!-- Header -->
+        <header
+            class="h-20 flex items-center justify-between px-10 border-b border-[#D3C9B0]/30 relative z-40 bg-[#F5F1E8]/60 backdrop-blur-md">
+            <div class="flex items-center gap-6">
+                <h2 class="font-display text-2xl font-bold">人物宇宙</h2>
+                <div class="flex bg-white/40 p-1 rounded-lg border border-[#D3C9B0]/50">
+                    <button
+                        class="px-3 py-1 bg-white text-[10px] font-bold rounded shadow-sm text-[#C9A962]">关系图谱</button>
+                    <button class="px-3 py-1 text-[10px] font-bold text-[#8B7355] hover:text-[#1A1A1A]">人物列表</button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <span class="text-[10px] text-[#A0A0A0] font-bold uppercase tracking-widest">关联剧本: 大漠孤烟</span>
+                <button
+                    class="p-2 border border-[#D3C9B0] rounded-lg text-[#5C5548] hover:bg-white hover:text-[#C9A962] transition-all">
+                    <iconify-icon icon="lucide:share-2"></iconify-icon>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Graph Area (Mock) -->
+        <div class="flex-1 relative bg-[#F5F1F0]/30 p-10 overflow-hidden group">
+            <!-- Grid Background -->
+            <div class="absolute inset-0 stipple-bg pointer-events-none opacity-40"></div>
+
+            <!-- Graph Controls -->
+            <div class="absolute bottom-10 left-10 p-2 glass-card rounded-xl flex flex-col gap-2 z-40">
+                <button
+                    class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-[#D3C9B0]/50 hover:text-[#C9A962]"><iconify-icon
+                        icon="lucide:plus"></iconify-icon></button>
+                <button
+                    class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-[#D3C9B0]/50 hover:text-[#C9A962]"><iconify-icon
+                        icon="lucide:minus"></iconify-icon></button>
+                <button
+                    class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-[#D3C9B0]/50 hover:text-[#C9A962]"><iconify-icon
+                        icon="lucide:maximize"></iconify-icon></button>
+            </div>
+
+            <!-- Visualization Content -->
+            <div class="relative w-full h-full">
+
+                <!-- Central Node (Protagonist) -->
+                <div class="char-node top-[45%] left-[45%] animate-float" style="z-index: 30;">
+                    <div class="node-primary rounded-full overflow-hidden shadow-2xl relative group">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Feng"
+                            class="w-full h-full object-cover bg-white" alt="Feng" />
+                        <div
+                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <iconify-icon icon="lucide:edit-2" class="text-white"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <p class="text-[11px] font-bold">风十三</p>
+                        <p class="text-[8px] text-[#C9A962] font-bold uppercase">主角</p>
+                    </div>
+                    <!-- Poem Tooltip -->
+                    <div
+                        class="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-white px-3 py-2 rounded-lg text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all shadow-xl">
+                        "魂兮归来，路引在此。"
+                    </div>
+                </div>
+
+                <!-- Secondary Nodes -->
+                <div class="char-node top-[20%] left-[30%] animate-float-reverse">
+                    <div class="node-secondary rounded-full overflow-hidden shadow-lg border-red-400">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Cao"
+                            class="w-full h-full object-cover bg-white" alt="Cao" />
+                    </div>
+                    <div class="mt-2 text-center">
+                        <p class="text-[10px] font-bold">曹督主</p>
+                        <p class="text-[8px] text-red-500 font-bold uppercase">反派</p>
+                    </div>
+                </div>
+
+                <div class="char-node top-[30%] left-[70%] animate-float">
+                    <div class="node-secondary rounded-full overflow-hidden shadow-lg border-pink-400">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Yue"
+                            class="w-full h-full object-cover bg-white" alt="Yue" />
+                    </div>
+                    <div class="mt-2 text-center">
+                        <p class="text-[10px] font-bold">莫月儿</p>
+                        <p class="text-[8px] text-pink-500 font-bold uppercase">恋人</p>
+                    </div>
+                </div>
+
+                <div class="char-node top-[70%] left-[55%] animate-float-reverse">
+                    <div class="node-secondary rounded-full overflow-hidden shadow-lg border-blue-400">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Uncle"
+                            class="w-full h-full object-cover bg-white" alt="Uncle" />
+                    </div>
+                    <div class="mt-2 text-center">
+                        <p class="text-[10px] font-bold">龙叔</p>
+                        <p class="text-[8px] text-blue-500 font-bold uppercase">导师</p>
+                    </div>
+                </div>
+
+                <!-- Relationship Lines (Mocking React Flow Edges) -->
+                <!-- Feng to Cao -->
+                <div class="rel-line w-[300px] top-[48%] left-[35%] rotate-[-45deg] bg-red-200"></div>
+                <div class="rel-label top-[32%] left-[40%] text-red-500 border-red-200">宿敌</div>
+
+                <!-- Feng to Yue -->
+                <div class="rel-line w-[280px] top-[50%] left-[52%] rotate-[-25deg] bg-pink-200"></div>
+                <div class="rel-label top-[38%] left-[62%] text-pink-500 border-pink-200">深爱</div>
+
+                <!-- Feng to Uncle -->
+                <div class="rel-line w-[200px] top-[55%] left-[48%] rotate-[45deg] bg-blue-200"></div>
+                <div class="rel-label top-[68%] left-[48%] text-blue-500 border-blue-200">师徒</div>
+
+            </div>
+        </div>
+
+        <!-- Right Side Panel: Character Details -->
+        <aside
+            class="absolute top-0 right-0 h-full w-96 glass-card shadow-2xl z-[100] transform translate-x-full group-hover:translate-x-0 transition-transform duration-500 flex flex-col">
+            <div class="p-8 border-b border-[#D3C9B0]/30 flex items-center justify-between">
+                <h3 class="font-display text-xl font-bold">人物档案</h3>
+                <button class="p-2 hover:bg-white/50 rounded-lg"><iconify-icon icon="lucide:x"></iconify-icon></button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+                <!-- Profile Header -->
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-2xl bg-white border-2 border-[#C9A962] overflow-hidden p-1">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Feng"
+                            class="w-full h-full object-cover rounded-xl" alt="Feng" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-display font-bold">风十三</span>
+                        <span class="text-[10px] font-bold text-[#C9A962] uppercase tracking-widest mt-1">THE LONELY
+                            BLADE</span>
+                        <div class="flex gap-2 mt-2">
+                            <span class="px-2 py-0.5 bg-[#1A1A1A] text-white text-[8px] rounded uppercase">28岁</span>
+                            <span
+                                class="px-2 py-0.5 bg-[#F5F1E8] border border-[#D3C9B0] text-[8px] rounded uppercase">独行浪子</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Poem Section -->
+                <div class="p-6 bg-[#1A1A1A] text-white rounded-2xl relative overflow-hidden group/poem">
+                    <iconify-icon icon="lucide:quote"
+                        class="absolute top-2 right-2 text-3xl text-white/5"></iconify-icon>
+                    <p
+                        class="text-[11px] font-bold text-[#C9A962] mb-3 border-b border-white/10 pb-2 uppercase tracking-widest">
+                        人物诗号</p>
+                    <p class="font-display italic text-lg leading-loose text-center py-2">
+                        魂兮归来，路引在此。<br />
+                        大漠惊雷，孤影随风。
+                    </p>
+                    <button
+                        class="absolute bottom-2 right-2 opacity-0 group-hover/poem:opacity-100 text-[#C9A962] transition-opacity">
+                        <iconify-icon icon="lucide:sparkles"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="space-y-6">
+                    <div>
+                        <h4
+                            class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-4 flex items-center justify-between">
+                            性格特征
+                            <button class="text-[#C9A962]"><iconify-icon icon="lucide:plus"></iconify-icon></button>
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 glass-card rounded-lg text-xs font-medium">冷酷冷静</span>
+                            <span
+                                class="px-3 py-1.5 glass-card rounded-lg text-xs font-medium border-l-2 border-l-[#C9A962]">重情重义</span>
+                            <span class="px-3 py-1.5 glass-card rounded-lg text-xs font-medium">心思细腻</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-4">行为模式 (AI 总结)
+                        </h4>
+                        <p
+                            class="text-xs text-[#5C5548] leading-relaxed bg-white/40 p-4 rounded-xl border border-[#D3C9B0]/20 italic">
+                            风十三在面对压力时往往表现得极度沉默，他习惯于通过观察环境微小的变化来预判危险。在对话中常使用简练且带有哲学意味的短句。
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-4">目标与动机</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-4">
+                                <div class="w-1.5 h-1.5 rounded-full bg-[#C9A962] mt-1.5"></div>
+                                <p class="text-xs text-[#1A1A1A] font-medium leading-relaxed">查清导致家族灭门的那场大火背后的真相。</p>
+                            </div>
+                            <div class="flex items-start gap-4 text-[#A0A0A0]">
+                                <div class="w-1.5 h-1.5 rounded-full bg-[#D3C9B0] mt-1.5"></div>
+                                <p class="text-xs font-medium leading-relaxed italic">保护莫月儿不受卷入这场宿命的纷争 (隐藏动机)。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    class="w-full py-4 bg-[#1A1A1A] text-white font-bold rounded-xl hover:bg-black transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3">
+                    <iconify-icon icon="lucide:save"></iconify-icon>
+                    <span>保存档案并同步剧本</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Tooltip Hint -->
+        <div class="absolute top-24 left-1/2 -translate-x-1/2 z-30 animate-pulse pointer-events-none">
+            <span
+                class="px-4 py-2 bg-white/80 backdrop-blur-md rounded-full text-[10px] font-bold text-[#C9A962] border border-[#C9A962]/20 shadow-xl">
+                右侧滑动查看详细档案 ➔
+            </span>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

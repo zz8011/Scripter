@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 世界观编辑面板</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --text-main: #1A1A1A;
+            --text-sub: #5C5548;
+            --text-muted: #8B7355;
+            --border-color: #D3C9B0;
+            --white-bg: #FFFFFF;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; }
+        .font-display { font-family: 'Noto Serif SC', serif; }
+        .font-editor { font-family: 'Courier Prime', 'Noto Sans SC', monospace; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        @view-transition { navigation: auto; }
+
+        ::view-transition-old(root) {
+            animation: 0.4s cubic-bezier(0.4, 0, 0.2, 1) both fade-out;
+        }
+        ::view-transition-new(root) {
+            animation: 0.4s cubic-bezier(0.4, 0, 0.2, 1) both fade-in;
+        }
+
+        @keyframes fade-out {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.98); }
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(1.02); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        .nav-item-active {
+            background-color: rgba(201, 169, 98, 0.1);
+            color: var(--brand-gold);
+            border-right: 3px solid var(--brand-gold);
+        }
+
+        .tag-pill {
+            background: rgba(201, 169, 98, 0.1);
+            color: var(--brand-gold-dark);
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .world-card-hover:hover .hover-overlay {
+            opacity: 1;
+        }
+
+        /* Icon Hover Scale Animation */
+        .icon-btn-hover {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .icon-btn-hover:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col font-ui paper-texture overflow-hidden">
+        
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Left Sidebar -->
+            <aside id="sidebar-left" class="hidden lg:flex w-64 rounded-r-2xl border-r border-[#D3C9B0] bg-white flex-col shadow-sm z-50">
+                <!-- Brand Logo -->
+                <div class="p-6 mb-2 flex items-center gap-3 border-b border-[#D3C9B0]/50">
+                    <div class="flex-shrink-0 w-8 h-8 bg-[#1A1A1A] rounded-md flex items-center justify-center shadow-sm">
+                        <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=20" alt="剧灵 Logo">
+                    </div>
+                    <span class="font-display font-bold text-lg text-[#1A1A1A] tracking-tight">剧灵</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+                    <!-- 剧本 (Collapsible) -->
+                    <div class="space-y-1">
+                        <button id="nav-script-btn" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                            <div class="flex items-center gap-3">
+                                <iconify-icon icon="lucide:scroll" class="text-[24px] icon-btn-hover"></iconify-icon>
+                                <span class="text-sm font-medium">剧本</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" class="text-xs text-[#8B7355] group-hover:text-[#1A1A1A]"></iconify-icon>
+                        </button>
+                        <div class="pl-10 space-y-1">
+                            <a href="https://p.superdesign.dev/draft/8477954d-2c9e-4d18-a896-fd187e825586" id="nav-ep1-link" class="block py-1.5 text-xs text-[#8B7355] hover:text-[#C9A962] transition-colors">第一集：湘西秘事</a>
+                            <a href="#" id="nav-ep2-link" class="block py-1.5 text-xs text-[#8B7355] hover:text-[#C9A962] transition-colors">第二集：古镇禁地</a>
+                        </div>
+                    </div>
+
+                    <!-- 人物 -->
+                    <a href="https://p.superdesign.dev/draft/86424e74-7efc-4a65-a1e0-f9a8043f5eb5" id="nav-chars-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                        <iconify-icon icon="lucide:users" class="text-[24px] icon-btn-hover"></iconify-icon>
+                        <span class="text-sm font-medium">人物</span>
+                    </a>
+
+                    <!-- 世界观 (Active) -->
+                    <a href="https://p.superdesign.dev/draft/61f79fc5-11c6-4a07-98e7-0041c61fdf51" id="nav-worldview-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item-active transition-all group">
+                        <iconify-icon icon="lucide:globe" class="text-[24px] icon-btn-hover"></iconify-icon>
+                        <span class="text-sm font-medium">世界观</span>
+                    </a>
+
+                    <!-- 分镜 -->
+                    <div class="space-y-1">
+                        <button id="nav-story-btn" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                            <div class="flex items-center gap-3">
+                                <iconify-icon icon="lucide:layout" class="text-[24px] icon-btn-hover"></iconify-icon>
+                                <span class="text-sm font-medium">分镜</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" class="text-xs text-[#8B7355] group-hover:text-[#1A1A1A]"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <!-- 场景 -->
+                    <a href="https://p.superdesign.dev/draft/9c027724-7510-4fe4-9509-5f87762565b8" id="nav-scenes-link" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                        <iconify-icon icon="lucide:map-pin" class="text-[24px] icon-btn-hover"></iconify-icon>
+                        <span class="text-sm font-medium">场景</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Center Content Area -->
+            <main class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header Toolbar -->
+                <header class="h-16 w-full bg-white/80 backdrop-blur-md border-b border-[#D3C9B0] px-6 flex items-center justify-between z-30">
+                    <div class="flex items-center gap-4">
+                        <button id="mobile-menu-toggle" class="lg:hidden text-[#5C5548] p-2 hover:bg-black/5 rounded-lg">
+                            <iconify-icon icon="lucide:menu" class="text-xl"></iconify-icon>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm">
+                            <a href="#" id="breadcrumb-proj" class="text-[#8B7355] hover:text-[#1A1A1A] transition-colors">《我送君归去》</a>
+                            <iconify-icon icon="lucide:chevron-right" class="text-[10px] text-[#D3C9B0]"></iconify-icon>
+                            <span class="font-bold text-[#1A1A1A]">世界观核心设定</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <!-- Search & Filter Controls -->
+                        <div class="hidden md:flex items-center gap-1 bg-white/50 border border-[#D3C9B0] rounded-lg px-2 py-1">
+                            <iconify-icon icon="lucide:search" class="text-[#8B7355] text-lg"></iconify-icon>
+                            <input type="text" placeholder="搜索设定..." class="bg-transparent border-none text-xs outline-none w-24 focus:w-40 transition-all text-[#1A1A1A]">
+                        </div>
+                        <button id="filter-btn" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors icon-btn-hover" title="筛选">
+                            <iconify-icon icon="lucide:filter" class="text-xl"></iconify-icon>
+                        </button>
+                        <button id="add-module-btn" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors icon-btn-hover" title="新建世界设定">
+                            <iconify-icon icon="lucide:plus-square" class="text-xl"></iconify-icon>
+                        </button>
+                        
+                        <div class="h-4 w-px bg-[#D3C9B0] mx-1"></div>
+                        
+                        <button id="save-world-btn" class="px-4 py-2 bg-[#1A1A1A] text-white rounded-lg text-xs font-bold hover:bg-black transition-all flex items-center gap-2 shadow-sm">
+                            <iconify-icon icon="lucide:save"></iconify-icon>
+                            保存设定
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Scrollable Viewport -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                    <div class="max-w-7xl mx-auto px-6 md:px-10 py-8 space-y-8">
+                        
+                        <!-- Atmosphere Manifesto Section -->
+                        <section class="relative bg-white border border-[#D3C9B0] rounded-xl p-8 shadow-sm group">
+                            <div class="absolute top-0 right-0 p-6 flex gap-2">
+                                <button id="share-manifesto-btn" class="p-2 text-[#8B7355] hover:text-[#1A1A1A] transition-colors icon-btn-hover" title="分享设定">
+                                    <iconify-icon icon="lucide:share-2" class="text-lg"></iconify-icon>
+                                </button>
+                                <button id="edit-manifesto-btn" onclick="document.getElementById('manifesto-modal').classList.remove('hidden')" class="flex items-center gap-2 px-3 py-1.5 bg-[#F5F1E8] rounded-lg text-xs font-bold text-[#1A1A1A] hover:bg-[#E6D3A3] transition-colors icon-btn-hover">
+                                    <iconify-icon icon="lucide:edit-3"></iconify-icon>
+                                    编辑详细设定
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-6 pr-48">
+                                <div>
+                                    <span class="text-[10px] font-bold text-[#C9A962] tracking-[0.2em] uppercase">Atmosphere Manifesto</span>
+                                    <h1 class="font-display font-bold text-3xl text-[#1A1A1A] mt-2">湘西民国秘史：宿命与摄魂铃</h1>
+                                </div>
+                                
+                                <div class="font-editor text-lg text-[#5C5548] leading-relaxed italic border-l-4 border-[#C9A962] pl-6 py-1">
+                                    “在那片被群山环绕的幽邃之地，生与死的边界因铜铃的震颤而模糊。军阀的野心在宗族禁忌前战栗，每一个归乡的灵魂都背负着无法言说的契约。”
+                                </div>
+
+                                <div class="flex flex-wrap gap-3 mt-6">
+                                    <span class="tag-pill"># 民俗悬疑</span>
+                                    <span class="tag-pill"># 民国风云</span>
+                                    <span class="tag-pill"># 恐怖美学</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Cards Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <!-- Card 1 -->
+                            <div class="world-card-hover group relative aspect-[3/4] bg-white border border-[#D3C9B0] rounded-lg overflow-hidden cursor-pointer shadow-subtle">
+                                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                
+                                <div class="hover-overlay absolute top-4 right-4 opacity-0 transition-opacity">
+                                    <button class="w-10 h-10 bg-[#C9A962] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#A68A45] active:scale-95 transition-all" title="AI 重新生成可视化">
+                                        <iconify-icon icon="lucide:sparkles" class="text-[24px]"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <iconify-icon icon="lucide:clock" class="text-[#C9A962] text-sm"></iconify-icon>
+                                        <span class="text-[10px] text-white/70 font-bold uppercase tracking-widest">时代背景</span>
+                                    </div>
+                                    <h3 class="font-display text-white font-bold text-lg">1920s 辰州秘事</h3>
+                                    <p class="text-xs text-white/60 line-clamp-2 mt-1">战乱中的湘西群山，古老宗族与新派势力的极限拉扯。</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="world-card-hover group relative aspect-[3/4] bg-white border border-[#D3C9B0] rounded-lg overflow-hidden cursor-pointer shadow-subtle">
+                                <img src="https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                
+                                <div class="hover-overlay absolute top-4 right-4 opacity-0 transition-opacity">
+                                    <button class="w-10 h-10 bg-[#C9A962] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#A68A45] active:scale-95 transition-all" title="AI 重新生成可视化">
+                                        <iconify-icon icon="lucide:sparkles" class="text-[24px]"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <iconify-icon icon="lucide:scroll" class="text-[#C9A962] text-sm"></iconify-icon>
+                                        <span class="text-[10px] text-white/70 font-bold uppercase tracking-widest">规则与禁忌</span>
+                                    </div>
+                                    <h3 class="font-display text-white font-bold text-lg">赶尸匠律令</h3>
+                                    <p class="text-xs text-white/60 line-clamp-2 mt-1">朱砂、符咒与三不赶：不可见光、不可言语、不可回头。</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="world-card-hover group relative aspect-[3/4] bg-white border border-[#D3C9B0] rounded-lg overflow-hidden cursor-pointer shadow-subtle">
+                                <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                
+                                <div class="hover-overlay absolute top-4 right-4 opacity-0 transition-opacity">
+                                    <button class="w-10 h-10 bg-[#C9A962] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#A68A45] active:scale-95 transition-all" title="AI 重新生成可视化">
+                                        <iconify-icon icon="lucide:sparkles" class="text-[24px]"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <iconify-icon icon="lucide:map" class="text-[#C9A962] text-sm"></iconify-icon>
+                                        <span class="text-[10px] text-white/70 font-bold uppercase tracking-widest">地理景观</span>
+                                    </div>
+                                    <h3 class="font-display text-white font-bold text-lg">万寿宫废墟</h3>
+                                    <p class="text-xs text-white/60 line-clamp-2 mt-1">深山之中的吊脚楼群，常年被迷雾笼罩的盛家古宅。</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Placeholder -->
+                            <button id="add-world-module-placeholder" class="aspect-[3/4] border-2 border-dashed border-[#D3C9B0] rounded-lg bg-white/40 hover:bg-white/60 hover:border-[#C9A962] transition-all flex flex-col items-center justify-center group">
+                                <div class="w-12 h-12 rounded-full bg-white border border-[#D3C9B0] flex items-center justify-center text-[#D3C9B0] group-hover:text-[#C9A962] group-hover:border-[#C9A962] transition-colors">
+                                    <iconify-icon icon="lucide:plus" class="text-2xl"></iconify-icon>
+                                </div>
+                                <span class="mt-4 text-sm font-bold text-[#8B7355] group-hover:text-[#1A1A1A]">新增核心设定</span>
+                                <span class="mt-1 text-[10px] text-gray-400">社会结构 / 历史溯源</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Helpers -->
+            <aside id="sidebar-right" class="hidden xl:flex w-72 rounded-l-2xl border-l border-[#D3C9B0] bg-white/50 backdrop-blur-md flex-col">
+                <div class="p-6 border-b border-[#D3C9B0]/50 flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-[#1A1A1A] tracking-widest uppercase">AI 灵感协作</h3>
+                    <iconify-icon icon="lucide:sparkles" class="text-[#C9A962] text-xl"></iconify-icon>
+                </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+                    <div class="p-4 bg-white border border-[#D3C9B0]/50 rounded-lg shadow-sm">
+                        <p class="text-xs text-[#5C5548] leading-relaxed italic">
+                            “当前背景下，建议强化‘朱砂’在视觉上的饱和度，作为生死的警戒色。在剧情冲突中，可以让符咒的失效成为转折点。”
+                        </p>
+                        <div class="mt-3 flex justify-end">
+                            <button class="text-[10px] font-bold text-[#C9A962] hover:underline flex items-center gap-1">
+                                <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>
+                                采纳建议
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="h-10 bg-white border-t border-[#D3C9B0] px-6 flex items-center justify-between z-50 text-[10px] text-[#8B7355]">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2"><iconify-icon icon="lucide:check-circle" class="text-green-600"></iconify-icon> 世界观一致性：优</div>
+                <div class="flex items-center gap-2"><iconify-icon icon="lucide:users" class="text-blue-500"></iconify-icon> 2 位协作者正在线</div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1"><iconify-icon icon="lucide:file-edit"></iconify-icon> 2,431 字世界观设定</span>
+                <span class="opacity-60">上次保存：14:32</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Manifesto Modal -->
+    <div id="manifesto-modal" class="fixed inset-0 z-[200] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+        <div class="absolute inset-10 md:inset-20 bg-[#F5F1E8] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            <div class="h-16 bg-white border-b border-[#D3C9B0] px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <h2 class="font-display font-bold text-xl">全局世界观核心案书</h2>
+                    <button id="modal-share-btn" class="p-2 text-[#8B7355] hover:text-[#C9A962] transition-colors icon-btn-hover" title="分享设定">
+                        <iconify-icon icon="lucide:share-2" class="text-xl"></iconify-icon>
+                    </button>
+                </div>
+                <button onclick="document.getElementById('manifesto-modal').classList.add('hidden')" class="p-2 hover:bg-black/5 rounded-full transition-colors icon-btn-hover" title="关闭">
+                    <iconify-icon icon="lucide:x" class="text-2xl text-[#1A1A1A]"></iconify-icon>
+                </button>
+            </div>
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Editor Area -->
+                <div class="flex-1 bg-white p-12 overflow-y-auto custom-scrollbar">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="flex justify-between items-center mb-8 border-b border-[#D3C9B0] pb-4">
+                            <h1 class="font-display text-4xl font-bold text-[#1A1A1A]" contenteditable="true">湘西民国秘史</h1>
+                            <iconify-icon icon="lucide:edit-3" class="text-[#C9A962] text-xl"></iconify-icon>
+                        </div>
+                        <div class="font-editor text-xl leading-relaxed text-[#1A1A1A] outline-none" contenteditable="true">
+                            <p class="mb-6">1924年。湘西群山之中。战火未曾踏足之地，却有着比硝烟更浓稠的阴冷。辰州符咒不再是封建迷信，而是维持阴阳两界微弱平衡的唯一锁链。</p>
+                            <p class="mb-6">军阀刘大帅的开山炮火，无意中炸开了盛家祖宅尘封百年的铁棺。那些本该在铜铃声中归去的亡魂，开始寻找能够承载生者气息的血肉躯壳。</p>
+                            <p>核心视觉：青砖黛瓦间的朱红符纸、潮湿雾气中的昏黄马灯、以及那穿透灵魂的古旧铜铃声。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Control Panel -->
+                <div class="w-80 border-l border-[#D3C9B0] p-8 flex flex-col space-y-8">
+                    <div>
+                        <h3 class="text-xs font-bold text-[#1A1A1A] mb-4 uppercase flex items-center gap-2">
+                            <iconify-icon icon="lucide:sliders"></iconify-icon>
+                            基调调优
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[11px] font-bold text-[#8B7355]"><span>悬疑感</span><span>85%</span></div>
+                                <div class="h-1 bg-white rounded-full overflow-hidden"><div class="w-[85%] h-full bg-[#C9A962]"></div></div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[11px] font-bold text-[#8B7355]"><span>年代感</span><span>70%</span></div>
+                                <div class="h-1 bg-white rounded-full overflow-hidden"><div class="w-[70%] h-full bg-[#C9A962]"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-auto">
+                        <button class="w-full py-3 bg-[#C9A962] text-white rounded-lg font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-[#A68A45] transition-all group">
+                            <iconify-icon icon="lucide:sparkles" class="text-xl group-hover:rotate-12 transition-transform"></iconify-icon>
+                            AI 润色全文
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

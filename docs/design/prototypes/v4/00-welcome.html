@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 Scripter | 让灵感在剧本中苏醒</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/form-validator.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --border-beige: #D3C9B0;
+            --ink-secondary: #5C5548;
+        }
+
+        html {
+            background-color: var(--ink-black);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--ink-black);
+            color: var(--paper-bg);
+            overflow-x: hidden;
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        .font-serif-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-mono-script {
+            font-family: 'Courier Prime', monospace;
+        }
+
+        /* Texture Overlays */
+        .paper-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .gradient-mesh {
+            background: radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 10% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 40%);
+        }
+
+        /* Floating Particles */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(var(--drift)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: var(--size);
+            height: var(--size);
+            background: radial-gradient(circle, var(--brand-gold) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatUp var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+            pointer-events: none;
+        }
+
+        /* Hero Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stagger-1 {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.6s;
+        }
+
+        /* Card Effects */
+        .feature-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--brand-gold);
+            box-shadow: 0 10px 30px -10px rgba(201, 169, 98, 0.3);
+        }
+
+        /* Gold Pulse */
+        @keyframes goldPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(201, 169, 98, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(201, 169, 98, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(201, 169, 98, 0);
+            }
+        }
+
+        .btn-pulse {
+            animation: goldPulse 2s infinite;
+        }
+
+        /* Auth Modal Styles */
+        .auth-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+        }
+
+        .auth-modal-overlay.active {
+            display: flex;
+        }
+
+        .auth-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .auth-modal {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            margin: auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #5C5548;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .auth-tab:hover {
+            color: #C9A962;
+        }
+
+        .auth-tab.active {
+            color: #C9A962;
+            border-bottom-color: #C9A962;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid #D3C9B0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A1A1A;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .social-btn:hover {
+            border-color: #C9A962;
+            background: #FAF7F0;
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #D3C9B0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1A1A1A;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #C9A962;
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+        }
+
+        .auth-input::placeholder {
+            color: #8B7355;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 4px;
+            cursor: pointer;
+            color: #8B7355;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #C9A962;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #D3C9B0;
+        }
+
+        .remember-forgot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #5C5548;
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            accent-color: #C9A962;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            font-size: 13px;
+            color: #C9A962;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: #A68A45;
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen relative flex flex-col overflow-x-hidden">
+        <!-- Textures -->
+        <div class="paper-overlay"></div>
+        <div class="fixed inset-0 gradient-mesh pointer-events-none"></div>
+
+        <!-- 1. Header Navigation -->
+        <header
+            class="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md bg-opacity-80 border-b border-white/5 py-4 px-6 md:px-12 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-[#C9A962] rounded-lg flex items-center justify-center shadow-lg shadow-gold/20">
+                    <iconify-icon icon="lucide:feather" class="text-[#1A1A1A] text-xl"></iconify-icon>
+                </div>
+                <span class="text-2xl font-serif-display font-bold text-white tracking-tight">剧灵 <span
+                        class="text-[#C9A962] font-sans font-normal text-sm ml-1 tracking-widest uppercase">Scripter</span></span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+                <a href="#features" class="hover:text-[#C9A962] transition-colors">核心功能</a>
+                <a href="#process" class="hover:text-[#C9A962] transition-colors">创作流程</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <button onclick="openAuthModal('login')" class="text-sm text-white/80 hover:text-white px-4 py-2">登入</button>
+                <button onclick="openAuthModal('register')"
+                    class="bg-[#C9A962] text-[#1A1A1A] px-6 py-2 rounded-md font-bold text-sm transition-all hover:bg-[#A68A45] hover:shadow-lg hover:shadow-gold/20">开始创作</button>
+            </div>
+        </header>
+
+        <!-- 2. Hero Section -->
+        <main class="flex-grow flex flex-col pt-32">
+            <section class="relative px-6 md:px-12 lg:px-24 mb-32 min-h-[70vh] flex items-center">
+                <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center w-full">
+                    <div class="space-y-8 text-white">
+                        <div class="space-y-1 opacity-0 animate-fade-in-up stagger-1">
+                            <h2 class="text-[#C9A962] font-mono-script italic text-base tracking-wider mb-1 uppercase">
+                                The
+                                Spirit of Creation</h2>
+                            <h1 class="text-6xl md:text-7xl font-serif-display leading-tight">剧灵</h1>
+                            <p class="text-xl md:text-2xl text-white/70 font-light">让灵感，在剧本中苏醒</p>
+                        </div>
+
+                        <div class="max-w-sm space-y-4 opacity-0 animate-fade-in-up stagger-2">
+                            <p class="text-base text-white/50 leading-relaxed">
+                                剧灵，一支懂你的笔。专为短剧创作打造，通过智能技术赋予灵感以形，让每一个故事都能在此优雅起笔。
+                            </p>
+                            <div class="flex items-center gap-3 text-[#C9A962] font-medium text-sm">
+                                <span class="h-px w-6 bg-[#C9A962]/50"></span>
+                                <span>浸入式 · 智能 · 协作</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4 opacity-0 animate-fade-in-up stagger-3">
+                            <button onclick="openAuthModal('register')"
+                                class="btn-pulse bg-[#C9A962] text-[#1A1A1A] px-10 py-4 rounded-lg font-bold text-lg flex items-center gap-2 hover:bg-[#A68A45] transition-all group">
+                                即刻起笔
+                                <iconify-icon icon="lucide:arrow-right"
+                                    class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative hidden lg:block opacity-0 animate-fade-in-up stagger-2">
+                        <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-[80px]">
+                        </div>
+                        <div
+                            class="relative z-10 border border-[#C9A962]/20 rounded-2xl p-4 bg-[#1A1A1A]/50 backdrop-blur-sm transform hover:scale-[1.02] transition-transform duration-500">
+                            <div
+                                class="aspect-video rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=1200"
+                                    alt="Workspace Preview"
+                                    class="w-full h-full object-cover mix-blend-overlay opacity-50">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <iconify-icon icon="lucide:play-circle"
+                                        class="text-7xl text-[#C9A962] opacity-80 group-hover:opacity-100 transition-opacity cursor-pointer"></iconify-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Features Section -->
+            <section id="features" class="px-6 md:px-12 lg:px-24 py-24 bg-[#0F0F0F]">
+                <div class="max-w-3xl mb-16">
+                    <h2 class="text-sm font-mono-script text-[#C9A962] tracking-widest uppercase mb-4 text-white">Core
+                        Features</h2>
+                    <h3 class="text-4xl md:text-5xl font-serif-display text-white mb-6">重构你的创作流</h3>
+                    <p class="text-lg text-white/50">我们剔除了所有干扰，只留下让你能全神贯注于故事的核心工具。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:pen-tool" class="text-2xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">沉浸式编辑器</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">基于 Courier Prime 行业标准的专业写作界面，支持 A4 校对模式，消除灵感噪音。
+                        </p>
+                    </div>
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:sparkles" class="text-2xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">智能 AI 助手</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">突破卡顿的 AI 续写与桥段优化，更懂短剧爆点逻辑，让灵感持续流动。</p>
+                    </div>
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:users-2" class="text-2xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">角色演化系统</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">结构化管理人物成长弧光，自动追踪冲突曲线，确保角色立体鲜活。</p>
+                    </div>
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:layout-dashboard" class="text-2xl text-[#C9A962]"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">全景世界观</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">多维构建故事背景，支持场景描述与视觉索引同步，支撑宏大故事框架。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. CTA Section -->
+            <section class="px-6 md:px-12 lg:px-24 py-32 text-center text-white">
+                <div
+                    class="max-w-4xl mx-auto bg-gradient-to-br from-[#1A1A1A] to-[#0a0a0a] p-12 md:p-20 rounded-3xl border border-white/10 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-[#C9A962]"></div>
+                    <h2 class="text-4xl md:text-6xl font-serif-display text-white mb-8">创作路上，你不孤单</h2>
+                    <p class="text-lg text-white/50 max-w-xl mx-auto mb-10">加入数万名专业编剧的选择。让每一秒灵感都能被精准捕获，让每一个故事都能熠熠生辉。</p>
+                    <button onclick="openAuthModal('register')"
+                        class="px-12 py-4 bg-[#C9A962] text-[#1A1A1A] font-bold rounded-lg hover:bg-[#A68A45] transition-colors">免费开启</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 5. Footer -->
+        <footer class="px-6 md:px-12 lg:px-24 py-12 border-t border-white/5 bg-[#0a0a0a]">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-8 h-8 bg-[#C9A962] rounded flex items-center justify-center">
+                        <iconify-icon icon="lucide:feather" class="text-[#1A1A1A] text-base"></iconify-icon>
+                    </div>
+                    <span class="text-xl font-serif-display font-bold">剧灵 Scripter</span>
+                </div>
+                <p class="text-xs text-white/20">© 2026 Scripter Inc. All Rights Reserved. 剧灵创作平台 版权所有</p>
+            </div>
+        </footer>
+
+        <!-- Auth Modal Overlay -->
+        <div id="auth-modal-overlay" class="auth-modal-overlay items-center justify-center p-6">
+            <div class="auth-backdrop" onclick="closeAuthModal()"></div>
+            <div class="auth-modal">
+                <!-- Close Button -->
+                <button onclick="closeAuthModal()"
+                    class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-[#8B7355] hover:text-[#1A1A1A] transition-colors">
+                    <iconify-icon icon="lucide:x"></iconify-icon>
+                </button>
+
+                <!-- Logo -->
+                <div class="p-6 pb-4 text-center border-b border-[#D3C9B0]/30">
+                    <div class="flex items-center justify-center gap-2 mb-1">
+                        <div class="w-10 h-10 bg-[#1A1A1A] rounded flex items-center justify-center">
+                            <iconify-icon icon="lucide:feather" class="text-[#C9A962] text-lg"></iconify-icon>
+                        </div>
+                        <span class="text-xl font-serif-display font-bold text-[#1A1A1A]">剧灵</span>
+                    </div>
+                    <p id="auth-subtitle" class="text-sm text-[#8B7355]">登录以继续创作</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex border-b border-[#D3C9B0]/30">
+                    <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</button>
+                    <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="login-form" class="p-6">
+                    <form data-validate onsubmit="handleLogin(event)">
+                        <!-- Email -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">邮箱地址</label>
+                            <input type="email" name="email" class="auth-input" placeholder="your@email.com"
+                                data-validate="required|email">
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">密码</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" class="auth-input" placeholder="请输入密码"
+                                    data-validate="required|minlength:6">
+                                <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember & Forgot -->
+                        <div class="remember-forgot">
+                            <label class="remember-me">
+                                <input type="checkbox" name="remember">
+                                <span>记住我</span>
+                            </label>
+                            <a href="#" class="forgot-link" onclick="showForgotPassword()">忘记密码？</a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                            class="w-full py-3 bg-[#C9A962] text-white font-semibold rounded-lg hover:bg-[#A68A45] transition-colors">
+                            登录
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-form" class="p-6" style="display: none;">
+                    <form data-validate onsubmit="handleRegister(event)">
+                        <!-- Username -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">用户名</label>
+                            <input type="text" name="username" class="auth-input" placeholder="请输入用户名"
+                                data-validate="required|minlength:2|maxlength:20">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">邮箱地址</label>
+                            <input type="email" name="email" class="auth-input" placeholder="your@email.com"
+                                data-validate="required|email">
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">密码</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" class="auth-input" placeholder="至少6位字符"
+                                    data-validate="required|minlength:6">
+                                <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="form-group mb-4">
+                            <label class="block text-sm font-semibold text-[#1A1A1A] mb-2">确认密码</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="confirmPassword" class="auth-input" placeholder="请再次输入密码"
+                                    data-validate="required|match:password">
+                                <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="form-group mb-4">
+                            <label class="remember-me">
+                                <input type="checkbox" name="terms" data-validate="required">
+                                <span>我同意 <a href="#" class="text-[#C9A962] hover:underline">用户协议</a> 和 <a href="#" class="text-[#C9A962] hover:underline">隐私政策</a></span>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                            class="w-full py-3 bg-[#C9A962] text-white font-semibold rounded-lg hover:bg-[#A68A45] transition-colors">
+                            注册账号
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Social Login -->
+                <div class="px-6 pb-6">
+                    <div class="divider">
+                        <span class="text-xs text-[#8B7355]">或使用以下方式</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" class="social-btn" onclick="socialLogin('wechat')">
+                            <svg viewBox="0 0 24 24" fill="#07C160">
+                                <path d="M8.5,3.5C5.5,3.5,2,6,2,9c0,2.5,1.5,4.5,3.5,5.5c-0.5,1.5-1,2.5-2,3.5c0.5,1,1.5,1.5,2.5,2 c1.5,0.5,2.5,0.5,3.5-0.5c1-0.5,2-1.5,3.5-3,4c0.5,1,1.5,1.5,2.5,2c1.5,0,2.5-1,3.5-2.5 c2-0.5,3.5-1.5,4.5-3.5c0.5-1.5,1-2.5,2-4c0-1-0.5-2-1.5-2.5C12,10.5,10.5,9.5,9,8c-1-0.5-2-1-3-1 c-1,0.5-2,1.5-3,3c0.5,1.5,1.5,2.5,2.5,3c0.5,1,1.5,1,2.5,1.5c1.5,0.5,2.5,0.5,3.5-0.5 c1-0.5,2-1.5,3.5-3,4c0.5,1,1.5,1.5,2.5,2c1.5,0,2.5-1,3.5-2.5c0.5-1.5,1-2.5,2-4C20,7,18.5,5.5,17,4 C16.5,3.5,14,3.5,11.5,3.5L8.5,3.5z"/>
+                            </svg>
+                            微信
+                        </button>
+                        <button type="button" class="social-btn" onclick="socialLogin('github')">
+                            <svg viewBox="0 0 24 24" fill="#1A1A1A">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756 0-3.071.877-3.071 1.96 0 1.111.385 1.246 1.111 1.246.877 0 1.587-.743 1.587-1.656 0-.868-1.088-1.983-1.088-3.254 0-2.598 1.85-4.479 4.212-4.479 1.088 0 2.006.371 2.598.982.877.826 1.587 2.598 1.587.877 0 1.587-.743 1.587-1.656 0-.868-1.088-1.983-1.088-3.254 0-2.598 1.85-4.479 4.212-4.479 1.088 0 2.006.371 2.598.982.877.826 1.587 2.598 1.587.877 0 1.587-.743 1.587-1.656 0-.868-1.088-1.983-1.088-3.254 0-2.598 1.85-4.479 4.212-4.479 1.088 0 2.006.371 2.598.982.877.826 1.587 2.598 1.587.877 0 1.587-.743 1.587-1.656 0-.868-1.088-1.983-1.088-3.254 0-2.598 1.85-4.479 4.212-4.479"/>
+                            </svg>
+                            GitHub
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auth Modal State
+        let currentAuthTab = 'login';
+        let authValidator = null;
+
+        function openAuthModal(tab = 'login') {
+            const overlay = document.getElementById('auth-modal-overlay');
+            overlay.classList.add('active');
+            switchAuthTab(tab);
+        }
+
+        function closeAuthModal() {
+            const overlay = document.getElementById('auth-modal-overlay');
+            overlay.classList.remove('active');
+        }
+
+        function switchAuthTab(tab) {
+            currentAuthTab = tab;
+
+            // Update tabs
+            document.querySelectorAll('.auth-tab').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.tab === tab) {
+                    t.classList.add('active');
+                }
+            });
+
+            // Update forms
+            document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+
+            // Update subtitle
+            document.getElementById('auth-subtitle').textContent = tab === 'login' ? '登录以继续创作' : '注册开启创作之旅';
+
+            // Re-initialize validator for visible form
+            initAuthValidator();
+        }
+
+        function initAuthValidator() {
+            const activeForm = currentAuthTab === 'login'
+                ? document.querySelector('#login-form form')
+                : document.querySelector('#register-form form');
+
+            if (activeForm && !activeForm.dataset.validatorInitialized) {
+                authValidator = new ScripterFormValidator({
+                    form: activeForm,
+                    onValid: (data) => {
+                        if (currentAuthTab === 'login') {
+                            handleLoginSuccess(data);
+                        } else {
+                            handleRegisterSuccess(data);
+                        }
+                    }
+                });
+                activeForm.dataset.validatorInitialized = 'true';
+            }
+        }
+
+        function togglePassword(button) {
+            const wrapper = button.closest('.password-wrapper');
+            const input = wrapper.querySelector('input');
+            const icon = button.querySelector('iconify-icon');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('icon', 'lucide:eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('icon', 'lucide:eye');
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            // Login logic here
+            console.log('Login submitted');
+            // Show loading state
+            // After success: window.location.href = '01-dashboard.html';
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            // Register logic here
+            console.log('Register submitted');
+            // Show loading state
+            // After success: window.location.href = '01-dashboard.html';
+        }
+
+        function handleLoginSuccess(data) {
+            // Simulate login
+            const btn = document.querySelector('#login-form button[type="submit"]');
+            btn.innerHTML = '<iconify-icon icon="lucide:loader-2" class="animate-spin mr-2"></iconify-icon>登录中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = '01-dashboard.html';
+            }, 1000);
+        }
+
+        function handleRegisterSuccess(data) {
+            // Simulate registration
+            const btn = document.querySelector('#register-form button[type="submit"]');
+            btn.innerHTML = '<iconify-icon icon="lucide:loader-2" class="animate-spin mr-2"></iconify-icon>注册中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = '01-dashboard.html';
+            }, 1000);
+        }
+
+        function showForgotPassword() {
+            // Show forgot password flow
+            alert('密码重置链接已发送到您的邮箱');
+        }
+
+        function socialLogin(provider) {
+            // Handle social login
+            console.log('Social login with:', provider);
+            // Implement OAuth flow
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+            }
+        });
+
+        // Initialize validator on first open
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for first modal open to initialize validator
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 项目详情</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --white-bg: #FFFFFF;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --text-main: #1A1A1A;
+            --text-sub: #5C5548;
+            --text-muted: #8B7355;
+            --border-color: #D3C9B0;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-left-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-20px);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(20px);
+        }
+
+        .integrated-sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 30;
+            height: 100vh;
+        }
+
+        .integrated-sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .edge-toggle:hover {
+            background: var(--hover-bg);
+            color: var(--brand-gold);
+            border-color: var(--brand-gold);
+        }
+
+        .toggle-left-edge {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right-edge {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+
+        /* Project Page Styles */
+        .episode-card {
+            transition: all 0.3s ease;
+        }
+
+        .episode-card:hover {
+            border-color: var(--brand-gold);
+            box-shadow: 0 8px 25px rgba(201, 169, 98, 0.1);
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--brand-gold);
+            transform: translateY(-2px);
+        }
+
+        .timeline-dot {
+            position: relative;
+        }
+
+        .timeline-dot::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 24px;
+            bottom: -8px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-dot:last-child::before {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden font-ui">
+
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left-edge">
+        <iconify-icon id="icon-toggle-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right-edge">
+        <iconify-icon id="icon-toggle-right" icon="lucide:chevron-right" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar: Navigation -->
+    <aside id="sidebar-left"
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <a href="00-welcome.html"
+            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
+                <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
+                    class="w-5 h-5" alt="Logo">
+            </div>
+            <div class="flex flex-col -gap-1">
+                <span class="font-display font-bold text-2xl tracking-tighter text-[#1A1A1A]">剧灵</span>
+                <span
+                    class="text-[8px] font-bold text-[#C9A962] tracking-widest uppercase -mt-1 opacity-70">scripter.art</span>
+            </div>
+        </a>
+
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+            <a href="01-dashboard.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">控制台</span>
+            </a>
+            <a href="02-editor.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">剧本</span>
+            </a>
+            <a href="03-characters.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">人物</span>
+            </a>
+            <a href="05-scenes.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">场景</span>
+            </a>
+            <a href="04-worldview.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">世界观</span>
+            </a>
+            <a href="06-storyboard.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span class="text-sm font-medium">分镜</span>
+            </a>
+        </nav>
+
+        <div
+            class="p-4 border-t border-[#D3C9B0]/40 text-[10px] text-[#8B7355] font-bold text-center uppercase tracking-widest">
+            v4.6 UNIFIED EDITION
+        </div>
+    </aside>
+
+    <!-- Main Content: Project Details -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <header class="h-20 bg-white/90 border-b border-[#D3C9B0] flex items-center justify-between px-8 z-10">
+            <div class="flex items-center gap-4">
+                <a href="01-dashboard.html"
+                    class="p-1 text-[#5C5548] hover:text-[#C9A962] transition-colors"><iconify-icon
+                        icon="lucide:arrow-left" class="text-xl"></iconify-icon></a>
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-lg overflow-hidden border border-[#D3C9B0]">
+                        <img src="https://images.unsplash.com/photo-1541447271487-09612b3f49f7?auto=format&fit=crop&q=80&w=200"
+                            class="w-full h-full object-cover" alt="Cover">
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-xl text-[#1A1A1A]">我送君归去</h1>
+                        <p class="text-xs text-[#8B7355]">武侠悬疑 · 80集 · 连载中</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors" title="导出">
+                    <iconify-icon icon="lucide:download" class="text-xl"></iconify-icon>
+                </button>
+                <button class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors" title="更多">
+                    <iconify-icon icon="lucide:more-vertical" class="text-xl"></iconify-icon>
+                </button>
+                <a href="02-editor.html"
+                    class="px-5 py-2 bg-[#C9A962] text-white rounded text-xs font-bold hover:bg-[#A68A45]">继续创作</a>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <div class="p-8 max-w-5xl mx-auto">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="stat-card bg-white rounded-lg p-4 border border-[#D3C9B0]">
+                        <p class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">总字数</p>
+                        <p class="text-2xl font-display font-bold text-[#1A1A1A]">48.2K</p>
+                    </div>
+                    <div class="stat-card bg-white rounded-lg p-4 border border-[#D3C9B0]">
+                        <p class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">已完成</p>
+                        <p class="text-2xl font-display font-bold text-[#1A1A1A]">24<span class="text-sm text-[#8B7355]">/80</span></p>
+                    </div>
+                    <div class="stat-card bg-white rounded-lg p-4 border border-[#D3C9B0]">
+                        <p class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">角色数</p>
+                        <p class="text-2xl font-display font-bold text-[#1A1A1A]">12</p>
+                    </div>
+                    <div class="stat-card bg-white rounded-lg p-4 border border-[#D3C9B0]">
+                        <p class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">场景数</p>
+                        <p class="text-2xl font-display font-bold text-[#1A1A1A]">86</p>
+                    </div>
+                </div>
+
+                <!-- Episodes List -->
+                <section class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3">
+                            剧集列表
+                        </h2>
+                        <button class="text-xs text-[#C9A962] font-semibold hover:text-[#A68A45]">
+                            <iconify-icon icon="lucide:plus" class="mr-1"></iconify-icon>
+                            新建剧集
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-scene-container>
+                        <div class="episode-card bg-white rounded-lg p-5 border border-[#D3C9B0]" data-scene-item>
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div data-scene-handle class="p-1 hover:bg-[#D3C9B0] rounded cursor-move">
+                                        <iconify-icon icon="lucide:grip-vertical" class="text-[#8B7355]"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <span data-scene-number class="text-xs font-bold text-[#C9A962]">E01</span>
+                                        <h3 class="font-display font-bold text-base text-[#1A1A1A]">第一集：入阵</h3>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 bg-[#7FA870]/10 text-[#7FA870] text-[10px] font-bold rounded">已完成</span>
+                            </div>
+                            <p class="text-xs text-[#8B7355] mb-3 line-clamp-2">雾姝湘西引魂，偶遇王语嫣。两人结伴而行，寻找失踪的武林秘籍。</p>
+                            <div class="flex items-center justify-between text-[10px] text-[#8B7355]">
+                                <span>8场景 · 3,124字</span>
+                                <span>2026-01-22</span>
+                            </div>
+                        </div>
+
+                        <div class="episode-card bg-white rounded-lg p-5 border border-[#D3C9B0]" data-scene-item>
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div data-scene-handle class="p-1 hover:bg-[#D3C9B0] rounded cursor-move">
+                                        <iconify-icon icon="lucide:grip-vertical" class="text-[#8B7355]"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <span data-scene-number class="text-xs font-bold text-[#C9A962]">E02</span>
+                                        <h3 class="font-display font-bold text-base text-[#1A1A1A]">第二集：谜踪</h3>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 bg-[#D9A046]/10 text-[#D9A046] text-[10px] font-bold rounded">编辑中</span>
+                            </div>
+                            <p class="text-xs text-[#8B7355] mb-3 line-clamp-2">追踪神秘人至古刹，发现密室。王语嫣身世初现端倪。</p>
+                            <div class="flex items-center justify-between text-[10px] text-[#8B7355]">
+                                <span>6场景 · 2,456字</span>
+                                <span>2026-01-21</span>
+                            </div>
+                        </div>
+
+                        <div class="episode-card bg-white rounded-lg p-5 border border-[#D3C9B0]" data-scene-item>
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div data-scene-handle class="p-1 hover:bg-[#D3C9B0] rounded cursor-move">
+                                        <iconify-icon icon="lucide:grip-vertical" class="text-[#8B7355]"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <span data-scene-number class="text-xs font-bold text-[#C9A962]">E03</span>
+                                        <h3 class="font-display font-bold text-base text-[#1A1A1A]">第三集：密室</h3>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 bg-[#8B7355]/10 text-[#8B7355] text-[10px] font-bold rounded">草稿</span>
+                            </div>
+                            <p class="text-xs text-[#8B7355] mb-3 line-clamp-2">密室中发现的线索指向三十年前的一场武林恩怨。</p>
+                            <div class="flex items-center justify-between text-[10px] text-[#8B7355]">
+                                <span>4场景 · 1,234字</span>
+                                <span>2026-01-20</span>
+                            </div>
+                        </div>
+
+                        <div class="episode-card bg-white rounded-lg p-5 border border-[#D3C9B0] flex items-center justify-center text-[#8B7355] cursor-pointer hover:border-[#C9A962] transition-colors">
+                            <div class="text-center">
+                                <div class="w-10 h-10 bg-[#FAF7F0] rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <iconify-icon icon="lucide:plus" class="text-[#C9A962] text-xl"></iconify-icon>
+                                </div>
+                                <span class="text-xs font-medium">添加新剧集</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Project Info -->
+                <section class="mb-8">
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-4">
+                        项目信息
+                    </h2>
+                    <div class="bg-white rounded-lg border border-[#D3C9B0] p-6">
+                        <dl class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <dt class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">类型</dt>
+                                <dd class="text-[#1A1A1A]">武侠悬疑短剧</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">总集数</dt>
+                                <dd class="text-[#1A1A1A]">80集</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">创建时间</dt>
+                                <dd class="text-[#1A1A1A]">2026-01-15</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">最后修改</dt>
+                                <dd class="text-[#1A1A1A]">2026-01-22</dd>
+                            </div>
+                            <div class="col-span-2">
+                                <dt class="text-[10px] font-bold text-[#8B7355] uppercase mb-1">简介</dt>
+                                <dd class="text-[#5C5548]">湘西巫女雾姝与落难千金王语嫣，在探寻武林秘籍的途中揭开一场惊天阴谋...</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <!-- Recent Activity -->
+                <section>
+                    <h2 class="text-sm font-bold text-[#8B7355] uppercase tracking-widest border-l-4 border-[#C9A962] pl-3 mb-4">
+                        最近动态
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 timeline-dot">
+                            <div class="w-4 h-4 bg-[#C9A962] rounded-full flex-shrink-0 mt-0.5"></div>
+                            <div class="flex-1 pb-4">
+                                <p class="text-sm text-[#1A1A1A]">完成了 <span class="font-semibold">第二集：谜踪</span> 的场景 6</p>
+                                <p class="text-[10px] text-[#8B7355]">2小时前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 timeline-dot">
+                            <div class="w-4 h-4 bg-[#7FA870] rounded-full flex-shrink-0 mt-0.5"></div>
+                            <div class="flex-1 pb-4">
+                                <p class="text-sm text-[#1A1A1A]">添加了新角色 <span class="font-semibold">慕容复</span></p>
+                                <p class="text-[10px] text-[#8B7355]">5小时前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 timeline-dot">
+                            <div class="w-4 h-4 bg-[#8B7355] rounded-full flex-shrink-0 mt-0.5"></div>
+                            <div class="flex-1">
+                                <p class="text-sm text-[#1A1A1A]">导出了 <span class="font-semibold">第一集</span> 的 PDF 剧本</p>
+                                <p class="text-[10px] text-[#8B7355]">昨天</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar: Quick Actions -->
+    <aside id="sidebar-right"
+        class="integrated-sidebar integrated-sidebar-right w-80 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        <!-- User Profile Header -->
+        <div class="p-6 border-b border-[#D3C9B0]/50 bg-white">
+            <div
+                class="flex items-center justify-between p-2 rounded hover:bg-[#FAF7F0] transition-colors cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100"
+                            class="w-9 h-9 rounded-full object-cover border border-[#D3C9B0]">
+                        <div
+                            class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-[#1A1A1A]">Felix Vincent</span>
+                        <div class="flex items-center gap-1.5">
+                            <span
+                                class="text-[9px] text-[#C9A962] font-black uppercase tracking-widest bg-[#C9A962]/10 px-1 rounded">Pro</span>
+                            <span class="text-[9px] text-[#8B7355]">编剧资深会员</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openSettingsModal()" class="text-gray-300 group-hover:text-[#1A1A1A] transition-colors">
+                    <iconify-icon icon="lucide:settings"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white">
+            <h3 class="text-sm font-bold text-[#1A1A1A] mb-4">快捷操作</h3>
+
+            <div class="space-y-2 mb-6">
+                <button class="w-full flex items-center gap-3 p-3 bg-[#FAF7F0] rounded hover:bg-[#F5F1E8] transition-colors text-left">
+                    <iconify-icon icon="lucide:edit" class="text-[#C9A962]"></iconify-icon>
+                    <span class="text-sm font-medium">编辑剧本</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 bg-[#FAF7F0] rounded hover:bg-[#F5F1E8] transition-colors text-left">
+                    <iconify-icon icon="lucide:users" class="text-[#5C5548]"></iconify-icon>
+                    <span class="text-sm font-medium">管理角色</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 bg-[#FAF7F0] rounded hover:bg-[#F5F1E8] transition-colors text-left">
+                    <iconify-icon icon="lucide:clapperboard" class="text-[#5C5548]"></iconify-icon>
+                    <span class="text-sm font-medium">场景列表</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 bg-[#FAF7F0] rounded hover:bg-[#F5F1E8] transition-colors text-left">
+                    <iconify-icon icon="lucide:download" class="text-[#5C5548]"></iconify-icon>
+                    <span class="text-sm font-medium">导出剧本</span>
+                </button>
+            </div>
+
+            <h3 class="text-sm font-bold text-[#1A1A1A] mb-4">主要角色</h3>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#C9A962] to-[#A68A45] flex items-center justify-center text-white font-bold text-sm">
+                        雾
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-[#1A1A1A]">雾姝</p>
+                        <p class="text-[10px] text-[#8B7355]">主角 · 湘西巫女</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#5C5548] to-[#1A1A1A] flex items-center justify-center text-white font-bold text-sm">
+                        王
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-[#1A1A1A]">王语嫣</p>
+                        <p class="text-[10px] text-[#8B7355]">主角 · 落难千金</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B7355] to-[#5C5548] flex items-center justify-center text-white font-bold text-sm">
+                        慕
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-[#1A1A1A]">慕容复</p>
+                        <p class="text-[10px] text-[#8B7355]">配角 · 神秘剑客</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-toggle-${side}`);
+            const isCollapsed = sidebar.classList.toggle(`sidebar-${side}-collapsed`);
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+
+        // Initialize drag and drop for episodes
+        document.addEventListener('DOMContentLoaded', () => {
+            const sceneContainer = document.querySelector('[data-scene-container]');
+            if (sceneContainer) {
+                new ScripterDragDrop({
+                    container: sceneContainer,
+                    items: '[data-scene-item]',
+                    handle: '[data-scene-handle]',
+                    type: 'scene'
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

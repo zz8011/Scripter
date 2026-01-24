@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 场景存储库</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --white-bg: #FFFFFF;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --ink-muted: #8B7355;
+            --border-beige: #D3C9B0;
+            --hover-bg: #FAF7F0;
+        }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; }
+        .font-display { font-family: 'Noto Serif SC', serif; }
+        .font-editor { font-family: 'Courier Prime', 'Noto Sans SC', monospace; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-beige);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        .scene-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .scene-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(26, 26, 26, 0.15);
+        }
+
+        .icon-hover {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .icon-hover:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-animate {
+            animation: modalFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .overlay-bg {
+            background: rgba(26, 26, 26, 0.65);
+            backdrop-filter: blur(8px);
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col font-ui paper-texture overflow-hidden">
+        
+        <div class="flex-1 flex overflow-hidden relative">
+            <!-- Left Sidebar (Desktop) -->
+            <aside id="sidebar-left" class="w-64 border-r border-[#D3C9B0] bg-white/90 backdrop-blur-md flex flex-col hidden lg:flex shrink-0 z-20">
+                <div class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#1A1A1A] rounded-md flex items-center justify-center shadow-md">
+                        <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=20" alt="Logo">
+                    </div>
+                    <span class="font-display font-bold text-xl tracking-tight text-[#1A1A1A]">剧灵</span>
+                </div>
+
+                <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+                    <!-- 剧本 (可折叠) -->
+                    <div class="mb-1">
+                        <button id="nav-script-collapse" class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                            <div class="flex items-center gap-4">
+                                <iconify-icon icon="lucide:scroll" class="text-2xl group-hover:text-[#C9A962] icon-hover"></iconify-icon>
+                                <span class="text-sm font-semibold">剧本</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" class="text-xs text-gray-400"></iconify-icon>
+                        </button>
+                        <div class="mt-1 ml-12 space-y-0.5">
+                            <a href="#" id="nav-ep-1" class="block px-3 py-1.5 text-xs text-[#8B7355] hover:text-[#C9A962] transition-colors">第一集：入阵</a>
+                            <a href="#" id="nav-ep-2" class="block px-3 py-1.5 text-xs text-[#8B7355] hover:text-[#C9A962] transition-colors">第二集：暗流</a>
+                        </div>
+                    </div>
+
+                    <!-- 人物 -->
+                    <a href="https://p.superdesign.dev/draft/86424e74-7efc-4a65-a1e0-f9a8043f5eb5" id="nav-characters-link" class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                        <iconify-icon icon="lucide:users" class="text-2xl group-hover:text-[#C9A962] icon-hover"></iconify-icon>
+                        <span class="text-sm font-semibold">人物</span>
+                    </a>
+
+                    <!-- 世界观 -->
+                    <a href="https://p.superdesign.dev/draft/61f79fc5-11c6-4a07-98e7-0041c61fdf51" id="nav-worldview-link" class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                        <iconify-icon icon="lucide:globe" class="text-2xl group-hover:text-[#C9A962] icon-hover"></iconify-icon>
+                        <span class="text-sm font-semibold">世界观</span>
+                    </a>
+
+                    <!-- 分镜 -->
+                    <div class="mb-1">
+                        <button id="nav-storyboard-collapse" class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                            <div class="flex items-center gap-4">
+                                <iconify-icon icon="lucide:layout" class="text-2xl group-hover:text-[#C9A962] icon-hover"></iconify-icon>
+                                <span class="text-sm font-semibold">分镜</span>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-right" class="text-xs text-gray-400"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <!-- 场景 (当前激活) -->
+                    <a href="#" id="nav-scene-link" class="flex items-center gap-4 px-4 py-3 rounded-lg bg-[#C9A962]/10 text-[#C9A962] border-r-4 border-[#C9A962] font-bold shadow-sm transition-all group">
+                        <iconify-icon icon="lucide:clapperboard" class="text-2xl icon-hover"></iconify-icon>
+                        <span class="text-sm">场景</span>
+                    </a>
+
+                    <div class="pt-8 pb-4 px-4">
+                        <div class="h-[1px] bg-[#D3C9B0]/30 w-full mb-6"></div>
+                        <div class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-4">工具</div>
+                        <a href="https://p.superdesign.dev/draft/ea66de4c-2713-4859-976a-eb946376d8da" id="nav-export-link" class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all group">
+                            <iconify-icon icon="lucide:file-output" class="text-2xl group-hover:text-[#C9A962] icon-hover"></iconify-icon>
+                            <span class="text-sm font-semibold">剧本导出</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="p-6">
+                    <div class="p-4 bg-[#1A1A1A] rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-[#C9A962] uppercase tracking-widest">创作度</span>
+                            <span class="text-[10px] text-white/40">65%</span>
+                        </div>
+                        <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-[#C9A962]" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 flex flex-col overflow-hidden min-w-0">
+                <!-- Header Toolbar -->
+                <header class="h-16 bg-white/60 backdrop-blur-md border-b border-[#D3C9B0] px-4 md:px-8 flex items-center justify-between z-10">
+                    <div class="flex items-center gap-4">
+                        <button id="mobile-menu-btn" class="lg:hidden p-2 text-[#1A1A1A] hover:text-[#C9A962] transition-colors">
+                            <iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon>
+                        </button>
+                        <div class="flex flex-col">
+                            <h1 class="text-lg font-display font-bold text-[#1A1A1A]">场景存储库</h1>
+                            <p class="text-[10px] text-[#8B7355] font-medium uppercase tracking-widest hidden md:block">Scene Library / Project V2.4</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <!-- Search & Filters -->
+                        <div class="flex items-center bg-[#F5F1E8]/50 border border-[#D3C9B0] rounded-full px-3 py-1.5 gap-2">
+                            <iconify-icon icon="lucide:search" class="text-[#8B7355]"></iconify-icon>
+                            <input type="text" placeholder="搜索场景、地点或人物..." class="w-48 xl:w-64 bg-transparent border-none text-xs outline-none">
+                        </div>
+                        
+                        <div class="flex items-center gap-1 border-x border-[#D3C9B0]/40 px-3">
+                            <button class="p-2 text-[#1A1A1A] hover:text-[#C9A962] transition-all transform hover:scale-110" title="筛选">
+                                <iconify-icon icon="lucide:filter" class="text-xl"></iconify-icon>
+                            </button>
+                            <button class="p-2 text-[#C9A962] transition-all transform hover:scale-110" title="网格视图">
+                                <iconify-icon icon="lucide:grid" class="text-xl"></iconify-icon>
+                            </button>
+                            <button class="p-2 text-[#8B7355] hover:text-[#C9A962] transition-all transform hover:scale-110" title="列表视图">
+                                <iconify-icon icon="lucide:list" class="text-xl"></iconify-icon>
+                            </button>
+                        </div>
+
+                        <button id="cta-add-scene" class="bg-[#C9A962] hover:bg-[#A68A45] text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg transition-all transform active:scale-95">
+                            <iconify-icon icon="lucide:plus-square" class="text-lg"></iconify-icon>
+                            <span>新建场景</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Content Grid -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                        
+                        <!-- Scene Card 1 -->
+                        <div onclick="document.getElementById('scene-modal').classList.remove('hidden')" class="scene-card group relative flex flex-col bg-white rounded-xl border border-[#D3C9B0] overflow-hidden cursor-pointer shadow-sm">
+                            <!-- Image Area (16:9) -->
+                            <div class="relative aspect-video overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1541447271487-09612b3f49f7?auto=format&fit=crop&q=80&w=800" alt="Scene" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                
+                                <!-- Image Toolbar -->
+                                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                    <button class="w-9 h-9 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-[#C9A962] hover:bg-white transition-all group/ai" title="AI 生成场景图片">
+                                        <iconify-icon icon="lucide:sparkles" class="text-lg group-hover/ai:rotate-12 transition-transform"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-3 left-4 right-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 bg-[#C9A962] text-white text-[9px] font-bold rounded">第 2 场</span>
+                                            <span class="px-2 py-0.5 bg-black/50 backdrop-blur-sm text-white text-[9px] font-bold rounded uppercase tracking-wider">深夜·外</span>
+                                        </div>
+                                        <div class="flex -space-x-1.5">
+                                            <div class="w-5 h-5 rounded-full border border-white/40 bg-[#C9A962] flex items-center justify-center text-[7px] font-bold text-white">雾</div>
+                                            <div class="w-5 h-5 rounded-full border border-white/40 bg-[#5C5548] flex items-center justify-center text-[7px] font-bold text-white">盛</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Info Area -->
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 text-[#C9A962] text-[10px] font-bold uppercase tracking-widest mb-2">
+                                    <iconify-icon icon="lucide:map-pin" class="text-xs"></iconify-icon>
+                                    <span>湘西废弃古庙</span>
+                                </div>
+                                <h3 class="text-base font-display font-bold text-[#1A1A1A] mb-2">古庙惊魂</h3>
+                                <p class="text-xs text-[#5C5548] line-clamp-2 leading-relaxed font-light">
+                                    残破的佛像在月光下显得狰狞，香炉倾倒，灰烬满地。雾姝步入庙宇，冷风贯穿...
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Scene Card 2 -->
+                        <div class="scene-card group relative flex flex-col bg-white rounded-xl border border-[#D3C9B0] overflow-hidden cursor-pointer shadow-sm">
+                            <div class="relative aspect-video overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" alt="Scene" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                
+                                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                    <button class="w-9 h-9 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-[#C9A962] hover:bg-white transition-all group/ai">
+                                        <iconify-icon icon="lucide:sparkles" class="text-lg group-hover/ai:rotate-12 transition-transform"></iconify-icon>
+                                    </button>
+                                </div>
+
+                                <div class="absolute bottom-3 left-4 right-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 bg-[#C9A962] text-white text-[9px] font-bold rounded">第 3 场</span>
+                                            <span class="px-2 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded uppercase tracking-wider">清晨·内</span>
+                                        </div>
+                                        <div class="flex -space-x-1.5">
+                                            <div class="w-5 h-5 rounded-full border border-white/40 bg-[#5C5548] flex items-center justify-center text-[7px] font-bold text-white">盛</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 text-[#C9A962] text-[10px] font-bold uppercase tracking-widest mb-2">
+                                    <iconify-icon icon="lucide:map-pin" class="text-xs"></iconify-icon>
+                                    <span>盛府·书房</span>
+                                </div>
+                                <h3 class="text-base font-display font-bold text-[#1A1A1A] mb-2">密信初现</h3>
+                                <p class="text-xs text-[#5C5548] line-clamp-2 leading-relaxed font-light">
+                                    晨光熹微，盛世安坐在堆满卷轴的案几前，指尖轻触封漆火印，面色凝重。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Add Card -->
+                        <div class="aspect-video rounded-xl border-2 border-dashed border-[#D3C9B0] flex flex-col items-center justify-center text-[#8B7355] hover:bg-[#FAF7F0] hover:border-[#C9A962] hover:text-[#C9A962] transition-all cursor-pointer group">
+                            <div class="w-12 h-12 rounded-xl border-2 border-current flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <iconify-icon icon="lucide:plus-square" class="text-2xl"></iconify-icon>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">添加新场景</span>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Panel (Stats) -->
+            <aside class="w-72 border-l border-[#D3C9B0] bg-white/40 backdrop-blur-md hidden xl:flex flex-col shrink-0 z-10">
+                <div class="p-8 border-b border-[#D3C9B0]/30">
+                    <h2 class="text-xs font-bold text-[#8B7355] uppercase tracking-widest mb-6">项目概览</h2>
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-[#8B7355] uppercase font-bold mb-1">总场次</span>
+                                <span class="text-2xl font-display font-bold text-[#1A1A1A]">24</span>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-[10px] text-[#8B7355] uppercase font-bold mb-1">已完成</span>
+                                <span class="text-2xl font-display font-bold text-[#C9A962]">12</span>
+                            </div>
+                        </div>
+                        <div class="h-1.5 w-full bg-[#D3C9B0]/30 rounded-full overflow-hidden">
+                            <div class="h-full bg-[#C9A962]" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                    <div class="mb-10">
+                        <h3 class="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest mb-6">场景地点分布</h3>
+                        <div class="space-y-5">
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between text-[11px] font-bold">
+                                    <span class="text-[#1A1A1A]">盛府</span>
+                                    <span class="text-[#8B7355]">8 场</span>
+                                </div>
+                                <div class="h-1 w-full bg-[#D3C9B0]/20 rounded-full">
+                                    <div class="h-full bg-[#C9A962] rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between text-[11px] font-bold">
+                                    <span class="text-[#1A1A1A]">废弃古庙</span>
+                                    <span class="text-[#8B7355]">4 场</span>
+                                </div>
+                                <div class="h-1 w-full bg-[#D3C9B0]/20 rounded-full">
+                                    <div class="h-full bg-[#5C5548] rounded-full" style="width: 20%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-[#1A1A1A] rounded-2xl text-white shadow-xl relative overflow-hidden">
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-2 text-[10px] font-bold text-[#C9A962] uppercase tracking-widest mb-3">
+                                <iconify-icon icon="lucide:sparkles" class="animate-pulse"></iconify-icon>
+                                <span>AI 剧力分析</span>
+                            </div>
+                            <p class="text-[11px] text-white/70 leading-relaxed italic font-light">
+                                "当前的第3场与第4场之间缺乏情感过渡，建议在场景切换时增加一个盛世安凝望远方的特写镜头。"
+                            </p>
+                            <button class="mt-5 w-full py-2.5 bg-white/10 hover:bg-[#C9A962] hover:text-[#1A1A1A] border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all">
+                                优化建议
+                            </button>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 opacity-5">
+                            <iconify-icon icon="lucide:feather" class="text-8xl"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="h-8 bg-white border-t border-[#D3C9B0] px-6 flex items-center justify-between z-50 shrink-0 text-[10px] font-bold tracking-tight text-[#8B7355]">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:file-text" class="text-[#C9A962] text-base"></iconify-icon>
+                    <span class="uppercase tracking-widest">剧本版本: JULING-V2.4</span>
+                </div>
+                <div class="h-3 w-[1px] bg-[#D3C9B0]"></div>
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:clock" class="text-[#C9A962] text-base"></iconify-icon>
+                    <span>最后同步于 2分钟前</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span class="uppercase tracking-widest">系统联机中</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Detailed Scene Modal -->
+        <div id="scene-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-10">
+            <div onclick="document.getElementById('scene-modal').classList.add('hidden')" class="absolute inset-0 overlay-bg"></div>
+            <div class="relative w-full h-full max-w-6xl bg-[#1A1A1A] md:rounded-3xl shadow-2xl overflow-hidden flex flex-col modal-animate">
+                <!-- Modal Header Overlay -->
+                <div class="absolute inset-0">
+                    <img src="https://images.unsplash.com/photo-1541447271487-09612b3f49f7?auto=format&fit=crop&q=80&w=1600" alt="Scene Background" class="w-full h-full object-cover opacity-30 blur-sm">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#1A1A1A]"></div>
+                </div>
+
+                <div class="relative z-10 p-6 md:p-10 flex-1 flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between mb-10">
+                        <div class="flex items-center gap-6">
+                            <div class="w-14 h-14 bg-[#C9A962] rounded-2xl flex items-center justify-center text-[#1A1A1A] shadow-2xl">
+                                <iconify-icon icon="lucide:clapperboard" class="text-3xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 mb-1">
+                                    <span class="text-[10px] font-bold text-[#C9A962] uppercase tracking-widest">第 2 场</span>
+                                    <h2 class="text-2xl font-display font-bold text-white">古庙惊魂</h2>
+                                </div>
+                                <div class="flex items-center gap-4 text-xs text-white/50">
+                                    <span class="flex items-center gap-1.5"><iconify-icon icon="lucide:map-pin"></iconify-icon>湘西废弃古庙</span>
+                                    <span class="flex items-center gap-1.5"><iconify-icon icon="lucide:clock"></iconify-icon>深夜 · 外景</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="px-6 py-2.5 bg-[#C9A962] hover:bg-[#A68A45] text-[#1A1A1A] rounded-full text-xs font-bold flex items-center gap-2 transition-all shadow-xl group/regen">
+                                <iconify-icon icon="lucide:sparkles" class="text-lg group-hover/regen:rotate-12 transition-transform"></iconify-icon>
+                                <span>重新生成</span>
+                            </button>
+                            <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+                            <button class="p-3 text-white/40 hover:text-[#C9A962] transition-colors transform hover:scale-110" title="编辑">
+                                <iconify-icon icon="lucide:edit-3" class="text-2xl"></iconify-icon>
+                            </button>
+                            <button class="p-3 text-white/40 hover:text-red-500 transition-colors transform hover:scale-110" title="删除">
+                                <iconify-icon icon="lucide:trash-2" class="text-2xl"></iconify-icon>
+                            </button>
+                            <button onclick="document.getElementById('scene-modal').classList.add('hidden')" class="p-3 text-white/40 hover:text-white transition-colors transform hover:rotate-90">
+                                <iconify-icon icon="lucide:x" class="text-2xl"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-10 overflow-hidden">
+                        <div class="lg:col-span-2 flex flex-col gap-8 overflow-y-auto custom-scrollbar pr-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-[#C9A962] uppercase tracking-widest mb-4 block">场景文学描写</label>
+                                <div class="p-8 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl relative group/edit">
+                                    <textarea class="w-full bg-transparent border-none focus:ring-0 text-lg text-white/90 font-editor leading-relaxed italic resize-none custom-scrollbar h-64" spellcheck="false">残破的佛像在月光下显得狰狞，香炉倾倒，灰烬满地。空气中弥漫着腐朽的木头味和淡淡的檀香。雾姝步入庙宇，冷风贯穿，她的衣袂在大殿内飘舞，脚步声在空旷的空间内产生诡异的回响。</textarea>
+                                    <div class="absolute bottom-4 right-4 opacity-0 group-hover/edit:opacity-100 transition-opacity">
+                                        <iconify-icon icon="lucide:edit-3" class="text-[#C9A962] text-sm"></iconify-icon>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-[10px] font-bold text-[#C9A962] uppercase block mb-2">灯光方案</span>
+                                    <p class="text-xs text-white/70">冷色调月光，高对比度侧光</p>
+                                </div>
+                                <div class="p-4 bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-[10px] font-bold text-[#C9A962] uppercase block mb-2">情绪基调</span>
+                                    <p class="text-xs text-white/70">压抑、悬疑、宿命感</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-10">
+                            <div>
+                                <label class="text-[10px] font-bold text-[#C9A962] uppercase tracking-widest mb-6 block">登场角色</label>
+                                <div class="flex flex-wrap gap-6">
+                                    <div class="flex flex-col items-center gap-3 group/avatar">
+                                        <div class="w-14 h-14 rounded-full bg-[#C9A962] border-2 border-white/20 flex items-center justify-center text-lg font-bold text-[#1A1A1A] shadow-xl group-hover/avatar:scale-110 transition-transform">雾</div>
+                                        <span class="text-[10px] font-bold text-white/80 uppercase">雾姝</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-3 group/avatar">
+                                        <div class="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center text-lg font-bold text-white shadow-xl group-hover/avatar:scale-110 transition-transform">盛</div>
+                                        <span class="text-[10px] font-bold text-white/80 uppercase">盛世安</span>
+                                    </div>
+                                    <button class="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center text-white/40 hover:border-[#C9A962] hover:text-[#C9A962] transition-all transform hover:scale-110">
+                                        <iconify-icon icon="lucide:plus-square" class="text-2xl"></iconify-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto p-6 bg-[#C9A962]/10 border border-[#C9A962]/20 rounded-2xl">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <iconify-icon icon="lucide:info" class="text-[#C9A962]"></iconify-icon>
+                                    <span class="text-[10px] font-bold text-[#C9A962] uppercase">修改历史</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center text-[10px]">
+                                        <span class="text-white/60">V2.3 - 优化了氛围描写</span>
+                                        <span class="text-white/30">10:24</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-[10px]">
+                                        <span class="text-white/60">V2.2 - 更改了登场时间点</span>
+                                        <span class="text-white/30">昨天</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mobile menu logic if needed
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar-left');
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('fixed');
+            sidebar.classList.toggle('inset-0');
+            sidebar.classList.toggle('z-[60]');
+        });
+
+        // Close modal on escape
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('scene-modal').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

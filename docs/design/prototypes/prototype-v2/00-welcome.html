@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 Scripter | 让灵感在剧本中苏醒</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="prefetch" href="01-login.html" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --border-beige: #D3C9B0;
+            --ink-secondary: #5C5548;
+        }
+
+        html { background-color: var(--ink-black); }
+
+        body {
+            margin: 0;
+            background-color: var(--ink-black);
+            color: var(--paper-bg);
+            overflow-x: hidden;
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        .font-serif-display { font-family: 'Noto Serif SC', serif; }
+        .font-mono-script { font-family: 'Courier Prime', monospace; }
+
+        /* Texture Overlays */
+        .paper-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .gradient-mesh {
+            background: radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 10% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 40%);
+        }
+
+        /* Floating Particles */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(var(--drift)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: var(--size);
+            height: var(--size);
+            background: radial-gradient(circle, var(--brand-gold) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatUp var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+            pointer-events: none;
+        }
+
+        /* Flowing Light Beams */
+        @keyframes lightBeam {
+            0% {
+                transform: rotate(0deg) translateY(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: var(--max-opacity);
+            }
+            100% {
+                transform: rotate(360deg) translateY(-100vh);
+                opacity: 0;
+            }
+        }
+
+        .light-beam {
+            position: absolute;
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(to bottom, transparent, var(--brand-gold), transparent);
+            animation: lightBeam var(--duration) linear infinite;
+            animation-delay: var(--delay);
+            pointer-events: none;
+        }
+
+        /* Floating Feathers */
+        @keyframes floatFeather {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: var(--max-opacity);
+            }
+            90% {
+                opacity: var(--max-opacity);
+            }
+            50% {
+                transform: translate(var(--x), var(--y)) rotate(var(--rotate)) scale(var(--scale));
+            }
+        }
+
+        .floating-feather {
+            position: absolute;
+            color: var(--brand-gold);
+            animation: floatFeather var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+            pointer-events: none;
+            filter: blur(3px);
+        }
+
+        /* Flowing Gradient Orbs */
+        @keyframes flowOrb {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(50px, -30px) scale(1.1);
+            }
+            50% {
+                transform: translate(-30px, 50px) scale(0.9);
+            }
+            75% {
+                transform: translate(-50px, -20px) scale(1.05);
+            }
+        }
+
+        .flow-orb {
+            position: absolute;
+            border-radius: 50%;
+            animation: flowOrb var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+            pointer-events: none;
+            filter: blur(60px);
+        }
+
+        /* Shimmer Effect */
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) skewX(-15deg);
+            }
+            100% {
+                transform: translateX(100vw) skewX(-15deg);
+            }
+        }
+
+        .shimmer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(201, 169, 98, 0.03) 50%,
+                transparent 100%
+            );
+            animation: shimmer 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Hero Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.2s; }
+        .stagger-2 { animation-delay: 0.4s; }
+        .stagger-3 { animation-delay: 0.6s; }
+
+        /* Card Effects */
+        .feature-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--brand-gold);
+            box-shadow: 0 10px 30px -10px rgba(201, 169, 98, 0.3);
+        }
+
+        .feature-card:hover iconify-icon {
+            transform: rotate(12deg) scale(1.1);
+            color: var(--brand-gold);
+        }
+
+        /* Gold Pulse */
+        @keyframes goldPulse {
+            0% { box-shadow: 0 0 0 0 rgba(201, 169, 98, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(201, 169, 98, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(201, 169, 98, 0); }
+        }
+
+        .btn-pulse {
+            animation: goldPulse 2s infinite;
+        }
+
+        /* Scroll Smoothness */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--ink-black);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--ink-secondary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen relative flex flex-col overflow-x-hidden">
+        <!-- Textures -->
+        <div class="paper-overlay"></div>
+        <div class="fixed inset-0 gradient-mesh pointer-events-none"></div>
+
+        <!-- 1. Header Navigation -->
+        <header class="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md bg-opacity-80 border-b border-white/5 py-4 px-6 md:px-12 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#C9A962] rounded-lg flex items-center justify-center shadow-lg shadow-gold/20">
+                    <iconify-icon icon="lucide:feather" class="text-[#1A1A1A] text-xl"></iconify-icon>
+                </div>
+                <span class="text-2xl font-serif-display font-bold text-white tracking-tight">剧灵 <span class="text-[#C9A962] font-sans font-normal text-sm ml-1 tracking-widest uppercase">Scripter</span></span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+                <a href="#features" class="hover:text-[#C9A962] transition-colors">核心功能</a>
+                <a href="#process" class="hover:text-[#C9A962] transition-colors">创作流程</a>
+                <a href="#" class="hover:text-[#C9A962] transition-colors">专业方案</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <a href="01-login.html" class="text-sm text-white/80 hover:text-white px-4 py-2">登录</a>
+                <a href="02-register.html" class="bg-[#C9A962] text-[#1A1A1A] px-6 py-2 rounded-md font-bold text-sm transition-all hover:bg-[#A68A45] hover:shadow-lg hover:shadow-gold/20">开始创作</a>
+            </div>
+        </header>
+
+        <!-- 2. Hero Section -->
+        <main class="flex-grow flex flex-col pt-32">
+            <section class="relative px-6 md:px-12 lg:px-24 mb-32 min-h-[70vh] flex items-center">
+                <div class="grid lg:grid-cols-2 gap-12 items-center w-full">
+                    <div class="space-y-8">
+                        <div class="space-y-2 opacity-0 animate-fade-in-up stagger-1">
+                            <h2 class="text-[#C9A962] font-mono-script italic text-lg tracking-wider mb-2">THE SPIRIT OF CREATION</h2>
+                            <h1 class="text-6xl md:text-8xl font-serif-display leading-tight">
+                                剧灵
+                            </h1>
+                            <p class="text-2xl md:text-3xl text-white/80 font-light">
+                                让灵感，在剧本中苏醒
+                            </p>
+                        </div>
+
+                        <div class="max-w-md space-y-4 opacity-0 animate-fade-in-up stagger-2">
+                            <p class="text-lg text-white/60 leading-relaxed">
+                                剧灵，一支懂你的笔。我们深刻理解编剧的孤独与坚持，用智能工具陪伴你每一步创作。
+                            </p>
+                            <div class="flex items-center gap-3 text-[#C9A962] font-medium">
+                                <span class="h-px w-8 bg-[#C9A962]/50"></span>
+                                <span>沉浸式 · 智能 · 协作</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4 opacity-0 animate-fade-in-up stagger-3">
+                            <a href="02-register.html" class="btn-pulse bg-[#C9A962] text-[#1A1A1A] px-10 py-4 rounded-lg font-bold text-lg flex items-center gap-2 hover:bg-[#A68A45] transition-all group">
+                                即刻起笔
+                                <iconify-icon icon="lucide:arrow-right" class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+                            </a>
+                            <a href="#features" class="border border-white/20 text-white px-10 py-4 rounded-lg font-bold text-lg hover:bg-white/5 transition-all">
+                                探索功能
+                            </a>
+                        </div>
+
+                        <div class="pt-8 flex gap-8 opacity-0 animate-fade-in-up stagger-3">
+                            <div class="flex flex-col">
+                                <span class="text-2xl font-serif-display text-white">50k+</span>
+                                <span class="text-xs text-white/40 uppercase tracking-widest">已完成剧本</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-2xl font-serif-display text-white">98%</span>
+                                <span class="text-xs text-white/40 uppercase tracking-widest">作家好评率</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative hidden lg:block opacity-0 animate-fade-in-up stagger-2">
+                        <!-- Decorative Elements -->
+                        <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-[80px]"></div>
+                        <div class="relative z-10 border border-[#C9A962]/20 rounded-2xl p-4 bg-[#1A1A1A]/50 backdrop-blur-sm">
+                             <div class="aspect-video rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 overflow-hidden relative group">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <iconify-icon icon="lucide:play-circle" class="text-7xl text-[#C9A962] opacity-80 group-hover:opacity-100 transition-opacity cursor-pointer"></iconify-icon>
+                                </div>
+                                <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=1200" alt="Workspace Preview" class="w-full h-full object-cover mix-blend-overlay opacity-50">
+                                <div class="absolute bottom-4 left-4 right-4 p-4 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+                                    <div class="flex items-center justify-between">
+                                        <div class="space-y-1">
+                                            <div class="h-2 w-24 bg-white/20 rounded"></div>
+                                            <div class="h-2 w-32 bg-white/10 rounded"></div>
+                                        </div>
+                                        <iconify-icon icon="lucide:sparkles" class="text-[#C9A962] animate-pulse"></iconify-icon>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Immersive Features Section -->
+            <section id="features" class="px-6 md:px-12 lg:px-24 py-24 bg-[#0F0F0F]">
+                <div class="max-w-3xl mb-16">
+                    <h2 class="text-sm font-mono-script text-[#C9A962] tracking-widest uppercase mb-4">Core Features</h2>
+                    <h3 class="text-4xl md:text-5xl font-serif-display text-white mb-6">重构你的创作流</h3>
+                    <p class="text-lg text-white/50">我们剔除了所有干扰，只留下让你能全神贯注于故事的核心工具。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Feature 1 -->
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:pen-tool" class="text-2xl text-[#C9A962] transition-all"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">沉浸式编辑器</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">基于 Courier Prime 行业标准的专业写作界面，支持全屏专注模式，消除灵感噪音。</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:sparkles" class="text-2xl text-[#C9A962] transition-all"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">剧灵 AI 引擎</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">突破卡顿的 AI 续写与桥段优化，基于千万级短剧数据训练，更懂当下爆点逻辑。</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:users-2" class="text-2xl text-[#C9A962] transition-all"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">角色演化系统</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">多维度角色档案管理，自动追踪人物弧光与冲突曲线，确保角色不再脸谱化。</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-card bg-[#1A1A1A] p-8 rounded-xl space-y-6">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-[#C9A962]/10">
+                            <iconify-icon icon="lucide:layout-dashboard" class="text-2xl text-[#C9A962] transition-all"></iconify-icon>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">场景库与世界观</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">全局世界观设定面板，支持场景参考图 AI 生成，视觉化构建你的故事疆域。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Creation Process Section -->
+            <section id="process" class="px-6 md:px-12 lg:px-24 py-32 bg-transparent relative">
+                <div class="text-center mb-24">
+                    <h2 class="text-4xl md:text-5xl font-serif-display text-white mb-4">从灵感到成品</h2>
+                    <p class="text-white/40">标准化的短剧工业化生产路径</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto relative">
+                    <!-- Vertical Line -->
+                    <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#C9A962]/0 via-[#C9A962]/50 to-[#C9A962]/0 hidden md:block"></div>
+
+                    <div class="space-y-24 md:space-y-32">
+                        <!-- Step 1 -->
+                        <div class="relative flex flex-col md:flex-row items-center gap-8 md:gap-0">
+                            <div class="md:w-1/2 md:pr-20 md:text-right">
+                                <h5 class="text-[#C9A962] font-mono-script mb-2">STEP 01</h5>
+                                <h4 class="text-2xl font-bold text-white mb-4">创意萌发与梗概</h4>
+                                <p class="text-white/50">输入核心概念，AI 协助生成三幕式大纲，快速确定故事基调与受众标签。</p>
+                            </div>
+                            <div class="absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-[#1A1A1A] border-2 border-[#C9A962] rounded-full flex items-center justify-center z-10">
+                                <iconify-icon icon="lucide:lightbulb" class="text-[#C9A962]"></iconify-icon>
+                            </div>
+                            <div class="md:w-1/2 md:pl-20">
+                                <div class="p-6 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                                    <div class="space-y-2">
+                                        <div class="h-2 w-full bg-[#C9A962]/20 rounded"></div>
+                                        <div class="h-2 w-3/4 bg-[#C9A962]/10 rounded"></div>
+                                        <div class="h-2 w-1/2 bg-[#C9A962]/5 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="relative flex flex-col md:flex-row-reverse items-center gap-8 md:gap-0">
+                            <div class="md:w-1/2 md:pl-20">
+                                <h5 class="text-[#C9A962] font-mono-script mb-2">STEP 02</h5>
+                                <h4 class="text-2xl font-bold text-white mb-4">智能填充与细化</h4>
+                                <p class="text-white/50">在剧本编辑区进行沉浸式写作，利用 AI 补全台词，实时校验人物性格一致性。</p>
+                            </div>
+                            <div class="absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-[#1A1A1A] border-2 border-[#C9A962] rounded-full flex items-center justify-center z-10">
+                                <iconify-icon icon="lucide:feather" class="text-[#C9A962]"></iconify-icon>
+                            </div>
+                            <div class="md:w-1/2 md:pr-20">
+                                <div class="p-6 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded bg-white/10 flex-shrink-0"></div>
+                                        <div class="space-y-2 w-full">
+                                            <div class="h-2 w-full bg-white/20 rounded"></div>
+                                            <div class="h-2 w-2/3 bg-white/10 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="relative flex flex-col md:flex-row items-center gap-8 md:gap-0">
+                            <div class="md:w-1/2 md:pr-20 md:text-right">
+                                <h5 class="text-[#C9A962] font-mono-script mb-2">STEP 03</h5>
+                                <h4 class="text-2xl font-bold text-white mb-4">分镜预览与导出</h4>
+                                <p class="text-white/50">一键生成分镜建议脚本，导出符合行业规范的 PDF 或 Markdown 格式，准备开机。</p>
+                            </div>
+                            <div class="absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-[#1A1A1A] border-2 border-[#C9A962] rounded-full flex items-center justify-center z-10">
+                                <iconify-icon icon="lucide:clapperboard" class="text-[#C9A962]"></iconify-icon>
+                            </div>
+                            <div class="md:w-1/2 md:pl-20">
+                                <div class="p-6 bg-[#C9A962]/10 rounded-xl border border-[#C9A962]/20 backdrop-blur-sm flex items-center justify-center">
+                                    <iconify-icon icon="lucide:file-check" class="text-4xl text-[#C9A962]"></iconify-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. CTA Block -->
+            <section class="px-6 md:px-12 lg:px-24 py-32 text-center">
+                <div class="max-w-4xl mx-auto bg-gradient-to-br from-[#1A1A1A] to-[#0a0a0a] p-12 md:p-20 rounded-3xl border border-white/10 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-[#C9A962]"></div>
+
+                    <div class="relative z-10 space-y-8">
+                        <h2 class="text-4xl md:text-6xl font-serif-display text-white">创作路上，你不孤单</h2>
+                        <p class="text-lg text-white/50 max-w-xl mx-auto">加入数万名专业编剧的选择。让每一秒灵感都能被精准捕获，让每一个故事都能熠熠生辉。</p>
+
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                            <input type="email" placeholder="输入邮箱，开启创作之旅" class="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#C9A962] transition-colors">
+                            <a href="02-register.html" class="w-full sm:w-auto px-8 py-4 bg-[#C9A962] text-[#1A1A1A] font-bold rounded-lg whitespace-nowrap hover:bg-[#A68A45] transition-colors">免费注册</a>
+                        </div>
+
+                        <p class="text-xs text-white/30 uppercase tracking-widest">无需信用卡 · 14天专业版试用</p>
+                    </div>
+
+                    <!-- Decor -->
+                    <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-[80px]"></div>
+                    <div class="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px]"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 6. Footer -->
+        <footer class="px-6 md:px-12 lg:px-24 py-12 border-t border-white/5 bg-[#0a0a0a]">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-[#C9A962] rounded flex items-center justify-center shadow-gold/10">
+                            <iconify-icon icon="lucide:feather" class="text-[#1A1A1A] text-base"></iconify-icon>
+                        </div>
+                        <span class="text-xl font-serif-display font-bold text-white">剧灵 Scripter</span>
+                    </div>
+                    <p class="text-sm text-white/30 max-w-xs leading-relaxed">
+                        剧灵，一支懂你的笔。专为短剧创作打造，通过智能技术赋予灵感以形，让每一位创作者的故事都能在此优雅起笔。
+                    </p>
+                </div>
+
+                <div class="space-y-6">
+                    <h5 class="text-sm font-bold text-white uppercase tracking-widest">平台</h5>
+                    <ul class="space-y-4 text-sm text-white/40">
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">剧本编辑器</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">剧灵 AI</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">多人协作</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">资产库</a></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <h5 class="text-sm font-bold text-white uppercase tracking-widest">支持</h5>
+                    <ul class="space-y-4 text-sm text-white/40">
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">帮助中心</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">API 文档</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">隐私政策</a></li>
+                        <li><a href="#" class="hover:text-[#C9A962] transition-colors">服务条款</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-xs text-white/20">© 2024 Scripter Inc. All Rights Reserved. 剧灵创作平台 版权所有</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-white/20 hover:text-[#C9A962] transition-colors"><iconify-icon icon="ri:wechat-fill" class="text-xl"></iconify-icon></a>
+                    <a href="#" class="text-white/20 hover:text-[#C9A962] transition-colors"><iconify-icon icon="ri:tiktok-fill" class="text-xl"></iconify-icon></a>
+                    <a href="#" class="text-white/20 hover:text-[#C9A962] transition-colors"><iconify-icon icon="ri:github-fill" class="text-xl"></iconify-icon></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Reveal on Scroll Simulation
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.add('translate-y-0');
+                    entry.target.classList.remove('opacity-0');
+                    entry.target.classList.remove('translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

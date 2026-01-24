@@ -1,0 +1,466 @@
+# =============================================================================
+# Scripter - Agent配置文件
+# =============================================================================
+# 用途：定义所有Agent和Skill的能力、参数、模型选择
+# =============================================================================
+
+agents:
+  # =============================================================================
+  # 主控Agent (Orchestrator)
+  # =============================================================================
+  orchestrator:
+    name: "主控Agent"
+    description: "流程协调、任务调度、上下文管理、版本控制"
+    version: "1.0"
+
+    # 模型配置
+    model:
+      primary: "claude-opus-4-5"
+      fallback: "claude-sonnet-4-5"
+
+    # Token配置
+    max_tokens: 60000           # 最大输入tokens
+    output_tokens: 4096         # 最大输出tokens
+
+    # 优先级
+    priority: 1                 # 最高优先级
+
+    # 核心功能
+    functions:
+      - name: "流程协调"
+        description: "管理创作流程的各个环节"
+        enabled: true
+
+      - name: "任务调度"
+        description: "识别任务类型并分配给对应Agent"
+        enabled: true
+
+      - name: "上下文管理"
+        description: "精准控制Token使用，智能加载上下文"
+        enabled: true
+
+      - name: "版本控制"
+        description: "Git操作和版本追踪"
+        enabled: true
+
+      - name: "进度追踪"
+        description: "记录创作进度和状态"
+        enabled: true
+
+    # 上下文策略
+    context_strategy:
+      load_global: true         # 始终加载全局上下文
+      load_session: true        # 保持会话上下文
+      load_task_dynamic: true   # 动态加载任务上下文
+
+    # 性能配置
+    performance:
+      parallel_tasks: 3         # 并行任务数
+      timeout: 300              # 超时时间（秒）
+
+  # =============================================================================
+  # 创意Agent (Creative)
+  # =============================================================================
+  creative:
+    name: "创意Agent"
+    description: "大纲生成、情节构思、冲突设计"
+    version: "1.0"
+
+    model:
+      primary: "claude-sonnet-4-5"
+      fallback: "claude-opus-4-5"
+
+    max_tokens: 50000
+    output_tokens: 4096
+    priority: 3
+
+    functions:
+      - name: "大纲生成"
+        description: "生成整体故事大纲和分集大纲"
+        enabled: true
+        config:
+          detail_level: "medium"  # simple/medium/detailed
+
+      - name: "情节构思"
+        description: "设计情节走向和转折点"
+        enabled: true
+        config:
+          plot_points_per_episode: 3
+
+      - name: "冲突设计"
+        description: "设计戏剧冲突和矛盾"
+        enabled: true
+        config:
+          conflict_types:
+            - "人物冲突"
+            - "情感冲突"
+            - "观念冲突"
+
+      - name: "故事线设计"
+        description: "设计主线、支线故事"
+        enabled: true
+
+    context_strategy:
+      load_global: true
+      load_session: true
+      required_context:
+        - "剧本元数据"
+        - "故事大纲"
+        - "人物小传"
+
+  # =============================================================================
+  # 场景Agent (Scene)
+  # =============================================================================
+  scene:
+    name: "场景Agent"
+    description: "场景创作、对白撰写、动作描述"
+    version: "1.0"
+
+    model:
+      primary: "claude-sonnet-4-5"
+      fallback: "claude-sonnet-4-5"
+
+    max_tokens: 50000
+    output_tokens: 3072
+    priority: 2
+
+    functions:
+      - name: "场景创作"
+        description: "创作完整的场景内容"
+        enabled: true
+        config:
+          include_dialogue: true
+          include_action: true
+          include_os: true
+
+      - name: "对白撰写"
+        description: "撰写角色对话"
+        enabled: true
+        config:
+          natural_dialogue: true
+          character_voice_match: true
+
+      - name: "动作描述"
+        description: "撰写动作和场景描述"
+        enabled: true
+        config:
+          visual: true           # 可视化、可拍摄
+          specific: true         # 具体而非抽象
+
+      - name: "OS生成"
+        description: "生成角色内心独白"
+        enabled: true
+
+    context_strategy:
+      load_global: true
+      load_session: true
+      required_context:
+        - "剧本元数据"
+        - "当前场景前后内容"
+        - "相关角色信息"
+        - "用户指令"
+
+    # 时长控制
+    duration_control:
+      enabled: true
+      target_duration: 30       # 目标30秒/场
+      tolerance: 5              # ±5秒
+
+  # =============================================================================
+  # 人物Agent (Character) ⭐核心特色
+  # =============================================================================
+  character:
+    name: "人物Agent"
+    description: "台词优化、表演指导、人物一致性检查、情感弧线分析"
+    version: "1.0"
+
+    model:
+      primary: "claude-sonnet-4-5"
+      fallback: "claude-opus-4-5"
+
+    max_tokens: 50000
+    output_tokens: 3072
+    priority: 2
+
+    functions:
+      - name: "台词优化"
+        description: "从角色角度优化对白，使其符合角色性格"
+        enabled: true
+        config:
+          check_personality: true
+          check_voice: true
+          add_emotional_markers: true
+
+      - name: "表演指导"
+        description: "优化动作描述和表演细节"
+        enabled: true
+        config:
+          add_facial_expressions: true
+          add_body_language: true
+          add_micro_expressions: true
+
+      - name: "人物一致性检查"
+        description: "检查角色性格和行为的一致性"
+        enabled: true
+        config:
+          check_scope: "episode"  # scene/episode/all
+          tolerance_level: "medium"
+
+      - name: "情感弧线分析"
+        description: "分析角色的情感变化和成长"
+        enabled: true
+        config:
+          track_emotions: true
+          identify_peaks: true
+          suggest_improvements: true
+
+      - name: "角色塑造"
+        description: "深化角色塑造，增加层次感"
+        enabled: true
+        config:
+          add_depth: true
+          add_nuance: true
+          avoid_stereotypes: true
+
+      - name: "关系互动优化"
+        description: "优化角色间的互动和对话"
+        enabled: true
+
+    # 上下文策略（重要！）
+    context_strategy:
+      load_global: true
+      load_session: true
+      load_full_profile: true        # 加载完整角色小传
+      history_samples: 10             # 最近N场对话样本
+      related_characters_only: true   # 只加载相关角色
+      compression_method: "feature_extraction"  # 特征提取而非完整历史
+
+      required_context:
+        - "目标场景完整内容"
+        - "目标角色完整小传"
+        - "历史对话样本（最近10场）"
+        - "角色关系网络"
+        - "当前情绪状态"
+
+    # 角色数据库配置
+    character_database:
+      path: "projects/{project}/characters/"
+      format: "yaml"
+      auto_update: true              # 自动更新角色学习数据
+
+  # =============================================================================
+  # 分析Agent (Analysis)
+  # =============================================================================
+  analysis:
+    name: "分析Agent"
+    description: "节奏分析、质量评估、一致性检查"
+    version: "1.0"
+
+    model:
+      primary: "claude-sonnet-4-5"
+      fallback: "claude-sonnet-4-5"
+
+    max_tokens: 55000
+    output_tokens: 4096
+    priority: 4
+
+    functions:
+      - name: "节奏分析"
+        description: "分析剧本节奏，给出改进建议"
+        enabled: true
+        config:
+          check_pacing: true
+          check_tension: true
+          check_flow: true
+
+      - name: "质量评估"
+        description: "综合评估剧本质量"
+        enabled: true
+        config:
+          criteria:
+            - "格式规范性"
+            - "人物一致性"
+            - "情节合理性"
+            - "对话自然度"
+            - "时长准确性"
+
+      - name: "一致性检查"
+        description: "检查剧本的一致性问题"
+        enabled: true
+        config:
+          check_character_consistency: true
+          check_plot_consistency: true
+          check_timeline_consistency: true
+
+      - name: "时长分析"
+        description: "分析每集时长是否符合要求"
+        enabled: true
+        config:
+          tolerance: 0.1             # 10%误差
+          suggest_adjustments: true
+
+    context_strategy:
+      load_global: true
+      load_session: false
+      batch_processing: true         # 支持批量处理
+
+      # 批量处理配置
+      batch_config:
+        chunk_size: 20               # 每次处理20集
+        parallel_workers: 3
+
+# =============================================================================
+# Skills配置
+# =============================================================================
+skills:
+  # =============================================================================
+  # 格式Skill (Format)
+  # =============================================================================
+  format:
+    name: "格式Skill"
+    description: "格式检查、修复、模板生成（基于v2.0规范）"
+    version: "2.0"
+    type: "lightweight"
+
+    functions:
+      - name: "格式检查"
+        description: "检查剧本是否符合v2.0规范"
+        enabled: true
+        auto_fix: false              # 不自动修复，只报告问题
+
+      - name: "格式修复"
+        description: "自动修复常见格式问题"
+        enabled: true
+        backup: true                 # 修复前备份
+
+      - name: "模板生成"
+        description: "生成符合v2.0规范的空白模板"
+        enabled: true
+
+    # 格式规范版本
+    standard_version: "v2.0"
+    spec_file: "script-format-v2.md"
+
+    # 检查项目
+    check_items:
+      - "场景标题格式"
+      - "对话格式"
+      - "动作描述"
+      - "OS内心独白"
+      - "标点符号"
+      - "集数标题"
+      - "特殊标记"
+
+  # =============================================================================
+  # 导出Skill (Export)
+  # =============================================================================
+  export:
+    name: "导出Skill"
+    description: "多格式导出、制作文档生成"
+    version: "1.0"
+    type: "lightweight"
+
+    functions:
+      - name: "PDF导出"
+        description: "导出为PDF格式"
+        enabled: true
+
+      - name: "DOCX导出"
+        description: "导出为Word文档"
+        enabled: true
+
+      - name: "制作文档生成"
+        description: "生成分镜头脚本、角色台词表等"
+        enabled: true
+
+      - name: "场景列表"
+        description: "生成场景清单"
+        enabled: true
+
+      - name: "角色台词表"
+        description: "生成每个角色的所有台词"
+        enabled: true
+
+    # 导出格式
+    export_formats:
+      - format: "pdf"
+        extension: ".pdf"
+        enabled: true
+
+      - format: "docx"
+        extension: ".docx"
+        enabled: true
+
+      - format: "xlsx"
+        extension: ".xlsx"
+        enabled: true
+
+      - format: "txt"
+        extension: ".txt"
+        enabled: true
+
+# =============================================================================
+# Agent协作配置
+# =============================================================================
+collaboration:
+  # Agent间的协作流程
+  workflows:
+    create_scene:
+      - agent: "scene"
+        action: "生成基础场景"
+      - agent: "character"
+        action: "优化台词和表演"
+      - skill: "format"
+        action: "格式检查和修复"
+
+    optimize_character:
+      - agent: "character"
+        action: "优化角色台词"
+      - skill: "format"
+        action: "格式检查"
+
+    analyze_quality:
+      - agent: "analysis"
+        action: "质量分析"
+      - agent: "character"
+        action: "人物一致性检查"
+      - agent: "analysis"
+        action: "生成综合报告"
+
+  # 并行处理配置
+  parallel_processing:
+    enabled: true
+    max_parallel_agents: 3
+    task_queue_size: 10
+
+# =============================================================================
+# 全局配置
+# =============================================================================
+global:
+  # 默认模型
+  default_model: "claude-sonnet-4-5"
+
+  # 默认Token预算
+  default_token_budget: 50000
+
+  # 默认超时
+  default_timeout: 120
+
+  # 重试配置
+  retry:
+    max_attempts: 3
+    backoff: true
+    initial_delay: 1
+
+  # 日志配置
+  logging:
+    enabled: true
+    level: "INFO"
+    file: "logs/agents.log"
+
+# =============================================================================
+# 配置版本信息
+# =============================================================================
+config_version: "1.0.0"
+last_updated: "2026-01-16"
+maintainer: "Claude Code"

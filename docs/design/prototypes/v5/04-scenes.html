@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 场景管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Ma+Shan+Zheng&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #0D0D0D;
+            --paper-cream: #F2EDE5;
+            --paper-warm: #E8DFD4;
+            --gold-primary: #C9A962;
+            --gold-dark: #8B7355;
+            --cinnabar: #C8553D;
+            --jade: #5B7F6F;
+            --text-muted: #8B7355;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+        }
+
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .font-calligraphy {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        .paper-texture {
+            background-color: var(--paper-cream);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gold-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        .sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--gold-dark);
+        }
+
+        .sidebar-right-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+        }
+
+        .nav-item.active {
+            background: var(--paper-warm);
+            color: var(--gold-primary);
+            font-weight: 600;
+            border-right: 3px solid var(--gold-primary);
+            border-radius: 0;
+        }
+
+        .edge-toggle {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 1.25rem;
+            height: 4rem;
+            background: white;
+            border: 1px solid var(--gold-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edge-toggle:hover {
+            background: var(--paper-warm);
+            border-color: var(--gold-primary);
+        }
+
+        .toggle-left {
+            left: 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+            border-left: none;
+        }
+
+        .toggle-right {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .kanban-column {
+            background: var(--paper-warm);
+            border-radius: 1rem;
+            padding: 1rem;
+            min-height: 400px;
+        }
+
+        .kanban-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gold-dark);
+        }
+
+        .kanban-title {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .kanban-count {
+            background: var(--gold-primary);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        /* Scene Card */
+        .scene-card {
+            background: white;
+            border: 1px solid var(--gold-dark);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .scene-card:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 4px 12px rgba(201, 169, 98, 0.15);
+        }
+
+        .scene-card:active {
+            cursor: grabbing;
+        }
+
+        .scene-number {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            color: var(--gold-primary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .scene-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .scene-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .scene-tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-int { background: rgba(91, 127, 111, 0.1); color: var(--jade); }
+        .tag-ext { background: rgba(201, 169, 98, 0.1); color: var(--gold-primary); }
+        .tag-day { background: rgba(255, 200, 100, 0.2); color: #B8860B; }
+        .tag-night { background: rgba(50, 50, 80, 0.1); color: #4A5568; }
+
+        .scene-duration {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .scene-preview {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--gold-dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-primary);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden">
+    <!-- Edge Toggles -->
+    <button onclick="toggleSidebar('left')" class="edge-toggle toggle-left">
+        <iconify-icon id="icon-left" icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+    </button>
+    <button onclick="toggleSidebar('right')" class="edge-toggle toggle-right">
+        <iconify-icon id="icon-right" icon="lucide:chevron-right" class="text-sm"></iconify-icon>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar-left" class="sidebar w-64 shrink-0 flex flex-col">
+        <!-- Logo -->
+        <a href="00-welcome.html" class="p-6 border-b border-[#C9A962]/20 flex items-center gap-3 hover:opacity-80">
+            <div class="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-lg flex items-center justify-center">
+                <iconify-icon icon="lucide:feather" class="text-white"></iconify-icon>
+            </div>
+            <div>
+                <h1 class="font-serif-cn font-bold text-2xl">剧灵</h1>
+                <p class="text-[10px] text-[#C9A962] font-bold tracking-widest uppercase">Scripter.art</p>
+            </div>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <a href="01-dashboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                <span>控制台</span>
+            </a>
+            <a href="02-editor.html" class="nav-item">
+                <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
+                <span>剧本</span>
+            </a>
+            <a href="03-characters.html" class="nav-item">
+                <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                <span>人物</span>
+            </a>
+            <a href="04-scenes.html" class="nav-item active">
+                <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
+                <span>场景</span>
+            </a>
+            <a href="05-worldview.html" class="nav-item">
+                <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
+                <span>世界观</span>
+            </a>
+            <a href="06-storyboard.html" class="nav-item">
+                <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
+                <span>分镜</span>
+            </a>
+        </nav>
+
+        <!-- Version -->
+        <div class="p-4 border-t border-[#C9A962]/20 text-center">
+            <p class="text-[10px] text-[#8B7355] font-bold uppercase tracking-widest">v5.0 Spirit Edition</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+        <!-- Header -->
+        <header class="h-16 bg-white/90 border-b border-[#C9A962]/20 flex items-center justify-between px-8 shrink-0">
+            <h1 class="font-serif-cn font-bold text-lg">场景看板</h1>
+            <button class="px-5 py-2 bg-gradient-to-r from-[#C9A962] to-[#8B7355] text-white rounded-lg font-semibold hover:shadow-lg transition-all">
+                <iconify-icon icon="lucide:plus" class="inline mr-2"></iconify-icon>
+                新建场景
+            </button>
+        </header>
+
+        <!-- Kanban Board -->
+        <div class="flex-1 overflow-auto p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="kanban-board">
+                    <!-- Column 1: Draft -->
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <div class="kanban-title">
+                                <iconify-icon icon="lucide:file" class="text-[#8B7355]"></iconify-icon>
+                                草稿
+                            </div>
+                            <span class="kanban-count">3</span>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 46 场</div>
+                            <div class="scene-title">雾姝的觉醒</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-int">内景</span>
+                                <span class="scene-tag tag-night">夜</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 2 分钟
+                            </div>
+                            <div class="scene-preview">
+                                雾姝在密室中独自修炼，蛊毒之力在她体内涌动...
+                            </div>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 47 场</div>
+                            <div class="scene-title">顾云深的抉择</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-ext">外景</span>
+                                <span class="scene-tag tag-day">日</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 3 分钟
+                            </div>
+                            <div class="scene-preview">
+                                顾云深站在山崖边，望着远处的山寨，内心挣扎...
+                            </div>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 50 场</div>
+                            <div class="scene-title">神秘老人的阴谋</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-int">内景</span>
+                                <span class="scene-tag tag-night">夜</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 4 分钟
+                            </div>
+                            <div class="scene-preview">
+                                神秘老人在密室中布置蛊阵，嘴角露出一丝冷笑...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: In Progress -->
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <div class="kanban-title">
+                                <iconify-icon icon="lucide:edit-3" class="text-[#C9A962]"></iconify-icon>
+                                创作中
+                            </div>
+                            <span class="kanban-count">2</span>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 48 场</div>
+                            <div class="scene-title">初次相遇</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-ext">外景</span>
+                                <span class="scene-tag tag-night">夜</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 5 分钟
+                            </div>
+                            <div class="scene-preview">
+                                月黑风高，雾气如潮。雾姝手持摄魂铃，与顾云深在密林中相遇...
+                            </div>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 49 场</div>
+                            <div class="scene-title">蛊毒发作</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-int">内景</span>
+                                <span class="scene-tag tag-night">夜</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 3 分钟
+                            </div>
+                            <div class="scene-preview">
+                                顾云深被蛊毒侵噬，雾姝用内力为他驱毒...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Completed -->
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <div class="kanban-title">
+                                <iconify-icon icon="lucide:check-circle" class="text-[#5B7F6F]"></iconify-icon>
+                                已完成
+                            </div>
+                            <span class="kanban-count">45</span>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 1 场</div>
+                            <div class="scene-title">湘西山区·夜·外</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-ext">外景</span>
+                                <span class="scene-tag tag-night">夜</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 2 分钟
+                            </div>
+                            <div class="scene-preview">
+                                月黑风高，雾气如潮水般在密林中翻涌...
+                            </div>
+                        </div>
+
+                        <div class="scene-card" draggable="true">
+                            <div class="scene-number">第 2 场</div>
+                            <div class="scene-title">苗寨入口·日·外</div>
+                            <div class="scene-meta">
+                                <span class="scene-tag tag-ext">外景</span>
+                                <span class="scene-tag tag-day">日</span>
+                            </div>
+                            <div class="scene-duration">
+                                <iconify-icon icon="lucide:clock"></iconify-icon>
+                                约 3 分钟
+                            </div>
+                            <div class="scene-preview">
+                                阳光穿过薄雾洒在苗寨上空，阿龙在入口处守候...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar - AI Assistant -->
+    <aside id="sidebar-right" class="sidebar sidebar-right w-80 shrink-0 flex flex-col">
+        <!-- Spirit Status -->
+        <div class="p-4 border-b border-[#C9A962]/20">
+            <div class="text-center p-4 bg-gradient-to-br from-[#F2EDE5] to-[#E8DFD4] rounded-lg border border-[#C9A962]/30">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center">
+                    <span class="font-calligraphy text-2xl text-white">灵</span>
+                </div>
+                <h4 class="font-serif-cn font-bold">墨韵</h4>
+                <p class="text-xs text-[#8B7355]">木火通明 · 静默观察中</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- AI Message -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A962] to-[#8B7355] flex items-center justify-center shrink-0">
+                    <span class="font-calligraphy text-sm text-white">灵</span>
+                </div>
+                <div class="flex-1 bg-white rounded-lg p-3 border border-[#C9A962]/20">
+                    <p class="text-sm">我看到你正在创作第 48、49 场，这是雾姝和顾云深相遇的关键场景。需要我帮你梳理情节节奏吗？</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-[#C9A962]/20">
+            <div class="flex gap-2">
+                <input type="text" placeholder="与墨韵对话..."
+                    class="flex-1 px-4 py-2 rounded-lg border border-[#C9A962]/30 focus:outline-none focus:border-[#C9A962] text-sm">
+                <button class="p-2 bg-[#C9A962] text-white rounded-lg hover:bg-[#8B7355] transition-colors">
+                    <iconify-icon icon="lucide:send"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        function toggleSidebar(side) {
+            const sidebar = document.getElementById(`sidebar-${side}`);
+            const icon = document.getElementById(`icon-${side}`);
+            const isCollapsed = side === 'right'
+                ? sidebar.classList.toggle('sidebar-right-collapsed')
+                : sidebar.classList.toggle('sidebar-collapsed');
+
+            if (side === 'left') {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-right' : 'lucide:chevron-left');
+            } else {
+                icon.setAttribute('icon', isCollapsed ? 'lucide:chevron-left' : 'lucide:chevron-right');
+            }
+        }
+
+        // Drag and Drop for Scene Cards
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', '');
+                card.classList.add('dragging');
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+            });
+        });
+
+        document.querySelectorAll('.kanban-column').forEach(column => {
+            column.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const dragging = document.querySelector('.dragging');
+                if (dragging) {
+                    column.appendChild(dragging);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

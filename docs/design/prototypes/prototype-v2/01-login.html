@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 灵感在剧本中苏醒</title>
+    <meta name="view-transition" content="same-origin">
+    <meta name="description" content="剧灵 Scripter - 一支懂你的笔，让灵感在剧本中苏醒">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="prefetch" href="02-register.html" as="document">
+    <link rel="prefetch" href="03-forgot-password.html" as="document">
+    <link rel="prefetch" href="04-dashboard.html" as="document">
+    <link rel="prefetch" href="05-social-auth.html" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --brand-gold-dark: #A68A45;
+            --ink-secondary: #5C5548;
+            --border-beige: #D3C9B0;
+            --text-muted: #A0A0A0;
+        }
+
+        html { background-color: var(--ink-black); }
+        body { margin: 0; padding: 0; overflow-x: hidden; }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+        .font-display { font-family: 'Noto Serif SC', serif; letter-spacing: -0.02em; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            position: relative;
+        }
+
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather { animation: float-glow 15s ease-in-out infinite; }
+
+        @keyframes breathing-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .animate-breathing-glow { animation: breathing-glow 12s ease-in-out infinite; }
+
+        .stagger-in { animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fade-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        .input-focus:focus {
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.08);
+            outline: none;
+        }
+
+        /* View Transitions */
+        @view-transition { navigation: auto; }
+        ::view-transition-old(sidebar), ::view-transition-new(sidebar) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(brand), ::view-transition-new(brand) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(main-content) { animation: 0.3s ease-out both fade-out; }
+        ::view-transition-new(main-content) { animation: 0.3s ease-in 0.1s both fade-in; }
+        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        .nav-item.active {
+            background: rgba(201, 169, 98, 0.12);
+            border-left: 3px solid var(--brand-gold);
+            color: var(--brand-gold);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            background-blend-mode: soft-light;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-beige);
+            box-shadow: 0 4px 15px -5px rgba(26, 26, 26, 0.05);
+        }
+    </style>
+</head>
+<body class="font-ui">
+    <div class="min-h-screen flex flex-col md:flex-row bg-white relative">
+
+        <!-- ==================== UNIFIED LEFT SIDEBAR ==================== -->
+        <aside style="view-transition-name: sidebar" class="hidden md:flex md:w-72 lg:w-[20%] xl:w-1/5 bg-[#1A1A1A] flex-col justify-between overflow-hidden relative border-r border-[#2A2A2A]">
+            <!-- Background Decorative -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="absolute w-[40rem] h-[40rem] bg-[radial-gradient(circle,rgba(201,169,98,0.1)_0%,transparent_70%)] animate-breathing-glow"></div>
+                <iconify-icon icon="lucide:feather" class="text-[30rem] text-[#C9A962] opacity-10 animate-brand-feather"></iconify-icon>
+            </div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <!-- Logo Area -->
+                <div class="p-6 lg:p-10" style="view-transition-name: brand">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#C9A962] rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A962]/20">
+                            <iconify-icon icon="lucide:feather" class="text-2xl text-[#1A1A1A]"></iconify-icon>
+                        </div>
+                        <span class="font-display text-3xl text-white font-bold tracking-tight">剧灵</span>
+                    </div>
+                    <p class="text-[10px] text-[#A0A0A0] font-medium mt-3 tracking-[0.4em] uppercase opacity-60">让灵感在剧本中苏醒</p>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="mt-4 flex-1">
+                    <div class="px-4 space-y-1.5">
+                        <a href="04-dashboard.html" class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/90 hover:text-white transition-all group">
+                            <iconify-icon icon="lucide:layout-grid" class="text-xl"></iconify-icon>
+                            <span class="font-medium">我的剧本</span>
+                        </a>
+                        <a href="#" class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all group">
+                            <iconify-icon icon="lucide:book-open" class="text-xl"></iconify-icon>
+                            <span class="font-medium">作品文库</span>
+                        </a>
+                        <a href="#" class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all group">
+                            <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                            <span class="font-medium">灵感工坊</span>
+                        </a>
+                        <a href="#" class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-all group">
+                            <iconify-icon icon="lucide:database" class="text-xl"></iconify-icon>
+                            <span class="font-medium">素材管理</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- Bottom Brand Motto -->
+                <div class="p-6 lg:p-10 border-t border-white/5 bg-gradient-to-t from-black/40 to-transparent">
+                    <h2 class="font-display text-sm text-white/50 leading-relaxed italic">
+                        "像作家一样思考，<br/>像艺术家一样感受。"
+                    </h2>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ==================== RIGHT: LOGIN FORM AREA ==================== -->
+        <main style="view-transition-name: main-content" class="flex-1 paper-texture flex flex-col min-h-screen relative overflow-hidden">
+
+            <!-- Mobile Top Header -->
+            <div class="md:hidden p-6 flex items-center gap-4 border-b border-[#D3C9B0]/50 bg-white/30">
+                <div class="w-10 h-10 bg-[#C9A962] rounded-xl flex items-center justify-center">
+                    <iconify-icon icon="lucide:feather" class="text-xl text-[#1A1A1A]"></iconify-icon>
+                </div>
+                <span class="font-display text-2xl text-white font-bold">剧灵</span>
+            </div>
+
+            <!-- Login Content -->
+            <div class="flex-1 flex items-center justify-center p-8 md:p-16">
+                <div class="w-full max-w-md">
+                    <!-- Brand Header (Desktop) -->
+                    <div class="hidden md:block mb-12 text-center stagger-in delay-1">
+                        <h1 class="font-display text-4xl font-bold text-[#1A1A1A] mb-4">欢迎回来</h1>
+                        <p class="text-[#5C5548] text-lg">登录你的剧灵账号，继续创作之旅</p>
+                    </div>
+
+                    <!-- Login Form Card -->
+                    <div class="glass-card rounded-2xl p-8 md:p-10 stagger-in delay-2 shadow-xl">
+                        <form class="space-y-6" onsubmit="return handleSubmit(event)">
+                            <!-- Account Input -->
+                            <div>
+                                <label for="account" class="block text-xs font-bold uppercase tracking-widest text-[#1A1A1A] mb-2">账号</label>
+                                <input type="text" id="account" name="account" placeholder="邮箱 / 手机号" required
+                                    class="w-full px-5 py-4 bg-[#FAF7F0] border border-[#D3C9B0] rounded-xl text-base text-[#1A1A1A] placeholder-[#A0A0A0] transition-all input-focus"
+                                    autocomplete="username">
+                            </div>
+
+                            <!-- Password Input -->
+                            <div>
+                                <label for="password" class="block text-xs font-bold uppercase tracking-widest text-[#1A1A1A] mb-2">密码</label>
+                                <div class="relative">
+                                    <input type="password" id="password" name="password" placeholder="请输入密码" required
+                                        class="w-full px-5 py-4 bg-[#FAF7F0] border border-[#D3C9B0] rounded-xl text-base text-[#1A1A1A] placeholder-[#A0A0A0] transition-all input-focus"
+                                        autocomplete="current-password">
+                                    <button type="button" id="toggle-password-btn" class="absolute right-5 top-1/2 -translate-y-1/2 text-[#8B7355] hover:text-[#C9A962] transition-colors">
+                                        <iconify-icon icon="lucide:eye-off" class="text-xl"></iconify-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="remember-me-check" class="w-5 h-5 rounded border-2 border-[#D3C9B0] bg-transparent checked:bg-[#C9A962] checked:border-[#C9A962] transition-all">
+                                    <span class="text-sm text-[#5C5548] font-medium">记住我</span>
+                                </label>
+                                <a href="03-forgot-password.html" class="text-sm text-[#8B7355] hover:text-[#C9A962] transition-colors">忘记密码？</a>
+                            </div>
+
+                            <!-- Login Button -->
+                            <button type="submit" class="w-full py-4 bg-[#C9A962] hover:bg-[#A68A45] text-white rounded-xl font-bold text-lg shadow-xl shadow-amber-900/15 transition-all active:scale-[0.98]">
+                                登 录
+                            </button>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="relative my-8">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-[#F0EAE0]"></div>
+                            </div>
+                            <div class="relative flex justify-center text-xs">
+                                <span class="px-4 bg-white/92 text-[#A0A0A0] uppercase tracking-[0.2em]">或通过以下方式继续</span>
+                            </div>
+                        </div>
+
+                        <!-- Social Login -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="05-social-auth.html" class="flex items-center justify-center gap-3 py-3 border border-[#F0EAE0] rounded-xl hover:bg-[#FAF7F0] hover:border-[#D3C9B0] transition-all group">
+                                <iconify-icon icon="ic:baseline-wechat" class="text-xl text-[#09B81A] group-hover:scale-110 transition-transform"></iconify-icon>
+                                <span class="text-sm font-semibold text-[#5C5548]">微信登录</span>
+                            </a>
+                            <a href="05-social-auth.html" class="flex items-center justify-center gap-3 py-3 border border-[#F0EAE0] rounded-xl hover:bg-[#FAF7F0] hover:border-[#D3C9B0] transition-all group">
+                                <iconify-icon icon="simple-icons:tiktok" class="text-lg text-[#1A1A1A] group-hover:scale-110 transition-transform"></iconify-icon>
+                                <span class="text-sm font-semibold text-[#5C5548]">抖音登录</span>
+                            </a>
+                        </div>
+
+                        <!-- Register Link -->
+                        <p class="mt-8 text-center text-sm text-[#5C5548]">
+                            还没有账号？
+                            <a href="02-register.html" class="text-[#C9A962] font-bold hover:text-[#A68A45] transition-colors ml-1">立即注册</a>
+                        </p>
+                    </div>
+
+                    <!-- Footer Copyright -->
+                    <div class="mt-16 text-center text-[10px] text-[#8B7355] opacity-60">
+                        © 2024 SCRIPTER · 剧灵. 版权所有
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Password Toggle
+        const togglePasswordBtn = document.getElementById('toggle-password-btn');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = togglePasswordBtn.querySelector('iconify-icon');
+
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.setAttribute('icon', isPassword ? 'lucide:eye' : 'lucide:eye-off');
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            window.location.href = '04-dashboard.html';
+            return false;
+        }
+    </script>
+</body>
+</html>

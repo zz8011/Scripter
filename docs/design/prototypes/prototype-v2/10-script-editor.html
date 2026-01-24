@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧灵 - 剧本编辑器</title>
+    <meta name="view-transition" content="same-origin">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="prefetch" href="04-dashboard.html" as="document">
+
+    <style>
+        :root {
+            --paper-bg: #F5F1E8;
+            --ink-black: #1A1A1A;
+            --brand-gold: #C9A962;
+            --border-beige: #D3C9B0;
+        }
+
+        html { background-color: var(--ink-black); }
+        body { margin: 0; padding: 0; overflow-x: hidden; }
+
+        .font-ui { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+        .font-display { font-family: 'Noto Serif SC', serif; letter-spacing: -0.02em; }
+        .font-editor { font-family: 'Courier Prime', 'Noto Sans SC', monospace; font-size: 18px; line-height: 1.6; }
+
+        .paper-texture {
+            background-color: var(--paper-bg);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        @keyframes float-glow {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2)); opacity: 0.15; }
+            50% { transform: translateY(-40px) rotate(8deg) scale(1.05); filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4)); opacity: 0.25; }
+        }
+
+        .animate-brand-feather { animation: float-glow 15s ease-in-out infinite; }
+
+        @keyframes breathing-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .animate-breathing-glow { animation: breathing-glow 12s ease-in-out infinite; }
+
+        .stagger-in { animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fade-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @view-transition { navigation: auto; }
+        ::view-transition-old(sidebar), ::view-transition-new(sidebar) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(brand), ::view-transition-new(brand) { animation: none; mix-blend-mode: normal; }
+        ::view-transition-old(main-content) { animation: 0.3s ease-out both fade-out; }
+        ::view-transition-new(main-content) { animation: 0.3s ease-in 0.1s both fade-in; }
+        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            background-blend-mode: soft-light;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-beige);
+            box-shadow: 0 4px 15px -5px rgba(26, 26, 26, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-beige);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-gold);
+        }
+
+        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-left-collapsed { width: 0; opacity: 0; pointer-events: none; transform: translateX(-100%); }
+        .sidebar-right-collapsed { width: 0; opacity: 0; pointer-events: none; transform: translateX(100%); }
+        .shadow-float { box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08); }
+
+        /* Modal Transition */
+        .modal-backdrop {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .animate-modal-enter {
+            animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="font-ui">
+    <div class="h-screen flex flex-col paper-texture overflow-hidden">
+
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Left Sidebar: Navigation -->
+            <aside id="sidebar-left" class="hidden lg:flex relative w-64 border-r border-[#D3C9B0] bg-white flex-col sidebar-transition z-20">
+                <div class="p-6 flex items-center gap-3 border-b border-[#D3C9B0]/50">
+                    <div class="w-8 h-8 bg-[#1A1A1A] rounded-md flex items-center justify-center shadow-md">
+                        <iconify-icon icon="lucide:feather" class="text-[#C9A962] text-lg"></iconify-icon>
+                    </div>
+                    <span class="font-display font-bold text-lg tracking-tight text-[#1A1A1A]">剧灵</span>
+                </div>
+
+                <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+                    <!-- Script (Active) -->
+                    <div class="space-y-0.5">
+                        <div class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-[#FAF7F0] text-[#C9A962] border-r-4 border-[#C9A962] rounded-r-none font-semibold cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <iconify-icon icon="lucide:scroll" class="text-[20px]"></iconify-icon>
+                                <span>剧本</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-open-outline-editor" class="hover:text-[#1A1A1A] transition-colors p-0.5">
+                                    <iconify-icon icon="lucide:edit-3" class="text-xs"></iconify-icon>
+                                </button>
+                                <iconify-icon icon="lucide:chevron-down" class="text-xs"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="pl-4 mt-1 space-y-0.5 border-l border-[#D3C9B0] ml-5">
+                            <div class="flex items-center justify-between px-3 py-1.5 text-xs font-medium text-[#5C5548] cursor-pointer hover:text-[#1A1A1A]">
+                                <span>第一集</span>
+                                <iconify-icon icon="lucide:chevron-down" class="text-[10px]"></iconify-icon>
+                            </div>
+                            <div class="space-y-0.5 pl-3">
+                                <a href="#" class="block px-3 py-1.5 text-xs text-[#C9A962] font-bold border-l-2 border-[#C9A962] bg-white/60">第 1 场：湘西山区</a>
+                                <a href="#" class="block px-3 py-1.5 text-xs text-[#5C5548] hover:text-[#C9A962] transition-colors">第 2 场：密林古宅</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Characters -->
+                    <a href="09-character-management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:users" class="text-[20px]"></iconify-icon>
+                        <span class="font-medium">人物</span>
+                    </a>
+
+                    <!-- World View -->
+                    <a href="08-world-view.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:globe" class="text-[20px]"></iconify-icon>
+                        <span class="font-medium">世界观</span>
+                    </a>
+
+                    <!-- Export -->
+                    <a href="11-script-export.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#5C5548] hover:bg-[#FAF7F0] transition-all">
+                        <iconify-icon icon="lucide:download" class="text-[20px]"></iconify-icon>
+                        <span class="font-medium">导出</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Center: Editor Section -->
+            <main class="flex-1 flex flex-col items-center overflow-hidden bg-[#F5F1E8] relative">
+
+                <button id="btn-toggle-left" class="lg:hidden fixed left-0 top-1/2 -translate-y-1/2 z-[60] w-6 h-12 bg-white/50 hover:bg-white border-y border-r border-[#D3C9B0] rounded-r-md flex items-center justify-center text-[#5C5548] hover:text-[#C9A962] transition-all shadow-sm">
+                    <iconify-icon icon="lucide:chevron-left" class="text-sm"></iconify-icon>
+                </button>
+
+                <button id="btn-toggle-right" class="lg:hidden fixed right-0 top-1/2 -translate-y-1/2 z-[60] w-6 h-12 bg-white/50 hover:bg-white border-y border-l border-[#D3C9B0] rounded-l-md flex items-center justify-center text-[#5C5548] hover:text-[#C9A962] transition-all shadow-sm">
+                    <iconify-icon icon="lucide:panel-right-close" class="text-lg"></iconify-icon>
+                </button>
+
+                <div class="w-full bg-white/60 backdrop-blur-sm border-b border-[#D3C9B0] py-2 px-4 flex items-center justify-between gap-4 z-10">
+                    <div class="flex items-center gap-3">
+                         <a href="04-dashboard.html" class="flex items-center justify-center p-1 text-[#5C5548] hover:text-[#C9A962] hover:bg-black/5 rounded-md transition-all">
+                            <iconify-icon icon="lucide:arrow-left" class="text-[18px]"></iconify-icon>
+                         </a>
+                         <h2 class="text-[#1A1A1A] font-semibold text-sm">我送君归去</h2>
+                         <div class="h-4 w-px bg-gray-300"></div>
+                         <div class="flex items-center gap-4">
+                            <button class="flex flex-col items-center gap-0.5 text-[#5C5548] hover:text-[#C9A962] transition-all">
+                                <iconify-icon icon="lucide:heading-1" class="text-[18px]"></iconify-icon>
+                                <span class="text-[8px] uppercase font-bold hidden sm:block">场景</span>
+                            </button>
+                            <button class="flex flex-col items-center gap-0.5 text-[#5C5548] hover:text-[#C9A962] transition-all">
+                                <iconify-icon icon="lucide:text-cursor-input" class="text-[18px]"></iconify-icon>
+                                <span class="text-[8px] uppercase font-bold hidden sm:block">动作</span>
+                            </button>
+                            <button class="flex flex-col items-center gap-0.5 text-[#5C5548] hover:text-[#C9A962] transition-all">
+                                <iconify-icon icon="lucide:user" class="text-[18px]"></iconify-icon>
+                                <span class="text-[8px] uppercase font-bold hidden sm:block">角色</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button class="p-1.5 text-[#C9A962] hover:bg-white/10 rounded-md transition-all hidden sm:flex">
+                            <iconify-icon icon="lucide:sparkles" class="text-[18px]"></iconify-icon>
+                        </button>
+                        <button class="px-3 py-1.5 bg-[#C9A962] text-white rounded text-xs font-semibold shadow-sm hover:bg-[#A68A45] transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:save" class="text-[18px]"></iconify-icon>
+                            <span class="hidden sm:inline">保存</span>
+                        </button>
+                        <button class="p-2 text-[#5C5548] hover:text-[#C9A962] hover:bg-black/5 rounded-md transition-all">
+                            <iconify-icon icon="lucide:maximize" class="text-[18px]"></iconify-icon>
+                        </button>
+                        <button class="px-3 py-1.5 border border-[#C9A962] text-[#C9A962] rounded text-xs font-semibold hover:bg-[#C9A962] hover:text-white transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:share" class="text-[18px]"></iconify-icon>
+                            <span class="hidden sm:inline">导出</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 w-full overflow-y-auto custom-scrollbar flex justify-center">
+                    <div class="my-8 w-full max-w-[850px] bg-white shadow-xl ring-1 ring-[#D3C9B0] min-h-[1000px] px-6 py-12 sm:p-16 md:p-24 font-editor relative mb-20">
+                        <div class="text-center text-[#1A1A1A] font-bold text-2xl mb-8 font-display">【第 1 集】</div>
+                        <div class="bg-[#F0F0F0] p-3 text-base font-bold mb-6 border-l-4 border-[#1A1A1A] tracking-wide">第 1 场：湘西山区·夜·外</div>
+                        <p class="mb-6 leading-relaxed">△ 月黑风高，雾气如潮水般在密林中翻涌。山路崎岖蜿蜒，两侧古树参天。</p>
+                        <div class="text-center font-bold mt-8 mb-2 uppercase text-lg tracking-widest">雾姝</div>
+                        <div class="text-center text-sm text-[#5C5548] mb-1 italic">（手持摄魂铃，目光如炬）</div>
+                        <div class="text-center w-[70%] mx-auto mb-4">魂兮归来，引灵还乡。莫听风吟，莫看月光，唯我铃音是汝故乡。</div>
+                        <div class="inline-block w-[2px] h-6 bg-[#C9A962] animate-pulse ml-1"></div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: AI Assistant -->
+            <aside id="sidebar-right" class="hidden lg:flex w-80 border-l border-[#D3C9B0] bg-white/90 backdrop-blur-md flex-col sidebar-transition shadow-float">
+                <div class="p-4 border-b border-[#D3C9B0] flex items-center justify-between gap-3 bg-white/50">
+                    <div class="flex-1 overflow-hidden text-right">
+                        <div class="text-sm font-bold text-[#1A1A1A] truncate">Felix Writer</div>
+                        <div class="text-[10px] text-[#8B7355] flex items-center justify-end gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> 在线编辑中
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-white border border-[#D3C9B0] overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User">
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <!-- AI Chat History -->
+                    <div class="flex-1 overflow-y-auto p-5 custom-scrollbar space-y-5">
+                        <h3 class="text-xs font-bold text-[#1A1A1A] flex items-center gap-2 uppercase tracking-wider">
+                            <iconify-icon icon="lucide:sparkles" class="text-[#C9A962]"></iconify-icon> 人工智能助手
+                        </h3>
+
+                        <!-- Assistant Message -->
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-[#1A1A1A] flex-shrink-0 flex items-center justify-center shadow-md">
+                                <iconify-icon icon="lucide:bot" class="text-[#C9A962] text-lg"></iconify-icon>
+                            </div>
+                            <div class="flex-1 bg-[#FAF7F0] p-3 rounded-xl rounded-tl-none border border-[#D3C9B0]/40 text-xs text-[#5C5548] leading-relaxed shadow-sm">
+                                你好，Felix！我是你的创作助手。我可以为你<span class="text-[#C9A962] font-bold">续写情节</span>、<span class="text-[#C9A962] font-bold">优化台词</span>或者<span class="text-[#C9A962] font-bold">检查逻辑漏洞</span>。
+                            </div>
+                        </div>
+
+                        <!-- User Message Placeholder -->
+                        <div class="flex gap-3 flex-row-reverse">
+                            <div class="w-8 h-8 rounded-lg bg-[#C9A962] flex-shrink-0 flex items-center justify-center shadow-md">
+                                <iconify-icon icon="lucide:user" class="text-white text-lg"></iconify-icon>
+                            </div>
+                            <div class="flex-1 bg-white p-3 rounded-xl rounded-tr-none border border-[#D3C9B0]/60 text-xs text-[#1A1A1A] leading-relaxed shadow-sm">
+                                帮我润色一下雾姝在这一场戏中的台词，让她显得更清冷孤傲一些。
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Input Area -->
+                    <div class="p-4 border-t border-[#D3C9B0]/50 bg-white/50 backdrop-blur-sm">
+                        <div class="relative">
+                            <textarea placeholder="描述你的需求，如：'续写接下来的冲突'" class="w-full bg-white border border-[#D3C9B0] rounded-xl p-3 pr-12 text-xs focus:outline-none focus:border-[#C9A962] resize-none h-24 custom-scrollbar shadow-inner"></textarea>
+                            <button class="absolute bottom-3 right-3 w-8 h-8 bg-[#1A1A1A] text-white rounded-lg flex items-center justify-center hover:bg-[#C9A962] transition-all shadow-md">
+                                <iconify-icon icon="lucide:arrow-up" class="text-lg"></iconify-icon>
+                            </button>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button class="text-[10px] px-3 py-1.5 bg-white border border-[#D3C9B0] rounded-full text-[#8B7355] hover:border-[#C9A962] hover:text-[#C9A962] transition-all flex items-center gap-1.5 shadow-sm">
+                                <iconify-icon icon="lucide:wand-2" class="text-xs"></iconify-icon>润色对白
+                            </button>
+                            <button class="text-[10px] px-3 py-1.5 bg-white border border-[#D3C9B0] rounded-full text-[#8B7355] hover:border-[#C9A962] hover:text-[#C9A962] transition-all flex items-center gap-1.5 shadow-sm">
+                                <iconify-icon icon="lucide:brain-circuit" class="text-xs"></iconify-icon>情节分析
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="h-8 bg-white/80 backdrop-blur-md border-t border-[#D3C9B0] text-[#5C5548] text-[11px] px-6 flex items-center justify-between z-50">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:file-text" class="text-[#C9A962]"></iconify-icon>
+                    <span>进度：第 1 集 2/80 场</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:type" class="text-[#C9A962]"></iconify-icon>
+                    <span>字数：1,248</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span>同步中</span>
+            </div>
+        </footer>
+
+        <!-- Script Outline Editor Modal -->
+        <div id="modal-outline-editor" class="modal-backdrop fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6">
+            <div class="animate-modal-enter w-full max-w-4xl max-h-[90vh] bg-[#F5F1E8] rounded-2xl shadow-2xl border border-[#D3C9B0] flex flex-col overflow-hidden paper-texture">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-[#D3C9B0] flex items-center justify-between bg-white/50 backdrop-blur-sm">
+                    <div>
+                        <h2 class="font-display text-2xl font-bold text-[#1A1A1A]">剧本分集大纲</h2>
+                        <p class="text-xs text-[#8B7355] mt-1">规划故事走向，确保每一集都有精彩冲突</p>
+                    </div>
+                    <button id="btn-close-modal" class="w-10 h-10 rounded-full hover:bg-black/5 flex items-center justify-center text-[#5C5548] transition-colors">
+                        <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Modal Body (Scrollable List) -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                    <!-- Episode Card 1 -->
+                    <div class="bg-white rounded-xl border border-[#D3C9B0] p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <div class="flex-1">
+                                <label class="block text-[10px] font-bold text-[#8B7355] uppercase mb-1">集数标题</label>
+                                <input type="text" value="第一集：魂铃惊现" class="w-full bg-transparent border-b border-[#D3C9B0] focus:border-[#C9A962] focus:outline-none py-1 text-lg font-bold text-[#1A1A1A]">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="px-3 py-1.5 text-xs font-semibold text-[#C9A962] border border-[#C9A962] rounded hover:bg-[#C9A962] hover:text-white transition-all flex items-center gap-1.5">
+                                    <iconify-icon icon="lucide:sparkles"></iconify-icon>
+                                    AI 扩充
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-[#8B7355] uppercase mb-1">分集梗概</label>
+                            <textarea rows="4" class="w-full bg-[#FAF7F0] rounded-lg p-3 text-sm text-[#5C5548] leading-relaxed border border-transparent focus:border-[#D3C9B0] focus:outline-none resize-none">赶尸师雾姝在湘西山林引灵还乡时，意外撞见落魄阔少盛世安。盛家因触碰禁忌正面临灭顶之灾，雾姝虽不耐烦盛世安的纠缠，却因一枚与其身世有关的玉佩卷入其中。</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Add Episode Button -->
+                    <button class="w-full py-4 border-2 border-dashed border-[#D3C9B0] rounded-xl text-[#8B7355] font-bold text-sm hover:border-[#C9A962] hover:text-[#C9A962] hover:bg-white/50 transition-all flex items-center justify-center gap-2">
+                        <iconify-icon icon="lucide:plus-circle" class="text-lg"></iconify-icon>
+                        添加新集数
+                    </button>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-6 border-t border-[#D3C9B0] flex items-center justify-between bg-white/50 backdrop-blur-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="text-xs text-[#5C5548]">
+                            <span class="font-bold">统计：</span> 共 2 集 / 预计总长 3,500 字
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="px-6 py-2 text-sm font-bold text-[#5C5548] hover:text-[#1A1A1A] transition-colors">取消</button>
+                        <button class="px-8 py-2.5 bg-[#1A1A1A] text-white rounded-lg text-sm font-bold shadow-lg hover:bg-black transition-all flex items-center gap-2">
+                            <iconify-icon icon="lucide:check-circle" class="text-lg text-[#C9A962]"></iconify-icon>
+                            保存大纲
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebarLeft = document.getElementById('sidebar-left');
+        const sidebarRight = document.getElementById('sidebar-right');
+        const btnToggleLeft = document.getElementById('btn-toggle-left');
+        const btnToggleRight = document.getElementById('btn-toggle-right');
+        const modal = document.getElementById('modal-outline-editor');
+        const openModalBtn = document.getElementById('btn-open-outline-editor');
+        const closeModalBtn = document.getElementById('btn-close-modal');
+        const cancelModalBtn = document.getElementById('btn-cancel-modal');
+        const saveOutlineBtn = document.getElementById('btn-save-outline');
+
+        // Sidebar Logic
+        const toggleLeft = (force) => {
+            const isCollapsed = sidebarLeft.classList.toggle('sidebar-left-collapsed', force);
+        };
+
+        const toggleRight = (force) => {
+            const isCollapsed = sidebarRight.classList.toggle('sidebar-right-collapsed', force);
+        };
+
+        if (btnToggleLeft) btnToggleLeft.addEventListener('click', () => toggleLeft());
+        if (btnToggleRight) btnToggleRight.addEventListener('click', () => toggleRight());
+
+        // Modal Logic
+        const openModal = () => {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+        if (saveOutlineBtn) {
+            saveOutlineBtn.addEventListener('click', () => {
+                saveOutlineBtn.innerHTML = '<iconify-icon icon="lucide:loader-2" class="animate-spin text-lg"></iconify-icon> 保存中...';
+                setTimeout(() => {
+                    saveOutlineBtn.innerHTML = '<iconify-icon icon="lucide:check-circle" class="text-lg text-[#C9A962]"></iconify-icon> 已保存';
+                    setTimeout(closeModal, 600);
+                }, 1000);
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        }
+    </script>
+</body>
+</html>
