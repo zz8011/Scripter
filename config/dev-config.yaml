@@ -1,0 +1,303 @@
+# =============================================================================
+# Scripter - 开发配置文件
+# =============================================================================
+# 用途：剧灵应用开发的配置
+# 版本：2.0
+# 更新：2026-01-24
+# =============================================================================
+
+# =============================================================================
+# 项目信息
+# =============================================================================
+project:
+  name: "Scripter (剧灵)"
+  version: "0.1.0"
+  stage: "MVP开发"
+  description: "AI驱动的短剧剧本创作平台"
+
+# =============================================================================
+# 技术栈
+# =============================================================================
+tech_stack:
+  frontend:
+    framework: "Next.js 14+"
+    ui_library: "shadcn/ui"
+    styling: "Tailwind CSS"
+    editor: "TipTap"
+    state_management: "React Context + Hooks"
+
+  backend:
+    api: "Next.js API Routes"
+    orm: "Drizzle ORM"
+    database: "PostgreSQL 15+"
+    auth: "Casdoor"
+
+  ai:
+    text: "智谱 GLM-4.7"
+    image: "T8Star (nano-banana-2)"
+
+  development:
+    language: "TypeScript"
+    package_manager: "pnpm"
+    testing: "Jest + Testing Library"
+    linting: "ESLint + Prettier"
+
+# =============================================================================
+# 开发环境
+# =============================================================================
+development:
+  # 本地开发服务器
+  server:
+    port: 3000
+    host: "localhost"
+
+  # 数据库
+  database:
+    url: "postgresql://localhost:5432/scripter"
+    pool_size: 10
+    migration_auto: true
+
+  # 环境变量
+  env_files:
+    - ".env.local"
+    - ".env.development"
+
+  required_env_vars:
+    - "DATABASE_URL"
+    - "ZHIPU_API_KEY"
+    - "T8STAR_API_KEY"
+    - "CASDOOR_ENDPOINT"
+    - "CASDOOR_CLIENT_ID"
+    - "CASDOOR_CLIENT_SECRET"
+
+# =============================================================================
+# 构建配置
+# =============================================================================
+build:
+  # 输出目录
+  out_dir: ".next"
+
+  # 静态资源
+  static_dir: "public"
+
+  # 构建优化
+  optimizations:
+    minify: true
+    treeshaking: true
+    bundle_analyzer: false
+
+  # 目标环境
+  target: "es2020"
+
+# =============================================================================
+# 测试配置
+# =============================================================================
+testing:
+  # 测试框架
+  framework: "jest"
+
+  # 测试环境
+  environment: "jsdom"
+
+  # 覆盖率要求
+  coverage:
+    statements: 70
+    branches: 70
+    functions: 70
+    lines: 70
+
+  # 测试文件模式
+  test_match:
+    - "**/__tests__/**/*.test.{ts,tsx}"
+    - "**/*.{spec,test}.{ts,tsx}"
+
+# =============================================================================
+# 代码规范
+# =============================================================================
+code_quality:
+  # TypeScript
+  typescript:
+    strict: true
+    strict_null_checks: true
+    no_unused_locals: true
+
+  # ESLint
+  eslint:
+    extends:
+      - "next/core-web-vitals"
+      - "@typescript-eslint/recommended"
+    rules:
+      "@typescript-eslint/no-unused-vars": "error"
+      "@typescript-eslint/no-explicit-any": "warn"
+
+  # Prettier
+  prettier:
+    semi: true
+    single_quote: true
+    tab_width: 2
+    trailing_comma: "es5"
+
+# =============================================================================
+# Git 配置
+# =============================================================================
+git:
+  # 主分支
+  main_branch: "main"
+
+  # 开发分支
+  develop_branch: "develop"
+
+  # 功能分支前缀
+  feature_prefix: "feature/"
+
+  # 修复分支前缀
+  fix_prefix: "fix/"
+
+  # 重构分支前缀
+  refactor_prefix: "refactor/"
+
+  # 提交规范
+  commit_convention: "conventional"
+
+# =============================================================================
+# Claude Code 配置
+# =============================================================================
+claude_code:
+  # 启用的插件
+  enabled_plugins:
+    - "typescript-lsp@claude-code-lsps"
+    - "everything-claude-code@everything-claude-code"
+    - "superpowers-marketplace@superpowers"
+
+  # 工作目录
+  work_dir: ".claude"
+
+  # 并行开发
+  parallel:
+    max_agents: 3
+    default_worktree_count: 3
+    worktree_parent_dir: ".."
+    worktree_prefix: "scripter-task"
+
+  # 上下文管理
+  context:
+    compact_threshold: 50
+    enable_memory_persistence: true
+    memory_file: ".claude/memory.json"
+
+  # 默认模型
+  default_model: "claude-opus-4-5-20251101"
+
+# =============================================================================
+# 部署配置
+# =============================================================================
+deployment:
+  # 目标平台
+  platform: "vercel"
+
+  # 环境变量（生产）
+  production_env:
+    NODE_ENV: "production"
+
+  # 构建命令
+  build_command: "pnpm build"
+
+  # 启动命令
+  start_command: "pnpm start"
+
+  # 域名（可选）
+  domain: null
+
+# =============================================================================
+# 监控和日志
+# =============================================================================
+monitoring:
+  # 错误追踪
+  error_tracking:
+    enabled: false
+    service: null
+
+  # 分析
+  analytics:
+    enabled: false
+    service: null
+
+  # 日志
+  logging:
+    level: "info"
+    format: "json"
+
+# =============================================================================
+# 性能目标
+# =============================================================================
+performance:
+  # 页面加载
+  first_contentful_paint: 1.5  # 秒
+  largest_contentful_paint: 2.5
+  cumulative_layout_shift: 0.1
+
+  # 交互
+  time_to_interactive: 3.0
+  first_input_delay: 100  # 毫秒
+
+  # 包大小
+  max_bundle_size: 200000  # 字节
+
+# =============================================================================
+# 安全配置
+# =============================================================================
+security:
+  # CSP
+  content_security_policy:
+    enabled: true
+    directives:
+      default_src: "'self'"
+      script_src: "'self' 'unsafe-eval' 'unsafe-inline'"
+      style_src: "'self' 'unsafe-inline'"
+      img_src: "'self' data: https:"
+
+  # CORS
+  cors:
+    enabled: true
+    origins:
+      - "http://localhost:3000"
+    credentials: true
+
+  # 速率限制
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+
+# =============================================================================
+# 功能开关
+# =============================================================================
+features:
+  # 用户认证
+  authentication:
+    enabled: true
+    provider: "casdoor"
+
+  # AI 功能
+  ai_features:
+    enabled: true
+    streaming: true
+    max_tokens_per_request: 4096
+
+  # 导出功能
+  export:
+    enabled: true
+    formats:
+      - "pdf"
+      - "docx"
+      - "txt"
+
+  # 协作功能
+  collaboration:
+    enabled: false  # MVP 暂不实现
+
+# =============================================================================
+# 配置版本
+# =============================================================================
+config_version: "2.0.0"
+last_updated: "2026-01-24"
+maintainer: "Scripter Team"

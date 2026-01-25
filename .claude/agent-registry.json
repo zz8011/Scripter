@@ -1,0 +1,231 @@
+{
+  "$schema": "./agent-registry-schema.json",
+  "version": "1.0.0",
+  "registry": {
+    "scientific-dev": {
+      "id": "scientific-dev",
+      "name": "科学开发工作流 Agent",
+      "description": "自动执行计划→TDD→验证→审查的完整流程",
+      "type": "orchestrator",
+      "color": "10B981",
+      "definition": ".claude/agents/scientific-dev-agent.md",
+      "capabilities": [
+        "scientific_workflow",
+        "planning",
+        "tdd_implementation",
+        "verification",
+        "code_review"
+      ],
+      "depends_on": [],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["workflow", "orchestrator", "scientific-dev"]
+      }
+    },
+    "ui-component-agent": {
+      "id": "ui-component-agent",
+      "name": "UI组件专家",
+      "description": "shadcn/ui定制与主题配置专家",
+      "type": "specialist",
+      "color": "E91E63",
+      "definition": ".claude/agents/ui-component-agent.md",
+      "capabilities": [
+        "shadcn_ui",
+        "tailwind_theme",
+        "layout_components",
+        "drag_drop_ui"
+      ],
+      "depends_on": [],
+      "triggers": [
+        "创建UI组件",
+        "修改主题",
+        "实现布局",
+        "组件优化"
+      ],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["frontend", "ui", "shadcn"]
+      }
+    },
+    "data-agent": {
+      "id": "data-agent",
+      "name": "数据层专家",
+      "description": "Prisma数据库设计与查询优化专家",
+      "type": "specialist",
+      "color": "4CAF50",
+      "definition": ".claude/agents/data-agent.md",
+      "capabilities": [
+        "prisma_schema",
+        "database_relations",
+        "query_optimization",
+        "nextauth_integration"
+      ],
+      "depends_on": [],
+      "triggers": [
+        "设计数据模型",
+        "创建迁移",
+        "优化查询",
+        "配置认证"
+      ],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["backend", "database", "prisma"]
+      }
+    },
+    "ai-integration-agent": {
+      "id": "ai-integration-agent",
+      "name": "AI集成专家",
+      "description": "GLM-4.7 + T8Star API集成专家",
+      "type": "specialist",
+      "color": "9C27B0",
+      "definition": ".claude/agents/ai-integration-agent.md",
+      "capabilities": [
+        "glm_api",
+        "t8star_api",
+        "streaming_responses",
+        "prompt_engineering"
+      ],
+      "depends_on": [],
+      "triggers": [
+        "集成AI API",
+        "流式响应",
+        "提示词优化"
+      ],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["ai", "api", "integration"]
+      }
+    },
+    "integration-agent": {
+      "id": "integration-agent",
+      "name": "集成测试专家",
+      "description": "第三方服务集成与测试专家",
+      "type": "specialist",
+      "color": "FF9800",
+      "definition": ".claude/agents/integration-agent.md",
+      "capabilities": [
+        "api_integration",
+        "external_services",
+        "integration_testing"
+      ],
+      "depends_on": [],
+      "triggers": [
+        "集成外部服务",
+        "API对接",
+        "集成测试"
+      ],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["integration", "testing", "api"]
+      }
+    },
+    "parallel-orchestrator": {
+      "id": "parallel-orchestrator",
+      "name": "并行开发协调器",
+      "description": "管理多个子Agent并行工作，提高开发效率",
+      "type": "orchestrator",
+      "color": "8B5CF6",
+      "definition": ".claude/agents/parallel-orchestrator.md",
+      "capabilities": [
+        "parallel_execution",
+        "task_coordination",
+        "conflict_resolution",
+        "git_worktree"
+      ],
+      "depends_on": [],
+      "metadata": {
+        "version": "1.0",
+        "created_at": "2026-01-25",
+        "author": "Scripter Team",
+        "tags": ["orchestrator", "parallel", "coordination"]
+      }
+    }
+  },
+  "workflows": {
+    "full_stack_feature": {
+      "name": "全栈功能开发",
+      "orchestrator": "scientific-dev",
+      "steps": [
+        {
+          "phase": "planning",
+          "agents": ["scientific-dev"]
+        },
+        {
+          "phase": "implementation",
+          "agents": ["ui-component-agent", "data-agent"],
+          "parallel": true
+        },
+        {
+          "phase": "ai_integration",
+          "agents": ["ai-integration-agent"],
+          "optional": true
+        },
+        {
+          "phase": "testing",
+          "agents": ["integration-agent"]
+        },
+        {
+          "phase": "review",
+          "agents": ["scientific-dev"]
+        }
+      ]
+    },
+    "ui_only_feature": {
+      "name": "纯UI功能",
+      "orchestrator": "scientific-dev",
+      "steps": [
+        {
+          "phase": "planning",
+          "agents": ["scientific-dev"]
+        },
+        {
+          "phase": "implementation",
+          "agents": ["ui-component-agent"]
+        },
+        {
+          "phase": "review",
+          "agents": ["scientific-dev"]
+        }
+      ]
+    },
+    "data_only_feature": {
+      "name": "纯数据功能",
+      "orchestrator": "scientific-dev",
+      "steps": [
+        {
+          "phase": "planning",
+          "agents": ["scientific-dev"]
+        },
+        {
+          "phase": "implementation",
+          "agents": ["data-agent"]
+        },
+        {
+          "phase": "testing",
+          "agents": ["integration-agent"]
+        },
+        {
+          "phase": "review",
+          "agents": ["scientific-dev"]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "registry_version": "1.0.0",
+    "last_updated": "2026-01-25",
+    "total_agents": 6,
+    "total_workflows": 3,
+    "maintainer": "Scripter Team"
+  }
+}

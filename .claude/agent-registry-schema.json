@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Registry Schema",
+  "description": "Scripter 项目 Agent 注册表架构定义",
+  "type": "object",
+  "required": ["version", "registry", "metadata"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "注册表版本号"
+    },
+    "registry": {
+      "type": "object",
+      "description": "Agent 注册表",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "object",
+          "required": ["id", "name", "description", "type", "definition", "capabilities"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Agent 唯一标识符"
+            },
+            "name": {
+              "type": "string",
+              "description": "Agent 显示名称"
+            },
+            "description": {
+              "type": "string",
+              "description": "Agent 功能描述"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["orchestrator", "specialist", "general"],
+              "description": "Agent 类型"
+            },
+            "color": {
+              "type": "string",
+              "description": "Agent 主题色（十六进制）"
+            },
+            "definition": {
+              "type": "string",
+              "description": "Agent 定义文件路径"
+            },
+            "capabilities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Agent 能力列表"
+            },
+            "depends_on": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "依赖的其他 agents"
+            },
+            "triggers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "触发调用此 agent 的关键词"
+            },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "version": { "type": "string" },
+                "created_at": { "type": "string" },
+                "author": { "type": "string" },
+                "tags": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "workflows": {
+      "type": "object",
+      "description": "预定义工作流",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "object",
+          "required": ["name", "orchestrator", "steps"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "工作流名称"
+            },
+            "orchestrator": {
+              "type": "string",
+              "description": "协调器 agent ID"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "description": "阶段名称"
+                  },
+                  "agents": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "此阶段涉及的 agents"
+                  },
+                  "parallel": {
+                    "type": "boolean",
+                    "description": "是否并行执行"
+                  },
+                  "optional": {
+                    "type": "boolean",
+                    "description": "是否可选"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["registry_version", "last_updated", "total_agents", "maintainer"],
+      "properties": {
+        "registry_version": { "type": "string" },
+        "last_updated": { "type": "string" },
+        "total_agents": { "type": "number" },
+        "total_workflows": { "type": "number" },
+        "maintainer": { "type": "string" }
+      }
+    }
+  }
+}

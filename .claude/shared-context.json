@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "created_at": "2026-01-25T08:15:00Z",
+  "updated_at": "2026-01-25T08:15:00Z",
+  "agents": [
+    {
+      "id": "agent-1",
+      "name": "Frontend Agent",
+      "task": "实现用户登录页面",
+      "status": "in_progress",
+      "branch": "feature/login-page",
+      "files": [
+        "src/app/login/page.tsx",
+        "src/components/LoginForm.tsx"
+      ],
+      "last_sync": "2026-01-25T08:15:00Z"
+    },
+    {
+      "id": "agent-2",
+      "name": "Backend Agent",
+      "task": "实现登录 API",
+      "status": "in_progress",
+      "branch": "feature/login-api",
+      "files": [
+        "src/app/api/auth/login/route.ts",
+        "src/lib/auth.ts"
+      ],
+      "last_sync": "2026-01-25T08:14:30Z"
+    },
+    {
+      "id": "agent-3",
+      "name": "Database Agent",
+      "task": "创建用户表 schema",
+      "status": "completed",
+      "branch": "feature/user-schema",
+      "files": [
+        "src/db/schema/users.ts"
+      ],
+      "last_sync": "2026-01-25T08:10:00Z"
+    }
+  ],
+  "shared_state": {
+    "database": {
+      "status": "schema_ready",
+      "schema_version": "0.0.1",
+      "last_migration": "2026-01-25T08:10:00Z"
+    },
+    "branches": {
+      "main": "main",
+      "feature_branches": [
+        "feature/login-page",
+        "feature/login-api",
+        "feature/user-schema"
+      ]
+    },
+    "interfaces": {
+      "LoginRequest": {
+        "email": "string",
+        "password": "string"
+      },
+      "LoginResponse": {
+        "success": "boolean",
+        "token": "string | null",
+        "error": "string | null"
+      }
+    }
+  },
+  "sync_checkpoints": [
+    {
+      "timestamp": "2026-01-25T08:10:00Z",
+      "agent": "agent-3",
+      "event": "Schema 创建完成",
+      "status": "success"
+    },
+    {
+      "timestamp": "2026-01-25T08:14:30Z",
+      "agent": "agent-2",
+      "event": "API 开发进行中",
+      "status": "success"
+    },
+    {
+      "timestamp": "2026-01-25T08:15:00Z",
+      "agent": "agent-1",
+      "event": "前端组件开发中",
+      "status": "success"
+    }
+  ],
+  "conflicts": [],
+  "metadata": {
+    "project": "Scripter",
+    "sprint": "Sprint 1-2: 基础架构搭建",
+    "coordinator": "main"
+  }
+}

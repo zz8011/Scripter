@@ -1,7 +1,8 @@
 {
   "enabledPlugins": {
     "typescript-lsp@claude-code-lsps": true,
-    "everything-claude-code@everything-claude-code": true
+    "everything-claude-code@everything-claude-code": true,
+    "superpowers-marketplace@superpowers": true
   },
   "extraKnownMarketplaces": {
     "claude-code-lsps": {
@@ -15,6 +16,75 @@
         "source": "github",
         "repo": "affaan-m/everything-claude-code"
       }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/project-context.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/agent-registry-loader.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/memory-loader.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/context-injector.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/phase-tracker.js"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-summary-enhanced.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/memory-persistence.js"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/strategic-compact-v2.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/decision-logger.js"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "COMPACT_THRESHOLD": "50",
+    "CLAUDE_DEFAULT_MODEL": "claude-opus-4-5-20251101"
   }
 }

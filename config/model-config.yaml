@@ -1,194 +1,491 @@
 # =============================================================================
-# Scripter - 模型配置文件
+# Scripter - AI 模型配置文件
 # =============================================================================
-# 用途：控制LLM模型调用、Token使用、上下文管理
-# 重要：35%安全阈值，避免LLM模型在长上下文下的性能衰减
-# =============================================================================
-
-model:
-  # 模型提供商
-  provider: "anthropic"
-
-  # 主模型（用于复杂任务）
-  primary_model: "claude-opus-4-5"
-
-  # 备用模型（用于简单任务）
-  fallback_model: "claude-sonnet-4-5"
-
-  # 上下文窗口配置
-  context_window: 200000        # 最大上下文：200k tokens
-  max_output: 128000            # 最大输出：128k tokens
-  usage_threshold: 0.35         # 使用阈值：35%（安全范围）
-  safety_margin: 0.30           # 安全边际：30%（保守使用）
-
-# =============================================================================
-# 上下文管理策略
+# 用途：配置剧灵应用使用的 AI 模型和 API
+# 版本：2.1
+# 更新：2026-01-24
+# 数据来源：https://bigmodel.cn/pricing
 # =============================================================================
 
+# =============================================================================
+# 模型提供商
+# =============================================================================
+providers:
+  # =============================================================================
+  # 智谱 AI (GLM-4.7)
+  # =============================================================================
+  zhipu:
+    name: "智谱 AI"
+    homepage: "https://open.bigmodel.cn/"
+    documentation: "https://open.bigmodel.cn/dev/api"
+    pricing: "https://bigmodel.cn/pricing"
+
+    # API 配置
+    api:
+      base_url: "https://open.bigmodel.cn/api/paas/v4/"
+      key_env: "ZHIPU_API_KEY"
+      timeout: 60000  # 毫秒
+      max_retries: 3
+
+    # 模型配置
+    models:
+      # 最新旗舰模型
+      primary: "glm-4.7"              # 主要模型（最强）
+      standard: "glm-4.6"             # 标准模型
+      fast: "glm-4.5-air"             # 快速模型
+      flashx: "glm-4.7-flashx"        # 极速性价比模型
+      flash: "glm-4.7-flash"          # 免费极速模型
+
+    # Token 限制
+    tokens:
+      # GLM-4.7 / 4.6
+      max_input_primary: 200000       # 200k tokens
+      max_output_primary: 200000
+
+      # GLM-4.5-Air
+      max_input_fast: 128000          # 128k tokens
+      max_output_fast: 128000
+
+      # Flash 系列
+      max_input_flash: 200000         # 200k tokens
+      max_output_flash: 200000
+
+      # 推荐配置
+      recommended_input: 8000         # 8k 输入（平衡性能和成本）
+      recommended_output: 2048        # 2k 输出
+
+    # 定价信息（来源：智谱官网 2026-01-24）
+    # 单位：人民币 / 百万 tokens
+    pricing:
+      glm_4_7:
+        # 输入 < 32k, 输出 < 0.2x (通常情况)
+        short_output:
+          input: 2.0                  # ¥2/百万输入
+          output: 8.0                 # ¥8/百万输出
+          cached: 0.4                 # 缓存输入 ¥0.4/百万
+
+        # 输入 < 32k, 输出 >= 0.2x (长输出)
+        long_output:
+          input: 3.0                  # ¥3/百万输入
+          output: 14.0                # ¥14/百万输出
+          cached: 0.6                 # 缓存输入 ¥0.6/百万
+
+        # 输入 >= 32k (长上下文)
+        long_context:
+          input: 4.0                  # ¥4/百万输入
+          output: 16.0                # ¥16/百万输出
+          cached: 0.8                 # 缓存输入 ¥0.8/百万
+
+        decode_rate: "30-50"          # tokens/秒
+
+      glm_4_6:
+        # 与 GLM-4.7 定价相同
+        short_output:
+          input: 2.0
+          output: 8.0
+          cached: 0.4
+        long_output:
+          input: 3.0
+          output: 14.0
+          cached: 0.6
+        long_context:
+          input: 4.0
+          output: 16.0
+          cached: 0.8
+        decode_rate: "30-50"
+
+      glm_4_5_air:
+        # 输入 < 32k, 输出 < 0.2x
+        short_output:
+          input: 0.8                  # ¥0.8/百万输入
+          output: 2.0                 # ¥2/百万输出
+          cached: 0.16                # 缓存输入 ¥0.16/百万
+
+        # 输入 < 32k, 输出 >= 0.2x
+        long_output:
+          input: 0.8                  # ¥0.8/百万输入
+          output: 6.0                 # ¥6/百万输出
+          cached: 0.16                # 缓存输入 ¥0.16/百万
+
+        # 输入 >= 32k
+        long_context:
+          input: 1.2                  # ¥1.2/百万输入
+          output: 8.0                 # ¥8/百万输出
+          cached: 0.24                # 缓存输入 ¥0.24/百万
+
+        decode_rate: "30-50"
+
+      glm_4_7_flashx:
+        # 200K 上下文，高性价比
+        input: 0.5                    # ¥0.5/百万输入
+        output: 3.0                   # ¥3/百万输出
+        cached: 0.1                   # 缓存输入 ¥0.1/百万
+        decode_rate: "30-40"
+
+      glm_4_7_flash:
+        # 完全免费
+        input: 0.0                    # 免费
+        output: 0.0                   # 免费
+        cached: 0.0                   # 免费
+        decode_rate: "20"             # 较慢
+
+    # 缓存优惠
+    cache_promo:
+      enabled: true
+      description: "限时免费"  # 官方标注 "Limited-Time-Free"
+      discount_ratio: 0.05           # 缓存价格约为原始价格的 5%
+
+    # 使用场景
+    use_cases:
+      - "剧本生成"
+      - "对话优化"
+      - "场景创作"
+      - "角色分析"
+      - "格式检查"
+
+    # 流式输出
+    streaming:
+      enabled: true
+      chunk_size: 1000
+
+# =============================================================================
+# 成本对比（基于官方定价）
+# =============================================================================
+cost_comparison:
+  # 假设场景：10k 输入 + 2k 输出（短输出场景）
+  example_scenario:
+    input_tokens: 10000
+    output_tokens: 2000
+
+  # 成本计算（人民币）
+  costs_per_request:
+    glm_4_7: 0.036                   # ¥0.036/次 = (10 * ¥2 + 2 * ¥8) / 1000000
+    glm_4_6: 0.036                   # ¥0.036/次
+    glm_4_5_air: 0.012               # ¥0.012/次 = (10 * ¥0.8 + 2 * ¥2) / 1000000
+    glm_4_7_flashx: 0.011            # ¥0.011/次 = (10 * ¥0.5 + 2 * ¥3) / 1000000
+    glm_4_7_flash: 0.0               # ¥0/次（免费）
+
+  # 相对于 GLM-4.7 的成本节省
+  savings_vs_primary:
+    glm_4_5_air: 0.67                # 节省 67%
+    glm_4_7_flashx: 0.69             # 节省 69%
+    glm_4_7_flash: 1.0               # 节省 100%
+
+# =============================================================================
+# 功能特定的模型配置
+# =============================================================================
+feature_models:
+  # 剧本生成（需要高质量，使用主力模型）
+  script_generation:
+    provider: "zhipu"
+    model: "glm-4.7"
+    temperature: 0.8
+    max_tokens: 4096
+    reasoning: "需要高质量创作和复杂推理"
+    cost_estimate: "¥0.036/次 (10k输入+2k输出)"
+
+  # 对话优化（需要质量，但输出较短）
+  dialogue_optimization:
+    provider: "zhipu"
+    model: "glm-4.7"
+    temperature: 0.7
+    max_tokens: 2048
+    reasoning: "需要保持角色性格一致性"
+    cost_estimate: "¥0.018/次 (5k输入+1k输出)"
+
+  # 场景创作（平衡质量和速度）
+  scene_creation:
+    provider: "zhipu"
+    model: "glm-4.7"
+    temperature: 0.8
+    max_tokens: 3072
+    reasoning: "场景描写需要细节"
+    cost_estimate: "¥0.028/次 (8k输入+1.5k输出)"
+
+  # 角色分析（可用更快模型）
+  character_analysis:
+    provider: "zhipu"
+    model: "glm-4.5-air"             # 使用 Air 节省成本
+    temperature: 0.6
+    max_tokens: 1024
+    reasoning: "分析任务相对简单"
+    cost_estimate: "¥0.006/次 (5k输入+1k输出)"
+
+  # 格式检查（简单任务，用 FlashX）
+  format_check:
+    provider: "zhipu"
+    model: "glm-4.7-flashx"          # 高性价比
+    temperature: 0.3
+    max_tokens: 512
+    reasoning: "规则检查，不需要复杂推理"
+    cost_estimate: "¥0.006/次 (5k输入+0.5k输出)"
+
+  # 快速预览（免费模型）
+  quick_preview:
+    provider: "zhipu"
+    model: "glm-4.7-flash"           # 完全免费
+    temperature: 0.7
+    max_tokens: 1024
+    reasoning: "快速预览，接受较低质量"
+    cost_estimate: "免费"
+
+  # 批量处理（高性价比）
+  batch_processing:
+    provider: "zhipu"
+    model: "glm-4.7-flashx"          # 性价比最高
+    temperature: 0.7
+    max_tokens: 2048
+    reasoning: "批量任务优先成本"
+    cost_estimate: "¥0.011/次 (10k输入+2k输出)"
+
+# =============================================================================
+# 上下文管理
+# =============================================================================
 context_management:
-  # Token预算配置
-  max_input_tokens: 60000       # 实际最大输入：60k (30% of 200k)
-  min_input_tokens: 10000       # 最小输入：10k
-  optimal_tokens: 40000         # 最佳使用：40k
+  # Token 预算
+  token_budget:
+    total: 100000                    # 总预算 100k
+    system: 1000                     # 系统提示
+    user_input: 10000                # 用户输入
+    context: 50000                   # 上下文
+    output: 4096                     # 输出
 
-  # 分块处理配置
-  chunk_size: 50000             # 分块大小：50k tokens
-  overlap_size: 2000            # 重叠大小：2k tokens（保持连贯性）
+  # 优先级策略
+  priority:
+    1: "user_input"                  # 用户输入（最高）
+    2: "current_task"                # 当前任务
+    3: "project_context"             # 项目上下文
+    4: "history"                     # 历史记录
+    5: "global_rules"                # 全局规则
 
-  # 优先级策略（按优先级排序）
-  priority_strategies:
-    1: "user_instructions"       # 用户指令（最高优先级）
-    2: "active_scene"            # 当前场景内容
-    3: "character_context"       # 角色信息
-    4: "recent_history"          # 最近操作历史
-    5: "plot_outline"            # 剧情大纲
-    6: "global_metadata"         # 全局元数据
+  # 压缩策略
+  compression:
+    enabled: true
+    threshold: 0.8                   # 80% 时触发压缩
+    method: "semantic"               # 语义压缩
 
-  # 上下文分层配置
-  layers:
-    global:
-      description: "全局层 - 始终加载"
-      components:
-        - name: "剧本元数据"
-          estimated_tokens: 500
-        - name: "人物小传（核心）"
-          estimated_tokens: 5000
-        - name: "故事大纲"
-          estimated_tokens: 3000
-        - name: "创作规则"
-          estimated_tokens: 1000
-      total_tokens: 9500
-
-    session:
-      description: "会话层 - 会话期间保持"
-      components:
-        - name: "当前工作集数"
-          estimated_tokens: 1000
-        - name: "最近操作历史"
-          estimated_tokens: 2000
-        - name: "用户偏好"
-          estimated_tokens: 1000
-      total_tokens: 4500
-
-    task:
-      description: "任务层 - 动态加载，任务完成后释放"
-      components:
-        - name: "当前场景内容"
-          estimated_tokens: 8000
-        - name: "前后场景"
-          estimated_tokens: 3000
-        - name: "相关角色信息"
-          estimated_tokens: 4000
-        - name: "剧情线索"
-          estimated_tokens: 3000
-      total_tokens: 18000
-      # 任务层可动态调整
+  # 缓存策略（重要：可大幅降低成本）
+  caching:
+    enabled: true                    # 启用缓存
+    strategy: "prompt_prefix"        # 缓存提示词前缀
+    savings: "95%"                   # 缓存价格约为原价的 5%
 
 # =============================================================================
-# Token监控
+# 提示词模板
 # =============================================================================
+prompts:
+  # 系统提示
+  system:
+    scripter: |
+      你是剧灵（Juling），一个专业的短剧剧本创作助手。
+      你的任务是帮助用户创作高质量的短剧剧本。
 
-token_monitoring:
-  # 是否启用Token计数
-  enable_counting: true
+      核心原则：
+      1. 遵循中文短剧剧本格式规范 v2.0
+      2. 保持角色性格一致性
+      3. 控制场景时长（每场 30 秒左右）
+      4. 快节奏，强冲突，每集都有悬念
 
-  # 警告阈值（占预算的百分比）
-  warning_threshold: 0.80       # 80%时发出警告
-  critical_threshold: 0.95      # 95%时发出严重警告
+      创作风格：
+      - 对话简洁有力，避免长篇独白
+      - 动作描述具体，便于拍摄
+      - 情感冲突强烈，抓住观众注意力
 
-  # Token计算方法
-  estimation_method: "cl100k_base"  # 使用OpenAI的token计算标准
+  # 功能提示
+  functions:
+    generate_scene: |
+      根据以下信息创作一个场景：
+      - 场景号：{scene_number}
+      - 场景地点：{location}
+      - 出场人物：{characters}
+      - 场景目标：{objective}
+      - 时长要求：{duration} 秒
 
-  # 统计和报告
-  statistics:
-    track_usage: true           # 跟踪使用情况
-    log_file: "logs/token-usage.log"
-    report_frequency: "daily"   # 报告频率：daily/weekly/monthly
+    optimize_dialogue: |
+      优化以下对话，使其：
+      - 更符合角色性格
+      - 更简洁有力
+      - 更有戏剧张力
+
+      原对话：
+      {dialogue}
+
+      角色信息：
+      {character_info}
+
+    analyze_character: |
+      分析角色的情感状态和行为动机：
+
+      角色名：{character_name}
+      当前情境：{situation}
+      对话内容：{dialogue}
+
+      请分析：
+      1. 情感状态
+      2. 行为动机
+      3. 潜台词
+      4. 表演建议
 
 # =============================================================================
-# 性能优化
+# 重试和错误处理
 # =============================================================================
-
-performance:
-  # 并行处理配置
-  parallel_workers: 3           # 最大并行任务数
-  parallel_token_budget: 40000  # 每个并行任务的Token预算
-
-  # 缓存配置
-  cache_enabled: true
-  cache_ttl: 3600              # 缓存有效期（秒）
-  cache_max_size: 1000         # 最大缓存条目数
-
-  # 流式输出
-  streaming: true              # 启用流式输出
-  stream_chunk_size: 1000      # 每次流式输出的token数
-
-  # 重试机制
+error_handling:
+  # 重试配置
   retry:
-    max_attempts: 3            # 最大重试次数
-    backoff_factor: 2          # 退避因子
-    initial_delay: 1           # 初始延迟（秒）
+    max_attempts: 3
+    backoff_factor: 2
+    initial_delay: 1000              # 毫秒
+    retry_on:
+      - "rate_limit_exceeded"
+      - "server_error"
+      - "timeout"
+
+  # 降级策略
+  fallback:
+    enabled: true
+    strategy: "grade_down"           # 降级策略：4.7 → 4.6 → 4.5-Air → FlashX
+    models:
+      - "glm-4.7"
+      - "glm-4.6"
+      - "glm-4.5-air"
+      - "glm-4.7-flashx"
+
+  # 超时配置
+  timeouts:
+    request: 60000                   # 请求超时 60秒
+    stream: 120000                   # 流式超时 120秒
+    image: 180000                   # 图片生成超时 180秒
 
 # =============================================================================
 # 成本控制
 # =============================================================================
-
 cost_control:
-  # 每日Token限制
-  daily_token_limit: 1000000   # 每日最大100万tokens
+  # 每日限制
+  daily_limits:
+    max_tokens: 1000000              # 100万 tokens/天
+    max_requests: 1000               # 最多1000次请求/天
+    max_cost: 50                     # ¥50/天
 
-  # 每月Token限制
-  monthly_token_limit: 25000000 # 每月最大2500万tokens
+  # 模型使用配额
+  model_quotas:
+    glm_4_7: 20                     # 最多20%使用 4.7
+    glm_4_6: 10                     # 最多10%使用 4.6
+    glm_4_5_air: 30                 # 最多30%使用 Air
+    glm_4_7_flashx: 35              # 最多35%使用 FlashX
+    glm_4_7_flash: 5                # 最多5%使用 Flash
 
-  # 告警配置
+  # 告警阈值
   alerts:
-    daily_usage_threshold: 0.80    # 每日使用80%时告警
-    monthly_usage_threshold: 0.85  # 每月使用85%时告警
+    token_usage: 0.8                 # 80% 时告警
+    cost_usage: 0.8                  # 80% 时告警
+    quota_exceeded: true             # 超过配额时告警
+
+  # 统计
+  statistics:
+    enabled: true
+    log_file: "logs/ai-usage.log"
+
+  # 成本优化建议
+  optimization_tips:
+    - "使用缓存：缓存提示词可节省 95% 成本"
+    - "选择合适模型：简单任务用 FlashX 或 Air"
+    - "控制输出长度：设置合理的 max_tokens"
+    - "批量处理：合并小任务减少请求次数"
 
 # =============================================================================
-# 模型特定配置
+# 缓存配置
 # =============================================================================
+cache:
+  # 响应缓存
+  response_cache:
+    enabled: true
+    ttl: 3600                       # 1小时
+    max_size: 1000                   # 最多1000条
 
-model_settings:
-  claude-opus-4-5:
-    max_tokens: 128000
-    temperature: 0.7
-    top_p: 0.9
-    use_cases:
-      - "复杂任务"
-      - "创意生成"
-      - "深度分析"
-
-  claude-sonnet-4-5:
-    max_tokens: 128000
-    temperature: 0.7
-    top_p: 0.9
-    use_cases:
-      - "场景创作"
-      - "内容优化"
-      - "格式检查"
+  # 提示词缓存（重要成本优化）
+  prompt_cache:
+    enabled: true
+    cache_prefix: true               # 缓存提示词前缀
+    common_prompts:
+      - "system.scripter"
+      - "functions.generate_scene"
+      - "functions.optimize_dialogue"
 
 # =============================================================================
-# 调试和日志
+# 监控和日志
 # =============================================================================
+monitoring:
+  # 请求日志
+  log_requests: true
 
-debug:
-  # 调试模式
-  enabled: false
+  # 响应日志
+  log_responses: false               # 关闭以节省日志空间
 
-  # 日志级别：DEBUG/INFO/WARNING/ERROR
-  log_level: "INFO"
+  # 性能监控
+  performance:
+    log_latency: true
+    latency_threshold: 5000          # 5秒
 
-  # Token使用详细日志
-  log_token_usage: true
+  # 错误监控
+  errors:
+    log_errors: true
+    alert_on_errors: true
 
-  # 上下文加载详细日志
-  log_context_loading: true
+  # 成本监控
+  cost:
+    track_usage: true
+    report_frequency: "hourly"       # 每小时报告
+    daily_report: true               # 每日汇总
 
 # =============================================================================
-# 版本信息
+# 模型选择指南
 # =============================================================================
+model_selection_guide:
+  # 按任务类型选择
+  by_task_type:
+    "复杂创作":
+      model: "glm-4.7"
+      reason: "需要最强的创作能力"
 
-config_version: "1.0.0"
-last_updated: "2026-01-16"
-maintainer: "Claude Code"
+    "简单分析":
+      model: "glm-4.7-flashx"
+      reason: "性价比高，速度够用"
+
+    "快速预览":
+      model: "glm-4.7-flash"
+      reason: "完全免费，速度快"
+
+    "批量处理":
+      model: "glm-4.7-flashx"
+      reason: "成本最低"
+
+    "角色分析":
+      model: "glm-4.5-air"
+      reason: "足够且便宜"
+
+  # 按成本选择
+  by_cost:
+    "不限制成本":
+      model: "glm-4.7"
+
+    "平衡成本和质量":
+      model: "glm-4.7-flashx"
+
+    "最低成本":
+      model: "glm-4.7-flash"
+
+  # 按速度选择
+  by_speed:
+    "最快速度":
+      model: "glm-4.7-flashx"
+
+    "平衡速度和质量":
+      model: "glm-4.7"
+
+# =============================================================================
+# 配置版本
+# =============================================================================
+config_version: "2.1.0"
+last_updated: "2026-01-24"
+data_source: "https://bigmodel.cn/pricing"
+maintainer: "Scripter Team"

@@ -1,466 +1,348 @@
 # =============================================================================
-# Scripter - Agent配置文件
+# Scripter - Claude Code Agent 配置文件
 # =============================================================================
-# 用途：定义所有Agent和Skill的能力、参数、模型选择
+# 用途：配置用于开发剧灵应用的 Claude Code Agents
+# 版本：2.0
+# 更新：2026-01-24
 # =============================================================================
 
+# =============================================================================
+# 开发 Agents（用于开发剧灵应用本身）
+# =============================================================================
 agents:
   # =============================================================================
-  # 主控Agent (Orchestrator)
+  # 前端开发 Agent
   # =============================================================================
-  orchestrator:
-    name: "主控Agent"
-    description: "流程协调、任务调度、上下文管理、版本控制"
-    version: "1.0"
+  frontend:
+    name: "Frontend Developer"
+    description: "Next.js + React + TypeScript + Tailwind CSS 专家"
 
-    # 模型配置
-    model:
-      primary: "claude-opus-4-5"
-      fallback: "claude-sonnet-4-5"
+    expertise:
+      - "Next.js 14+ App Router"
+      - "React 18+ Hooks 和并发特性"
+      - "TypeScript 类型系统"
+      - "Tailwind CSS 响应式设计"
+      - "shadcn/ui 组件库"
+      - "TipTap 富文本编辑器"
 
-    # Token配置
-    max_tokens: 60000           # 最大输入tokens
-    output_tokens: 4096         # 最大输出tokens
+    responsibilities:
+      - "实现页面和组件"
+      - "状态管理"
+      - "路由配置"
+      - "UI 交互"
+      - "性能优化"
 
-    # 优先级
-    priority: 1                 # 最高优先级
+    context_requirements:
+      - "docs/design/.claude/design-context.md"
+      - "docs/tech/component-conventions.md"
 
-    # 核心功能
-    functions:
-      - name: "流程协调"
-        description: "管理创作流程的各个环节"
-        enabled: true
-
-      - name: "任务调度"
-        description: "识别任务类型并分配给对应Agent"
-        enabled: true
-
-      - name: "上下文管理"
-        description: "精准控制Token使用，智能加载上下文"
-        enabled: true
-
-      - name: "版本控制"
-        description: "Git操作和版本追踪"
-        enabled: true
-
-      - name: "进度追踪"
-        description: "记录创作进度和状态"
-        enabled: true
-
-    # 上下文策略
-    context_strategy:
-      load_global: true         # 始终加载全局上下文
-      load_session: true        # 保持会话上下文
-      load_task_dynamic: true   # 动态加载任务上下文
-
-    # 性能配置
-    performance:
-      parallel_tasks: 3         # 并行任务数
-      timeout: 300              # 超时时间（秒）
+    default_model: "claude-sonnet-4-5"
 
   # =============================================================================
-  # 创意Agent (Creative)
+  # 后端开发 Agent
   # =============================================================================
-  creative:
-    name: "创意Agent"
-    description: "大纲生成、情节构思、冲突设计"
-    version: "1.0"
+  backend:
+    name: "Backend Developer"
+    description: "Next.js API + Drizzle ORM + PostgreSQL 专家"
 
-    model:
-      primary: "claude-sonnet-4-5"
-      fallback: "claude-opus-4-5"
+    expertise:
+      - "Next.js API Routes"
+      - "Drizzle ORM"
+      - "PostgreSQL 查询优化"
+      - "RESTful API 设计"
+      - "JWT 认证"
+      - "Casdoor 集成"
 
-    max_tokens: 50000
-    output_tokens: 4096
-    priority: 3
+    responsibilities:
+      - "实现 API 端点"
+      - "数据库操作"
+      - "认证授权"
+      - "数据验证"
+      - "错误处理"
 
-    functions:
-      - name: "大纲生成"
-        description: "生成整体故事大纲和分集大纲"
-        enabled: true
-        config:
-          detail_level: "medium"  # simple/medium/detailed
+    context_requirements:
+      - "docs/tech/api-spec.md"
+      - "docs/tech/tech-design.md"
 
-      - name: "情节构思"
-        description: "设计情节走向和转折点"
-        enabled: true
-        config:
-          plot_points_per_episode: 3
-
-      - name: "冲突设计"
-        description: "设计戏剧冲突和矛盾"
-        enabled: true
-        config:
-          conflict_types:
-            - "人物冲突"
-            - "情感冲突"
-            - "观念冲突"
-
-      - name: "故事线设计"
-        description: "设计主线、支线故事"
-        enabled: true
-
-    context_strategy:
-      load_global: true
-      load_session: true
-      required_context:
-        - "剧本元数据"
-        - "故事大纲"
-        - "人物小传"
+    default_model: "claude-sonnet-4-5"
 
   # =============================================================================
-  # 场景Agent (Scene)
+  # AI 集成 Agent
   # =============================================================================
-  scene:
-    name: "场景Agent"
-    description: "场景创作、对白撰写、动作描述"
-    version: "1.0"
+  ai_integration:
+    name: "AI Integration Specialist"
+    description: "GLM-4.7 + T8Star API 集成专家"
 
-    model:
-      primary: "claude-sonnet-4-5"
-      fallback: "claude-sonnet-4-5"
+    expertise:
+      - "智谱 GLM-4.7 API"
+      - "T8Star 图片生成 API"
+      - "流式响应处理"
+      - "提示词工程"
+      - "上下文管理"
+      - "错误重试"
 
-    max_tokens: 50000
-    output_tokens: 3072
-    priority: 2
+    responsibilities:
+      - "集成 AI API"
+      - "实现流式响应"
+      - "优化提示词"
+      - "管理 Token 使用"
+      - "处理 AI 错误"
 
-    functions:
-      - name: "场景创作"
-        description: "创作完整的场景内容"
-        enabled: true
-        config:
-          include_dialogue: true
-          include_action: true
-          include_os: true
+    context_requirements:
+      - "config/model-config.yaml"
+      - "docs/tech/ai-integration.md"
 
-      - name: "对白撰写"
-        description: "撰写角色对话"
-        enabled: true
-        config:
-          natural_dialogue: true
-          character_voice_match: true
-
-      - name: "动作描述"
-        description: "撰写动作和场景描述"
-        enabled: true
-        config:
-          visual: true           # 可视化、可拍摄
-          specific: true         # 具体而非抽象
-
-      - name: "OS生成"
-        description: "生成角色内心独白"
-        enabled: true
-
-    context_strategy:
-      load_global: true
-      load_session: true
-      required_context:
-        - "剧本元数据"
-        - "当前场景前后内容"
-        - "相关角色信息"
-        - "用户指令"
-
-    # 时长控制
-    duration_control:
-      enabled: true
-      target_duration: 30       # 目标30秒/场
-      tolerance: 5              # ±5秒
+    default_model: "claude-opus-4-5"
 
   # =============================================================================
-  # 人物Agent (Character) ⭐核心特色
+  # 数据库 Agent
   # =============================================================================
-  character:
-    name: "人物Agent"
-    description: "台词优化、表演指导、人物一致性检查、情感弧线分析"
-    version: "1.0"
+  database:
+    name: "Database Specialist"
+    description: "Drizzle ORM + PostgreSQL 数据建模专家"
 
-    model:
-      primary: "claude-sonnet-4-5"
-      fallback: "claude-opus-4-5"
+    expertise:
+      - "Drizzle ORM Schema"
+      - "PostgreSQL 索引优化"
+      - "数据迁移"
+      - "关系设计"
+      - "查询优化"
+      - "备份策略"
 
-    max_tokens: 50000
-    output_tokens: 3072
-    priority: 2
+    responsibilities:
+      - "设计数据模型"
+      - "编写迁移"
+      - "优化查询"
+      - "数据库测试"
 
-    functions:
-      - name: "台词优化"
-        description: "从角色角度优化对白，使其符合角色性格"
-        enabled: true
-        config:
-          check_personality: true
-          check_voice: true
-          add_emotional_markers: true
+    context_requirements:
+      - "docs/tech/tech-design.md"
 
-      - name: "表演指导"
-        description: "优化动作描述和表演细节"
-        enabled: true
-        config:
-          add_facial_expressions: true
-          add_body_language: true
-          add_micro_expressions: true
-
-      - name: "人物一致性检查"
-        description: "检查角色性格和行为的一致性"
-        enabled: true
-        config:
-          check_scope: "episode"  # scene/episode/all
-          tolerance_level: "medium"
-
-      - name: "情感弧线分析"
-        description: "分析角色的情感变化和成长"
-        enabled: true
-        config:
-          track_emotions: true
-          identify_peaks: true
-          suggest_improvements: true
-
-      - name: "角色塑造"
-        description: "深化角色塑造，增加层次感"
-        enabled: true
-        config:
-          add_depth: true
-          add_nuance: true
-          avoid_stereotypes: true
-
-      - name: "关系互动优化"
-        description: "优化角色间的互动和对话"
-        enabled: true
-
-    # 上下文策略（重要！）
-    context_strategy:
-      load_global: true
-      load_session: true
-      load_full_profile: true        # 加载完整角色小传
-      history_samples: 10             # 最近N场对话样本
-      related_characters_only: true   # 只加载相关角色
-      compression_method: "feature_extraction"  # 特征提取而非完整历史
-
-      required_context:
-        - "目标场景完整内容"
-        - "目标角色完整小传"
-        - "历史对话样本（最近10场）"
-        - "角色关系网络"
-        - "当前情绪状态"
-
-    # 角色数据库配置
-    character_database:
-      path: "projects/{project}/characters/"
-      format: "yaml"
-      auto_update: true              # 自动更新角色学习数据
+    default_model: "claude-sonnet-4-5"
 
   # =============================================================================
-  # 分析Agent (Analysis)
+  # 测试 Agent
   # =============================================================================
-  analysis:
-    name: "分析Agent"
-    description: "节奏分析、质量评估、一致性检查"
-    version: "1.0"
+  testing:
+    name: "QA Engineer"
+    description: "Jest + Testing Library 测试专家"
 
-    model:
-      primary: "claude-sonnet-4-5"
-      fallback: "claude-sonnet-4-5"
+    expertise:
+      - "Jest 测试框架"
+      - "React Testing Library"
+      - "API 测试"
+      - "E2E 测试"
+      - "覆盖率分析"
+      - "TDD 方法"
 
-    max_tokens: 55000
-    output_tokens: 4096
-    priority: 4
+    responsibilities:
+      - "编写单元测试"
+      - "编写集成测试"
+      - "测试覆盖率"
+      - "自动化测试"
 
-    functions:
-      - name: "节奏分析"
-        description: "分析剧本节奏，给出改进建议"
-        enabled: true
-        config:
-          check_pacing: true
-          check_tension: true
-          check_flow: true
+    context_requirements:
+      - "docs/tech/testing.md"
 
-      - name: "质量评估"
-        description: "综合评估剧本质量"
-        enabled: true
-        config:
-          criteria:
-            - "格式规范性"
-            - "人物一致性"
-            - "情节合理性"
-            - "对话自然度"
-            - "时长准确性"
+    default_model: "claude-sonnet-4-5"
 
-      - name: "一致性检查"
-        description: "检查剧本的一致性问题"
-        enabled: true
-        config:
-          check_character_consistency: true
-          check_plot_consistency: true
-          check_timeline_consistency: true
+  # =============================================================================
+  # DevOps Agent
+  # =============================================================================
+  devops:
+    name: "DevOps Engineer"
+    description: "部署、CI/CD、监控专家"
 
-      - name: "时长分析"
-        description: "分析每集时长是否符合要求"
-        enabled: true
-        config:
-          tolerance: 0.1             # 10%误差
-          suggest_adjustments: true
+    expertise:
+      - "Vercel 部署"
+      - "GitHub Actions"
+      - "Docker 容器化"
+      - "环境变量管理"
+      - "性能监控"
+      - "日志管理"
 
-    context_strategy:
-      load_global: true
-      load_session: false
-      batch_processing: true         # 支持批量处理
+    responsibilities:
+      - "配置部署"
+      - "设置 CI/CD"
+      - "环境配置"
+      - "性能优化"
 
-      # 批量处理配置
-      batch_config:
-        chunk_size: 20               # 每次处理20集
-        parallel_workers: 3
+    context_requirements:
+      - "config/dev-config.yaml"
+
+    default_model: "claude-sonnet-4-5"
 
 # =============================================================================
-# Skills配置
+# Agent 协作流程
+# =============================================================================
+workflows:
+  # 新功能开发流程
+  feature_development:
+    steps:
+      - agent: "frontend"
+        task: "创建 UI 组件"
+
+      - agent: "backend"
+        task: "实现 API 端点"
+
+      - agent: "ai_integration"
+        task: "集成 AI 功能（如需要）"
+
+      - agent: "testing"
+        task: "编写测试"
+
+      - agent: "code_reviewer"
+        task: "代码审查"
+
+  # Bug 修复流程
+  bug_fix:
+    steps:
+      - agent: "systematic-debugging"
+        task: "诊断问题"
+
+      - agent: "frontend|backend"
+        task: "修复问题"
+
+      - agent: "testing"
+        task: "验证修复"
+
+  # 性能优化流程
+  performance_optimization:
+    steps:
+      - agent: "code-reviewer"
+        task: "分析代码"
+
+      - agent: "frontend|backend"
+        task: "实施优化"
+
+      - agent: "testing"
+        task: "性能测试"
+
+# =============================================================================
+# 并行执行配置
+# =============================================================================
+parallel:
+  # 最大并行 Agent 数
+  max_agents: 3
+
+  # Agent 组（可并行执行）
+  groups:
+    independent_features:
+      - "frontend"
+      - "backend"
+      - "database"
+
+    full_stack:
+      - "frontend"
+      - "backend"
+      - "ai_integration"
+
+    testing:
+      - "testing"
+      - "code_reviewer"
+
+# =============================================================================
+# 技能映射
 # =============================================================================
 skills:
-  # =============================================================================
-  # 格式Skill (Format)
-  # =============================================================================
-  format:
-    name: "格式Skill"
-    description: "格式检查、修复、模板生成（基于v2.0规范）"
-    version: "2.0"
-    type: "lightweight"
+  # superpowers 技能
+  brainstorming:
+    agent: "all"
+    trigger: "功能规划、设计讨论"
 
-    functions:
-      - name: "格式检查"
-        description: "检查剧本是否符合v2.0规范"
-        enabled: true
-        auto_fix: false              # 不自动修复，只报告问题
+  test_driven_development:
+    agent: "frontend|backend"
+    trigger: "使用 /tdd 命令"
 
-      - name: "格式修复"
-        description: "自动修复常见格式问题"
-        enabled: true
-        backup: true                 # 修复前备份
+  systematic_debugging:
+    agent: "all"
+    trigger: "遇到 Bug、测试失败"
 
-      - name: "模板生成"
-        description: "生成符合v2.0规范的空白模板"
-        enabled: true
+  verification_before_completion:
+    agent: "all"
+    trigger: "任务完成、提交前"
 
-    # 格式规范版本
-    standard_version: "v2.0"
-    spec_file: "script-format-v2.md"
+  writing_plans:
+    agent: "all"
+    trigger: "使用 /plan 命令"
 
-    # 检查项目
-    check_items:
-      - "场景标题格式"
-      - "对话格式"
-      - "动作描述"
-      - "OS内心独白"
-      - "标点符号"
-      - "集数标题"
-      - "特殊标记"
+  # everything-claude-code 技能
+  tdd_workflow:
+    agent: "frontend|backend|testing"
+    trigger: "TDD 开发"
 
-  # =============================================================================
-  # 导出Skill (Export)
-  # =============================================================================
-  export:
-    name: "导出Skill"
-    description: "多格式导出、制作文档生成"
-    version: "1.0"
-    type: "lightweight"
+  frontend_patterns:
+    agent: "frontend"
+    trigger: "React/Next.js 组件开发"
 
-    functions:
-      - name: "PDF导出"
-        description: "导出为PDF格式"
-        enabled: true
+  backend_patterns:
+    agent: "backend"
+    trigger: "API/数据库开发"
 
-      - name: "DOCX导出"
-        description: "导出为Word文档"
-        enabled: true
-
-      - name: "制作文档生成"
-        description: "生成分镜头脚本、角色台词表等"
-        enabled: true
-
-      - name: "场景列表"
-        description: "生成场景清单"
-        enabled: true
-
-      - name: "角色台词表"
-        description: "生成每个角色的所有台词"
-        enabled: true
-
-    # 导出格式
-    export_formats:
-      - format: "pdf"
-        extension: ".pdf"
-        enabled: true
-
-      - format: "docx"
-        extension: ".docx"
-        enabled: true
-
-      - format: "xlsx"
-        extension: ".xlsx"
-        enabled: true
-
-      - format: "txt"
-        extension: ".txt"
-        enabled: true
+  security_review:
+    agent: "backend"
+    trigger: "涉及安全、认证"
 
 # =============================================================================
-# Agent协作配置
+# 上下文策略
 # =============================================================================
-collaboration:
-  # Agent间的协作流程
-  workflows:
-    create_scene:
-      - agent: "scene"
-        action: "生成基础场景"
-      - agent: "character"
-        action: "优化台词和表演"
-      - skill: "format"
-        action: "格式检查和修复"
+context_strategy:
+  # 全局上下文（始终加载）
+  global:
+    - "README.md"
+    - "config/dev-config.yaml"
 
-    optimize_character:
-      - agent: "character"
-        action: "优化角色台词"
-      - skill: "format"
-        action: "格式检查"
+  # 项目上下文（按需加载）
+  project:
+    frontend:
+      - "docs/design/.claude/design-context.md"
+      - "docs/tech/component-conventions.md"
 
-    analyze_quality:
-      - agent: "analysis"
-        action: "质量分析"
-      - agent: "character"
-        action: "人物一致性检查"
-      - agent: "analysis"
-        action: "生成综合报告"
+    backend:
+      - "docs/tech/api-spec.md"
+      - "docs/tech/tech-design.md"
 
-  # 并行处理配置
-  parallel_processing:
-    enabled: true
-    max_parallel_agents: 3
-    task_queue_size: 10
+    ai:
+      - "config/model-config.yaml"
+      - "docs/tech/ai-integration.md"
+
+  # 任务上下文（动态加载）
+  task:
+    - "相关源代码文件"
+    - "相关测试文件"
+    - "相关文档"
 
 # =============================================================================
-# 全局配置
+# 输出规范
 # =============================================================================
-global:
-  # 默认模型
-  default_model: "claude-sonnet-4-5"
+output_standards:
+  code:
+    language: "TypeScript"
+    style: "ESLint + Prettier"
+    comments: "JSDoc"
 
-  # 默认Token预算
-  default_token_budget: 50000
+  commits:
+    format: "conventional"
+    types:
+      - "feat"
+      - "fix"
+      - "refactor"
+      - "style"
+      - "docs"
+      - "test"
+      - "chore"
 
-  # 默认超时
-  default_timeout: 120
-
-  # 重试配置
-  retry:
-    max_attempts: 3
-    backoff: true
-    initial_delay: 1
-
-  # 日志配置
-  logging:
-    enabled: true
-    level: "INFO"
-    file: "logs/agents.log"
+  pull_requests:
+    template: ".github/PULL_REQUEST_TEMPLATE.md"
+    required_checks:
+      - "tests"
+      - "lint"
+      - "build"
+      - "code-review"
 
 # =============================================================================
-# 配置版本信息
+# 配置版本
 # =============================================================================
-config_version: "1.0.0"
-last_updated: "2026-01-16"
-maintainer: "Claude Code"
+config_version: "2.0.0"
+last_updated: "2026-01-24"
+maintainer: "Scripter Team"
