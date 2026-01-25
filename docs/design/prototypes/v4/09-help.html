@@ -72,8 +72,8 @@
         }
 
         .integrated-sidebar {
-            background: white;
-            border-right: 1px solid var(--border-color);
+            background: #1A1A1A;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             z-index: 30;
             height: 100vh;
@@ -83,6 +83,82 @@
             border-right: none;
             border-left: 1px solid var(--border-color);
         }
+
+        /* Navigation link styles for dark sidebar */
+        .integrated-sidebar a {
+            color: #FFFFFF;
+        }
+        .integrated-sidebar a:hover {
+            color: #C9A962;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* v2 Visual Effects - Animations */
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather {
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
+        @keyframes breathing-glow {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .animate-breathing-glow {
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        /* Active navigation state */
+        .nav-item.active {
+            background: rgba(201, 169, 98, 0.12);
+            border-left: 3px solid var(--brand-gold);
+            color: var(--brand-gold);
+        }
+
+        /* Sidebar decorative background */
+        .sidebar-decoration {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sidebar-glow {
+            position: absolute;
+            width: 40rem;
+            height: 40rem;
+            background: radial-gradient(circle, rgba(201, 169, 98, 0.1) 0%, transparent 70%);
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        .sidebar-feather {
+            font-size: 30rem;
+            color: #C9A962;
+            opacity: 0.1;
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
 
         .edge-toggle {
             position: fixed;
@@ -171,9 +247,18 @@
 
     <!-- Left Sidebar: Navigation -->
     <aside id="sidebar-left"
-        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden relative">
+        
+        <!-- Decorative Background -->
+        <div class="sidebar-decoration">
+            <div class="sidebar-glow"></div>
+            <iconify-icon icon="lucide:feather" class="sidebar-feather animate-brand-feather"></iconify-icon>
+        </div>
+
+        <!-- Content with higher z-index -->
+        <div class="relative z-10 flex flex-col h-full">
         <a href="00-welcome.html"
-            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            class="p-6 border-b border-white/10 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
                 <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
                     class="w-5 h-5" alt="Logo">
@@ -187,39 +272,39 @@
 
         <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
             <a href="01-dashboard.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">控制台</span>
             </a>
             <a href="02-editor.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">剧本</span>
             </a>
             <a href="03-characters.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">人物</span>
             </a>
             <a href="05-scenes.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">场景</span>
             </a>
             <a href="04-worldview.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">世界观</span>
             </a>
             <a href="06-storyboard.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">分镜</span>
             </a>
         </nav>
 
         <div
-            class="p-4 border-t border-[#D3C9B0]/40 text-[10px] text-[#8B7355] font-bold text-center uppercase tracking-widest">
+            class="p-4 border-t border-white/5 text-[10px] text-white/50 font-bold text-center uppercase tracking-widest bg-gradient-to-t from-black/40 to-transparent font-bold text-center uppercase tracking-widest">
             v4.6 UNIFIED EDITION
         </div>
     </aside>
@@ -402,7 +487,7 @@
     <aside id="sidebar-right"
         class="integrated-sidebar integrated-sidebar-right w-80 shrink-0 flex flex-col sidebar-transition overflow-hidden">
         <!-- User Profile Header -->
-        <div class="p-6 border-b border-[#D3C9B0]/50 bg-white">
+        <div class="p-6 border-b border-white/10 bg-white">
             <div
                 class="flex items-center justify-between p-2 rounded hover:bg-[#FAF7F0] transition-colors cursor-pointer group">
                 <div class="flex items-center gap-3">

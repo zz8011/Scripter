@@ -207,7 +207,7 @@ class ScripterModal {
                 color: #1A1A1A;
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 8px;
             }
 
             .modal-close {

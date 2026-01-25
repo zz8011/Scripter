@@ -11,6 +11,7 @@
     <script src="js/ai-chat.js"></script>
     <script src="js/modal.js"></script>
     <script src="js/drag-drop.js"></script>
+    <script src="js/version-control.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap"
         rel="stylesheet">
@@ -80,8 +81,8 @@
         }
 
         .integrated-sidebar {
-            background: white;
-            border-right: 1px solid var(--border-color);
+            background: #1A1A1A;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             z-index: 30;
             height: 100vh;
@@ -90,6 +91,81 @@
         .integrated-sidebar-right {
             border-right: none;
             border-left: 1px solid var(--border-color);
+        }
+
+        /* Navigation link styles for dark sidebar */
+        .integrated-sidebar a {
+            color: #FFFFFF;
+        }
+        .integrated-sidebar a:hover {
+            color: #C9A962;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* v2 Visual Effects - Animations */
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather {
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
+        @keyframes breathing-glow {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .animate-breathing-glow {
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        /* Active navigation state */
+        .nav-item.active {
+            background: rgba(201, 169, 98, 0.12);
+            border-left: 3px solid var(--brand-gold);
+            color: var(--brand-gold);
+        }
+
+        /* Sidebar decorative background */
+        .sidebar-decoration {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sidebar-glow {
+            position: absolute;
+            width: 40rem;
+            height: 40rem;
+            background: radial-gradient(circle, rgba(201, 169, 98, 0.1) 0%, transparent 70%);
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        .sidebar-feather {
+            font-size: 30rem;
+            color: #C9A962;
+            opacity: 0.1;
+            animation: float-glow 15s ease-in-out infinite;
         }
 
         .edge-toggle {
@@ -226,7 +302,8 @@
 
             .integrated-sidebar,
             .edge-toggle,
-            header {
+            header,
+            .version-panel {
                 display: none;
             }
 
@@ -243,6 +320,114 @@
                 min-height: 100%;
             }
         }
+
+        /* Version Control Panel Styles */
+        .version-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 360px;
+            height: 100vh;
+            background: white;
+            border-left: 1px solid var(--border-color);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 200;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .version-panel.panel-closed {
+            transform: translateX(100%);
+        }
+
+        .version-panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--hover-bg);
+        }
+
+        .version-list {
+            overflow-y: auto;
+            flex: 1;
+            padding: 16px;
+        }
+
+        .version-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .version-item:hover {
+            border-color: var(--brand-gold);
+            background: var(--hover-bg);
+        }
+
+        .version-item.current {
+            border-color: var(--brand-gold);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        .version-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .version-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .version-actions button {
+            padding: 4px 8px;
+            font-size: 11px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .version-actions button:hover {
+            border-color: var(--brand-gold);
+            color: var(--brand-gold);
+        }
+
+        .version-description {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .version-stats {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .version-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .version-empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -256,65 +441,68 @@
         <iconify-icon id="icon-toggle-right" icon="lucide:chevron-right" class="text-xs"></iconify-icon>
     </button>
 
-    <!-- Left Project Nav: Unified -->
+    <!-- Left Sidebar: Unified Navigation -->
     <aside id="sidebar-left"
-        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
-        <a href="00-welcome.html"
-            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
-                <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
-                    class="w-5 h-5" alt="Logo">
-            </div>
-            <div class="flex flex-col -gap-1">
-                <span class="font-display font-bold text-2xl tracking-tighter text-[#1A1A1A]">剧灵</span>
-                <span
-                    class="text-[8px] font-bold text-[#C9A962] tracking-widest uppercase -mt-1 opacity-70">scripter.art</span>
-            </div>
-        </a>
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden relative">
+        <!-- Decorative Background -->
+        <div class="sidebar-decoration">
+            <div class="sidebar-glow"></div>
+            <iconify-icon icon="lucide:feather" class="sidebar-feather animate-brand-feather"></iconify-icon>
+        </div>
 
-        <nav class="flex-1 py-4 px-3 space-y-4 overflow-y-auto custom-scrollbar">
-            <div class="space-y-1">
+        <!-- Content with higher z-index -->
+        <div class="relative z-10 flex flex-col h-full">
+            <a href="00-welcome.html"
+                class="p-6 border-b border-white/10 flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
+                    <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
+                        class="w-5 h-5" alt="Logo">
+                </div>
+                <div class="flex flex-col -gap-1">
+                    <span class="font-display font-bold text-2xl tracking-tighter text-[#1A1A1A]">剧灵</span>
+                    <span
+                        class="text-[8px] font-bold text-[#C9A962] tracking-widest uppercase -mt-1 opacity-70">scripter.art</span>
+                </div>
+            </a>
+
+            <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
                 <a href="01-dashboard.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group">
                     <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
                     <span class="text-sm font-medium">控制台</span>
                 </a>
                 <a href="02-editor.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded bg-[#FAF7F0] text-[#C9A962] font-semibold border-r-4 border-[#C9A962] rounded-r-none">
+                    class="nav-item active flex items-center gap-4 px-6 py-4 rounded-xl text-white/90 transition-all group">
                     <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
-                    <span class="text-sm">剧本</span>
+                    <span class="text-sm font-medium">剧本</span>
                 </a>
                 <a href="03-characters.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group">
                     <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
                     <span class="text-sm font-medium">人物</span>
                 </a>
                 <a href="05-scenes.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group">
                     <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
                     <span class="text-sm font-medium">场景</span>
                 </a>
                 <a href="04-worldview.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group">
                     <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
                     <span class="text-sm font-medium">世界观</span>
                 </a>
                 <a href="06-storyboard.html"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                    class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group">
                     <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
                     <span class="text-sm font-medium">分镜</span>
                 </a>
-            </div>
+            </nav>
 
-            <div class="pt-4 border-t border-[#D3C9B0]/30 space-y-1">
-                <div class="px-3 mb-2 text-[10px] font-bold text-[#8B7355] uppercase tracking-widest">章节结构</div>
-                <div
-                    class="bg-[#FAF7F0] p-2 rounded border border-[#D3C9B0]/40 text-xs font-bold text-[#1A1A1A] flex items-center gap-2">
-                    <iconify-icon icon="lucide:book-open" class="text-[#C9A962]"></iconify-icon>
-                    第一集：入阵
-                </div>
+            <div
+                class="p-4 border-t border-white/5 text-[10px] text-white/50 font-bold text-center uppercase tracking-widest bg-gradient-to-t from-black/40 to-transparent">
+                v4.6 UNIFIED EDITION
             </div>
-        </nav>
+        </div>
     </aside>
 
     <!-- Editor Workspace -->
@@ -335,11 +523,15 @@
                     title="格式检查">
                     <iconify-icon icon="lucide:file-check" class="text-xl"></iconify-icon>
                 </button>
+                <button onclick="toggleVersionPanel()" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors"
+                    title="版本历史">
+                    <iconify-icon icon="lucide:history" class="text-xl"></iconify-icon>
+                </button>
                 <button onclick="window.print()" class="p-2 text-[#5C5548] hover:text-[#C9A962] transition-colors"
                     title="打印/导出 PDF">
                     <iconify-icon icon="lucide:printer" class="text-xl"></iconify-icon>
                 </button>
-                <button
+                <button onclick="saveCurrentVersion()"
                     class="px-5 py-1.5 bg-[#C9A962] text-white rounded text-xs font-bold hover:bg-[#A68A45] shadow-sm">保存草稿</button>
             </div>
         </header>
@@ -476,8 +668,141 @@
                 container: document.getElementById('ai-chat-container')
             });
             window.editorAiChat = aiChat;
+
+            // Initialize Version Control
+            window.versionControl = new VersionControl({
+                projectId: 'demo-project',
+                maxVersions: 50
+            });
+
+            // Auto-save every 5 minutes
+            setInterval(() => {
+                const scriptContent = document.querySelector('[data-script-content]');
+                if (scriptContent) {
+                    window.versionControl.updateContent(scriptContent.innerText);
+                    window.versionControl.save('自动保存');
+                }
+            }, 300000); // 5 minutes
+
+            console.log('Version Control initialized');
         });
+
+        // Version Control Functions
+        function toggleVersionPanel() {
+            const panel = document.getElementById('version-panel');
+            if (panel) {
+                panel.classList.toggle('panel-closed');
+            }
+        }
+
+        function closeVersionPanel() {
+            const panel = document.getElementById('version-panel');
+            if (panel) {
+                panel.classList.add('panel-closed');
+            }
+        }
+
+        function saveCurrentVersion() {
+            const scriptContent = document.querySelector('[data-script-content]');
+            if (scriptContent && window.versionControl) {
+                window.versionControl.updateContent(scriptContent.innerText);
+                const version = window.versionControl.save('手动保存');
+
+                // Show success notification
+                alert(`版本已保存！\n${version.description}`);
+
+                // Refresh version list if panel is open
+                renderVersionList();
+            }
+        }
+
+        function restoreVersion(versionId) {
+            if (confirm('确定要恢复到这个版本吗？当前内容将被覆盖。')) {
+                try {
+                    const version = window.versionControl.restore(versionId);
+
+                    // Update editor content
+                    const scriptContent = document.querySelector('[data-script-content]');
+                    if (scriptContent) {
+                        scriptContent.innerText = version.content;
+                    }
+
+                    alert(`已恢复到版本：${version.description}`);
+                    renderVersionList();
+                } catch (error) {
+                    alert('恢复版本失败：' + error.message);
+                }
+            }
+        }
+
+        function deleteVersion(versionId, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个版本吗？')) {
+                window.versionControl.deleteVersion(versionId);
+                renderVersionList();
+            }
+        }
+
+        function renderVersionList() {
+            const versionList = document.getElementById('version-list');
+            if (!versionList || !window.versionControl) return;
+
+            const versions = window.versionControl.getHistory();
+
+            if (versions.length === 0) {
+                versionList.innerHTML = `
+                    <div class="version-empty">
+                        <div class="version-empty-icon">
+                            <iconify-icon icon="lucide:history"></iconify-icon>
+                        </div>
+                        <p>暂无版本历史</p>
+                        <p style="font-size: 11px; margin-top: 8px;">编辑并保存内容后，版本历史将显示在这里</p>
+                    </div>
+                `;
+                return;
+            }
+
+            versionList.innerHTML = versions.map((version, index) => `
+                <div class="version-item ${index === 0 ? 'current' : ''}" onclick="restoreVersion('${version.id}')">
+                    <div class="version-meta">
+                        <span class="version-time">${window.versionControl.formatTimestamp(version.timestamp)}</span>
+                        <div class="version-actions">
+                            ${index !== 0 ? `<button onclick="deleteVersion('${version.id}', event)" title="删除版本">
+                                <iconify-icon icon="lucide:trash-2"></iconify-icon>
+                            </button>` : '<span style="font-size: 10px; color: #C9A962;">当前</span>'}
+                        </div>
+                    </div>
+                    <div class="version-description">${version.description}</div>
+                    <div class="version-stats">
+                        ${version.metadata.wordCount} 字 · ${version.metadata.sceneCount} 场
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open version panel and render list when button clicked
+        const originalToggleVersionPanel = toggleVersionPanel;
+        toggleVersionPanel = function() {
+            originalToggleVersionPanel();
+            setTimeout(renderVersionList, 300);
+        };
     </script>
+
+    <!-- Version Control Panel -->
+    <div id="version-panel" class="version-panel panel-closed">
+        <div class="version-panel-header">
+            <h3 style="font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <iconify-icon icon="lucide:history" style="color: #C9A962;"></iconify-icon>
+                版本历史
+            </h3>
+            <button onclick="closeVersionPanel()" style="background: none; border: none; cursor: pointer; padding: 4px;">
+                <iconify-icon icon="lucide:x"></iconify-icon>
+            </button>
+        </div>
+        <div class="version-list" id="version-list">
+            <!-- Version list will be dynamically generated -->
+        </div>
+    </div>
 </body>
 
 </html>

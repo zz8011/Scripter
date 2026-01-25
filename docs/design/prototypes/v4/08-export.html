@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script src="js/modal.js"></script>
+    <script src="js/export.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&family=Courier+Prime:wght@400;700&display=swap"
         rel="stylesheet">
@@ -72,8 +73,8 @@
         }
 
         .integrated-sidebar {
-            background: white;
-            border-right: 1px solid var(--border-color);
+            background: #1A1A1A;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             z-index: 30;
             height: 100vh;
@@ -83,6 +84,82 @@
             border-right: none;
             border-left: 1px solid var(--border-color);
         }
+
+        /* Navigation link styles for dark sidebar */
+        .integrated-sidebar a {
+            color: #FFFFFF;
+        }
+        .integrated-sidebar a:hover {
+            color: #C9A962;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* v2 Visual Effects - Animations */
+        @keyframes float-glow {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-40px) rotate(8deg) scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+                opacity: 0.25;
+            }
+        }
+
+        .animate-brand-feather {
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
+        @keyframes breathing-glow {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .animate-breathing-glow {
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        /* Active navigation state */
+        .nav-item.active {
+            background: rgba(201, 169, 98, 0.12);
+            border-left: 3px solid var(--brand-gold);
+            color: var(--brand-gold);
+        }
+
+        /* Sidebar decorative background */
+        .sidebar-decoration {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sidebar-glow {
+            position: absolute;
+            width: 40rem;
+            height: 40rem;
+            background: radial-gradient(circle, rgba(201, 169, 98, 0.1) 0%, transparent 70%);
+            animation: breathing-glow 12s ease-in-out infinite;
+        }
+
+        .sidebar-feather {
+            font-size: 30rem;
+            color: #C9A962;
+            opacity: 0.1;
+            animation: float-glow 15s ease-in-out infinite;
+        }
+
 
         .edge-toggle {
             position: fixed;
@@ -175,9 +252,18 @@
 
     <!-- Left Sidebar: Navigation -->
     <aside id="sidebar-left"
-        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden">
+        class="integrated-sidebar w-64 lg:w-72 shrink-0 flex flex-col sidebar-transition overflow-hidden relative">
+        
+        <!-- Decorative Background -->
+        <div class="sidebar-decoration">
+            <div class="sidebar-glow"></div>
+            <iconify-icon icon="lucide:feather" class="sidebar-feather animate-brand-feather"></iconify-icon>
+        </div>
+
+        <!-- Content with higher z-index -->
+        <div class="relative z-10 flex flex-col h-full">
         <a href="00-welcome.html"
-            class="p-6 border-b border-[#D3C9B0]/50 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            class="p-6 border-b border-white/10 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div class="w-8 h-8 bg-[#1A1A1A] rounded flex items-center justify-center">
                 <img src="https://api.iconify.design/lucide/feather.svg?color=%23C9A962&width=64&height=64&box=1A1A1A"
                     class="w-5 h-5" alt="Logo">
@@ -191,39 +277,39 @@
 
         <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">
             <a href="01-dashboard.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">控制台</span>
             </a>
             <a href="02-editor.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:scroll" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">剧本</span>
             </a>
             <a href="03-characters.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">人物</span>
             </a>
             <a href="05-scenes.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:clapperboard" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">场景</span>
             </a>
             <a href="04-worldview.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:globe" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">世界观</span>
             </a>
             <a href="06-storyboard.html"
-                class="flex items-center gap-3 px-3 py-2.5 rounded text-[#5C5548] hover:bg-[#FAF7F0] transition-colors group">
+                class="nav-item flex items-center gap-4 px-6 py-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all">
                 <iconify-icon icon="lucide:layout" class="text-xl"></iconify-icon>
                 <span class="text-sm font-medium">分镜</span>
             </a>
         </nav>
 
         <div
-            class="p-4 border-t border-[#D3C9B0]/40 text-[10px] text-[#8B7355] font-bold text-center uppercase tracking-widest">
+            class="p-4 border-t border-white/5 text-[10px] text-white/50 font-bold text-center uppercase tracking-widest bg-gradient-to-t from-black/40 to-transparent font-bold text-center uppercase tracking-widest">
             v4.6 UNIFIED EDITION
         </div>
     </aside>
@@ -476,7 +562,7 @@
     <aside id="sidebar-right"
         class="integrated-sidebar integrated-sidebar-right w-80 shrink-0 flex flex-col sidebar-transition overflow-hidden">
         <!-- User Profile Header -->
-        <div class="p-6 border-b border-[#D3C9B0]/50 bg-white">
+        <div class="p-6 border-b border-white/10 bg-white">
             <div
                 class="flex items-center justify-between p-2 rounded hover:bg-[#FAF7F0] transition-colors cursor-pointer group">
                 <div class="flex items-center gap-3">
@@ -528,6 +614,7 @@
 
     <script>
         let selectedFormat = 'pdf';
+        let exporter = null;
 
         function toggleSidebar(side) {
             const sidebar = document.getElementById(`sidebar-${side}`);
@@ -552,7 +639,58 @@
             selectedFormat = format;
         }
 
-        function startExport() {
+        /**
+         * 获取模拟剧本数据
+         * 在实际应用中，这将从 localStorage 或 API 获取
+         */
+        function getMockScriptData() {
+            return {
+                title: '我送君归去',
+                scenes: [
+                    {
+                        number: 1,
+                        episode: 1,
+                        location: '湘西山区·密林尽头',
+                        time: '夜·外',
+                        content: [
+                            { type: 'scene_header', content: '1. 【湘西山区·密林尽头】 夜·外' },
+                            { type: 'action', content: '月黑风高，雾气如潮水般在密林中翻涌。地面上铺满腐叶，偶尔传来枯枝断裂的声音。' },
+                            { type: 'character', content: '雾姝' },
+                            { type: 'parenthetical', content: '手持摄魂铃，目光如炬' },
+                            { type: 'dialogue', content: '归命礼，摄魂灵。' },
+                            { type: 'action', content: '铃声清脆，穿透夜色，仿佛在召唤着什么。远处传来低沉的呜咽声。' },
+                            { type: 'transition', content: '切至' }
+                        ]
+                    },
+                    {
+                        number: 2,
+                        episode: 1,
+                        location: '破旧义庄·停尸房',
+                        time: '日·内',
+                        content: [
+                            { type: 'scene_header', content: '2. 【破旧义庄·停尸房】 日·内' },
+                            { type: 'action', content: '阳光透过破碎的窗纸斜射在腐烂的棺木上。空气中弥漫着霉味。风十三推开沉重的木门，灰尘飞舞。' },
+                            { type: 'action', content: '房间中央停着一口漆黑的棺材，棺盖半开，隐约可见里面躺着一个人。' }
+                        ]
+                    },
+                    {
+                        number: 3,
+                        episode: 1,
+                        location: '龙门客栈·大堂',
+                        time: '日·内',
+                        content: [
+                            { type: 'scene_header', content: '3. 【龙门客栈·大堂】 日·内' },
+                            { type: 'action', content: '客栈内人声鼎沸，各路英雄好汉聚集于此。风十三默默观察着每一个人。' },
+                            { type: 'character', content: '店小二' },
+                            { type: 'parenthetical', content: '擦着桌子' },
+                            { type: 'dialogue', content: '客官，您要点什么？' }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        async function startExport() {
             const btn = event.target.closest('button');
             const originalContent = btn.innerHTML;
 
@@ -562,18 +700,112 @@
             `;
             btn.disabled = true;
 
-            setTimeout(() => {
+            try {
+                // 获取剧本数据
+                const scriptData = getMockScriptData();
+
+                // 创建导出器实例
+                if (!exporter) {
+                    exporter = new ScripterExport({
+                        format: selectedFormat,
+                        onProgress: (progress) => {
+                            console.log(`Export progress: ${progress}%`);
+                        }
+                    });
+                }
+
+                // 更新导出格式
+                exporter.format = selectedFormat;
+
+                // 执行导出
+                await exporter.export(scriptData, selectedFormat);
+
+                // 显示成功状态
                 btn.innerHTML = `
                     <iconify-icon icon="lucide:check"></iconify-icon>
                     导出成功
+                `;
+
+                // 添加到导出历史（模拟）
+                addExportHistory(scriptData.title, selectedFormat);
+
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Export failed:', error);
+                btn.innerHTML = `
+                    <iconify-icon icon="lucide:x"></iconify-icon>
+                    导出失败
                 `;
 
                 setTimeout(() => {
                     btn.innerHTML = originalContent;
                     btn.disabled = false;
                 }, 2000);
-            }, 1500);
+            }
         }
+
+        /**
+         * 添加导出历史记录（模拟）
+         */
+        function addExportHistory(title, format) {
+            const tableBody = document.querySelector('tbody');
+            if (!tableBody) return;
+
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const formatNames = {
+                'pdf': 'PDF',
+                'txt': '纯文本',
+                'word': 'Word',
+                'finaldraft': 'Final Draft'
+            };
+
+            const formatIcons = {
+                'pdf': 'file-text',
+                'txt': 'file-code',
+                'word': 'file',
+                'finaldraft': 'clapperboard'
+            };
+
+            const newRow = document.createElement('tr');
+            newRow.className = 'hover:bg-[#FAF7F0]';
+            newRow.innerHTML = `
+                <td class="px-5 py-3 text-[#1A1A1A]">
+                    <div class="flex items-center gap-2">
+                        <iconify-icon icon="lucide:${formatIcons[format]}" class="text-[#C9A962]"></iconify-icon>
+                        ${title}_${format.toUpperCase()}
+                    </div>
+                </td>
+                <td class="px-5 py-3 text-[#8B7355]">${formatNames[format]}</td>
+                <td class="px-5 py-3 text-[#8B7355]">${dateStr}</td>
+                <td class="px-5 py-3 text-right">
+                    <button class="text-[#C9A962] hover:text-[#A68A45]">
+                        <iconify-icon icon="lucide:download"></iconify-icon>
+                    </button>
+                </td>
+            `;
+
+            // 插入到第一行
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化导出器
+            exporter = new ScripterExport({
+                format: 'pdf',
+                onProgress: (progress) => {
+                    console.log(`Export progress: ${progress}%`);
+                }
+            });
+
+            console.log('Export module initialized');
+        });
     </script>
 </body>
 

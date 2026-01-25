@@ -170,8 +170,8 @@ class ScripterAIChat {
                 flex: 1;
             }
             .ai-message-bubble {
-                padding: 10px 14px;
-                border-radius: 10px;
+                padding: 8px 16px;
+                border-radius: 8px;
                 font-size: 12px;
                 line-height: 1.6;
                 word-wrap: break-word;
@@ -379,39 +379,46 @@ class ScripterAIChat {
     async streamResponse(prompt) {
         const messagesContainer = document.querySelector(this.messagesSelector);
 
-        // Create assistant message element
-        const messageEl = document.createElement('div');
-        messageEl.className = 'ai-message assistant';
-        const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        try {
+            // Create assistant message element
+            const messageEl = document.createElement('div');
+            messageEl.className = 'ai-message assistant';
+            const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
-        messageEl.innerHTML = `
-            <div class="ai-message-avatar">
-                <iconify-icon icon="lucide:sparkles" class="text-sm"></iconify-icon>
-            </div>
-            <div class="ai-message-content">
-                <div class="ai-message-bubble"><span class="streaming-text"></span><span class="streaming-cursor"></span></div>
-                <div class="ai-message-timestamp">${timestamp}</div>
-            </div>
-        `;
-        messagesContainer.appendChild(messageEl);
+            messageEl.innerHTML = `
+                <div class="ai-message-avatar">
+                    <iconify-icon icon="lucide:sparkles" class="text-sm"></iconify-icon>
+                </div>
+                <div class="ai-message-content">
+                    <div class="ai-message-bubble"><span class="streaming-text"></span><span class="streaming-cursor"></span></div>
+                    <div class="ai-message-timestamp">${timestamp}</div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageEl);
 
-        const textEl = messageEl.querySelector('.streaming-text');
-        let fullResponse = '';
+            const textEl = messageEl.querySelector('.streaming-text');
+            let fullResponse = '';
 
-        // Simulate streaming (replace with actual API call)
-        const response = await this.mockStreamResponse(prompt);
+            // Simulate streaming (replace with actual API call)
+            const response = await this.mockStreamResponse(prompt);
 
-        // Typewriter effect
-        for (let i = 0; i < response.length; i++) {
-            fullResponse += response[i];
-            textEl.innerHTML = this.formatMessage(fullResponse);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            await this.delay(15); // Typing speed
+            // Typewriter effect
+            for (let i = 0; i < response.length; i++) {
+                fullResponse += response[i];
+                textEl.innerHTML = this.formatMessage(fullResponse);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                await this.delay(15); // Typing speed
+            }
+
+            // Remove cursor
+            const cursor = messageEl.querySelector('.streaming-cursor');
+            if (cursor) cursor.remove();
+
+        } catch (error) {
+            console.error('AI Chat Stream Error:', error);
+            this.showError('消息流式传输失败，请重试');
+            throw error;
         }
-
-        // Remove cursor
-        const cursor = messageEl.querySelector('.streaming-cursor');
-        if (cursor) cursor.remove();
     }
 
     async mockStreamResponse(prompt) {
@@ -732,6 +739,27 @@ class ScripterAIChat {
                 content: formatResult
             });
         }, 500);
+    }
+
+    showError(message) {
+        const messagesContainer = document.querySelector(this.messagesSelector);
+        if (!messagesContainer) {
+            console.error(message);
+            return;
+        }
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'ai-message assistant error';
+        errorEl.innerHTML = `
+            <div class="ai-message-avatar">
+                <iconify-icon icon="lucide:alert-circle" class="text-sm text-red-500"></iconify-icon>
+            </div>
+            <div class="ai-message-content">
+                <div class="ai-message-bubble bg-red-50 border-red-200">${message}</div>
+            </div>
+        `;
+        messagesContainer.appendChild(errorEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
 

@@ -237,7 +237,8 @@ class ScripterDragDrop {
             display: none;
             pointer-events: none;
             z-index: 999;
-            box-shadow: 0 2px 4px rgba(201, 169, 98, 0.3);
+            box-shadow: 0 0 8px rgba(201, 169, 98, 0.6), 0 0 16px rgba(201, 169, 98, 0.4);
+            transition: all 0.15s ease;
         `;
         this.container.appendChild(this.indicator);
     }
