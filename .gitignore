@@ -56,6 +56,13 @@ Thumbs.db
 .claude/session-context.json
 .claude/cache/
 
+# Playwright Test Artifacts
+.playwright-mcp/
+playwright-report/
+test-results/
+# Only ignore specific temp text files, not all .txt
+nul
+
 # Temporary files
 tmp*/
 tmp.*
