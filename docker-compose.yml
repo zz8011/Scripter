@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: scripter-postgres
+    environment:
+      POSTGRES_DB: scripter
+      POSTGRES_USER: scripter_user
+      POSTGRES_PASSWORD: scripter_password_2025
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scripter_user -d scripter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scripter-network
+
+  # Casdoor 认证服务
+  casdoor:
+    image: casbin/casdoor:latest
+    container_name: scripter-casdoor
+    environment:
+      # 数据库配置
+      driverName: "postgres"
+      dataSourceName: "postgres://scripter_user:scripter_password_2025@postgres:5432/casdoor?sslmode=disable"
+
+      # 管理员账号
+      USERNAME: admin
+      PASSWORD: admin123
+
+      # 服务配置
+      ADDRESS: ":8000"
+
+      # 基础 URL（重要！）
+      BASE_URL: "http://localhost:8000"
+
+      # 会话配置
+      SESSION_TIMEOUT: "72h"
+
+      # 日志配置
+      LOG_LEVEL: "info"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - scripter-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Scripter 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scripter-backend
+    environment:
+      # 数据库配置
+      DATABASE_URL: "postgresql://scripter_user:scripter_password_2025@postgres:5432/scripter"
+
+      # Casdoor 配置
+      CASDOOR_ENDPOINT: "http://casdoor:8000"
+      CASDOOR_CLIENT_ID: "${CASDOOR_CLIENT_ID:-c8c9c7f2b6f34f5a8a9e5d6f7e8a9b0c}"
+      CASDOOR_CLIENT_SECRET: "${CASDOOR_CLIENT_SECRET:-a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6}"
+      CASDOOR_CALLBACK_URL: "${NEXT_PUBLIC_APP_URL:-http://localhost:3000}/api/auth/callback"
+
+      # 智谱 AI 配置
+      ZHIPU_API_KEY: "${ZHIPU_API_KEY}"
+
+      # 应用配置
+      NEXT_PUBLIC_APP_URL: "${NEXT_PUBLIC_APP_URL:-http://localhost:3000}"
+      NODE_ENV: "production"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - scripter-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  scripter-network:
+    driver: bridge

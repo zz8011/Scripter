@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: casdoor-postgres
+    environment:
+      POSTGRES_USER: casdoor
+      POSTGRES_PASSWORD: casdoor_password_change_me
+      POSTGRES_DB: casdoor
+    ports:
+      - "5433:5432"
+    volumes:
+      - casdoor-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U casdoor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Casdoor 服务
+  casdoor:
+    image: casbin/casdoor:latest
+    container_name: casdoor-server
+    environment:
+      RUNNING_IN_DOCKER: "true"
+      DRIVER: postgres
+      SQL_CONNECTION_STRING: "postgres://casdoor:casdoor_password_change_me@postgres:5432/casdoor?sslmode=disable"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - casdoor-conf-data:/conf
+    restart: unless-stopped
+
+volumes:
+  casdoor-postgres-data:
+  casdoor-conf-data:
