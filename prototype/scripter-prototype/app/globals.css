@@ -1,0 +1,580 @@
+@import "tailwindcss";
+
+/* ==================================================
+   剧灵 Scripter - 设计系统 CSS 变量
+   版本: v4.7 DUAL-THEME EDITION
+   ================================================== */
+
+:root {
+  /* 核心色彩 Core Colors - 浅色主题 */
+  --paper-bg: #F5F1E8;
+  --white-bg: #FFFFFF;
+  --ink-black: #1A1A1A;
+  --brand-gold: #C9A962;
+  --brand-gold-dark: #A68A45;
+  --brand-gold-light: #E6D3A3;
+  --ink-secondary: #5C5548;
+  --text-muted: #8B7355;
+  --border-color: #D3C9B0;
+  --hover-bg: #FAF7F0;
+
+  /* 覆盖层文字颜色 - 在深色渐变背景上的文字 */
+  --overlay-text: #FFFFFF;
+  --overlay-text-muted: rgba(255, 255, 255, 0.7);
+
+  /* 按钮文字颜色 - 在深色/金色背景上的文字 */
+  --button-text-on-dark: #FFFFFF;  /* 在深色/金色背景上的文字 */
+  --button-text-on-light: #FFFFFF; /* 在浅色背景上的文字（浅色主题） */
+  --button-text-on-light-dark: #1A1A1A; /* 在浅色背景上的文字（深色主题） */
+
+  /* 语义色彩 Semantic Colors */
+  --success-green: #7FA870;
+  --info-blue: #7EA0C9;
+  --error-red: #C96262;
+  --warning-orange: #E8A858;
+
+  /* 侧边栏 Sidebar - 浅色主题（统一浅色） */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #1A1A1A;
+  --sidebar-text-muted: rgba(26, 26, 26, 0.5);
+  --sidebar-hover: rgba(26, 26, 26, 0.05);
+  --sidebar-active-bg: rgba(201, 169, 98, 0.12);
+  --sidebar-active-border: #C9A962;
+  --sidebar-active-text: #C9A962;
+
+  /* 玻璃拟态 Glass Morphism */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-blur: 12px;
+  --glass-border: rgba(211, 201, 176, 0.4);
+
+  /* 阴影 Shadows */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-base: 0 4px 12px rgba(26, 26, 26, 0.05);
+  --shadow-float: 0 8px 24px rgba(26, 26, 26, 0.08);
+  --shadow-card-hover: 0 10px 30px rgba(201, 169, 98, 0.08);
+
+  /* 过渡动画 Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Logo 变量 - 浅色主题 */
+  --logo-bg: #C9A962;
+  --logo-icon: #1A1A1A;
+  --logo-shadow: rgba(201, 169, 98, 0.2);
+}
+
+/* ==================================================
+   深色主题 Dark Theme
+   ================================================== */
+
+.dark {
+  /* 核心色彩 Core Colors - 深色主题 */
+  --paper-bg: #0D0D0D;
+  --white-bg: #1A1A1A;
+  --ink-black: #E8E4DC;
+  --brand-gold: #C9A962;
+  --brand-gold-dark: #B89A5A;
+  --brand-gold-light: #E6D3A3;
+  --ink-secondary: #B0A898;
+  --text-muted: #6B6560;
+  --border-color: #2A2A2A;
+  --hover-bg: #1A1A1A;
+
+  /* 覆盖层文字颜色 - 在米白渐变背景上的文字 */
+  --overlay-text: #1A1A1A;
+  --overlay-text-muted: rgba(26, 26, 26, 0.7);
+
+  /* 按钮文字颜色 - 在深色/金色背景上的文字 */
+  --button-text-on-dark: #FFFFFF;  /* 在深色/金色背景上的文字 */
+  --button-text-on-light: #FFFFFF; /* 在浅色背景上的文字（浅色主题） */
+  --button-text-on-light-dark: #1A1A1A; /* 在浅色背景上的文字（深色主题） */
+
+  /* 语义色彩 Semantic Colors - 保持一致 */
+  --success-green: #7FA870;
+  --info-blue: #7EA0C9;
+  --error-red: #C96262;
+  --warning-orange: #E8A858;
+
+  /* 侧边栏 Sidebar - 深色主题 */
+  --sidebar-bg: #0A0A0A;
+  --sidebar-text: #E8E4DC;
+  --sidebar-text-muted: rgba(232, 228, 220, 0.5);
+  --sidebar-hover: rgba(255, 255, 255, 0.03);
+  --sidebar-active-bg: rgba(201, 169, 98, 0.15);
+  --sidebar-active-border: #C9A962;
+  --sidebar-active-text: #C9A962;
+
+  /* 玻璃拟态 Glass Morphism - 深色主题 */
+  --glass-bg: rgba(26, 26, 26, 0.6);
+  --glass-blur: 12px;
+  --glass-border: rgba(201, 169, 98, 0.2);
+
+  /* 阴影 Shadows - 深色主题 */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 10px 30px rgba(201, 169, 98, 0.15);
+
+  /* Logo 变量 - 深色主题（反色） */
+  --logo-bg: #1A1A1A;
+  --logo-icon: #C9A962;
+  --logo-shadow: rgba(0, 0, 0, 0.5);
+}
+
+@theme inline {
+  /* 色彩映射 */
+  --color-paper: var(--paper-bg);
+  --color-white: var(--white-bg);
+  --color-ink: var(--ink-black);
+  --color-gold: var(--brand-gold);
+  --color-gold-dark: var(--brand-gold-dark);
+  --color-gold-light: var(--brand-gold-light);
+  --color-secondary: var(--ink-secondary);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border-color);
+  --color-hover: var(--hover-bg);
+
+  /* 语义色彩 */
+  --color-success: var(--success-green);
+  --color-info: var(--info-blue);
+  --color-error: var(--error-red);
+  --color-warning: var(--warning-orange);
+
+  /* 背景色彩 */
+  --background: var(--paper-bg);
+  --foreground: var(--ink-black);
+
+  /* 字体 */
+  --font-ui: var(--font-inter);
+  --font-display: var(--font-noto-serif);
+  --font-editor: var(--font-courier-prime);
+}
+
+/* ==================================================
+   基础样式 Base Styles
+   ================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--paper-bg);
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  background-attachment: fixed;
+  color: var(--ink-black);
+  font-family: var(--font-inter), 'Noto Sans SC', sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+/* 字体家族类 */
+.font-ui {
+  font-family: var(--font-inter), 'Noto Sans SC', sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-noto-serif), serif;
+  letter-spacing: -0.02em;
+}
+
+.font-editor {
+  font-family: var(--font-courier-prime), 'Courier New', monospace;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* 纸质纹理背景 */
+.paper-texture {
+  background-color: var(--paper-bg);
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+}
+
+/* 白色背景容器 */
+.white-bg {
+  background-color: var(--white-bg);
+}
+
+/* ==================================================
+   自定义滚动条 Custom Scrollbar
+   ================================================== */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-gold);
+}
+
+/* ==================================================
+   View Transitions API
+   ================================================== */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(sidebar),
+::view-transition-new(sidebar) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(main-content) {
+  animation: 0.3s ease-out both fade-out;
+}
+
+::view-transition-new(main-content) {
+  animation: 0.4s ease-in 0.1s both fade-in;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* 深色主题特定覆盖 */
+.dark body {
+  background-color: #0D0D0D;
+  color: #E8E4DC;
+}
+
+.dark .paper-texture {
+  /* 深色模式移除纹理，保持纯色 */
+  background-image: none;
+}
+
+/* ==================================================
+   动画 Animations
+   ================================================== */
+
+/* 羽毛笔浮动发光动画 */
+@keyframes float-glow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 20px rgba(201, 169, 98, 0.2));
+    opacity: 0.15;
+  }
+  50% {
+    transform: translateY(-40px) rotate(8deg) scale(1.05);
+    filter: drop-shadow(0 0 60px rgba(201, 169, 98, 0.4));
+    opacity: 0.25;
+  }
+}
+
+.animate-float-glow {
+  animation: float-glow 15s ease-in-out infinite;
+}
+
+/* 呼吸发光动画 */
+@keyframes breathing-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.animate-breathing-glow {
+  animation: breathing-glow 12s ease-in-out infinite;
+}
+
+/* 侧边栏过渡动画 */
+.sidebar-transition {
+  transition: all var(--transition-smooth);
+}
+
+/* 光标闪烁动画 */
+@keyframes cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-cursor-blink {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* ==================================================
+   组件样式 Component Styles
+   ================================================== */
+
+/* 玻璃拟态卡片 */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+
+/* 平面卡片 */
+.card-flat {
+  background: var(--white-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all var(--transition-smooth);
+}
+
+.card-flat:hover {
+  border-color: var(--brand-gold);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* 侧边栏装饰背景 */
+.sidebar-decoration {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sidebar-glow {
+  position: absolute;
+  width: 40rem;
+  height: 40rem;
+  background: radial-gradient(circle, rgba(201, 169, 98, 0.1) 0%, transparent 70%);
+  animation: breathing-glow 12s ease-in-out infinite;
+}
+
+.sidebar-feather {
+  font-size: 30rem;
+  color: var(--brand-gold);
+  opacity: 0.1;
+  animation: float-glow 15s ease-in-out infinite;
+}
+
+/* 深色模式下羽毛笔更淡 */
+.dark .sidebar-feather {
+  opacity: 0.03;
+}
+
+/* 边缘折叠按钮 */
+.edge-toggle {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 1.25rem;
+  height: 4rem;
+  background: var(--white-bg);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-subtle);
+}
+
+.edge-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--brand-gold);
+  border-color: var(--brand-gold);
+}
+
+.edge-toggle-left {
+  left: 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  border-left: none;
+}
+
+.edge-toggle-right {
+  right: 0;
+  border-radius: 0.5rem 0 0 0.5rem;
+  border-right: none;
+}
+
+/* A4 纸张容器 */
+.a4-paper {
+  width: 210mm;
+  min-height: 297mm;
+  background: var(--white-bg);
+  box-shadow: var(--shadow-base);
+  padding: 25.4mm;
+  margin-bottom: 200px;
+  border: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+/* 剧本段落样式 */
+.script-scene-header {
+  background: #F0F0F0;
+  padding: 8px 15px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  border-bottom: 2px solid var(--ink-black);
+  text-transform: uppercase;
+}
+
+.script-dialogue-wrap {
+  width: 80%;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.script-char-name {
+  font-weight: bold;
+  letter-spacing: 2px;
+  display: block;
+}
+
+/* ==================================================
+   打印样式 Print Styles
+   ================================================== */
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .a4-paper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+  }
+}
+
+/* ==================================================
+   响应式断点 Responsive Breakpoints
+   ================================================== */
+
+@media (max-width: 640px) {
+  /* xs - 隐藏侧栏，全屏编辑 */
+  .sidebar-mobile-hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* md - 默认隐藏 AI 面板 */
+  .ai-panel-md-hidden {
+    display: none;
+  }
+}
+
+/* ==================================================
+   着陆页动画 Landing Page Animations
+   ================================================== */
+
+/* 着陆页背景色 Landing Page Background */
+body {
+  background-color: var(--ink-black);
+}
+
+/* 字体类定义 Font Classes */
+.font-serif-display {
+  font-family: var(--font-noto-serif), serif;
+}
+
+.font-mono-script {
+  font-family: var(--font-courier-prime), monospace;
+}
+
+/* 纹理覆盖层 Paper Overlay */
+.paper-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* 渐变网格背景 Gradient Mesh */
+.gradient-mesh {
+  background: radial-gradient(circle at 80% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at 10% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 40%);
+}
+
+/* Gold Pulse Animation for CTA Button */
+@keyframes goldPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 98, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(201, 169, 98, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 98, 0);
+  }
+}
+
+/* Hero Fade In Up Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stagger-1 {
+  animation-delay: 0.2s;
+}
+
+.stagger-2 {
+  animation-delay: 0.4s;
+}
+
+.stagger-3 {
+  animation-delay: 0.6s;
+}
