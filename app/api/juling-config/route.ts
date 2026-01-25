@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrCreateJulingConfig, updateJulingConfig } from '@/db/queries/juling-configs'
+import { getOrCreateJulingConfig, updateJulingConfig } from '@/lib/db/queries/juling-configs'
 import { auth } from '@/lib/session'
 
 /**

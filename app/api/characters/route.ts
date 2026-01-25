@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createCharacter, getCharactersByProjectId, updateCharacter, deleteCharacter } from '@/db/queries/characters'
-import { getProjectById } from '@/db/queries/projects'
+import { createCharacter, getCharactersByProjectId, updateCharacter, deleteCharacter } from '@/lib/db/queries/characters'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

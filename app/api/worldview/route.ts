@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory, updateWorldviewItem, deleteWorldviewItem } from '@/db/queries/worldview'
-import { getProjectById } from '@/db/queries/projects'
+import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory, updateWorldviewItem, deleteWorldviewItem } from '@/lib/db/queries/worldview'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

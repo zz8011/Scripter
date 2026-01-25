@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAIConversation, getAIConversationsByUserId, getAIConversationsByProjectId, addMessageToConversation } from '@/db/queries/ai-conversations'
-import { getProjectById } from '@/db/queries/projects'
+import { createAIConversation, getAIConversationsByUserId, getAIConversationsByProjectId, addMessageToConversation } from '@/lib/db/queries/ai-conversations'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

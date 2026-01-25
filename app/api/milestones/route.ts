@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMilestonesByUserId, getMilestonesByProjectId, recordMilestone, getUserAIContributionStats } from '@/db/queries/creative-milestones'
-import { getProjectById } from '@/db/queries/projects'
+import { getMilestonesByUserId, getMilestonesByProjectId, recordMilestone, getUserAIContributionStats } from '@/lib/db/queries/creative-milestones'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getProjectsByUserId, createProject } from '@/db/queries'
+import { getProjectsByUserId, createProject } from '@/lib/db/queries'
 import { getSession } from '@/lib/session'
 import { z } from 'zod'
 

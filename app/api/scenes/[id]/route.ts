@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateScene, deleteScene } from '@/db/queries/scenes'
-import { getProjectById } from '@/db/queries/projects'
+import { updateScene, deleteScene } from '@/lib/db/queries/scenes'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

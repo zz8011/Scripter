@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { exchangeToken, getUserInfo } from '@/lib/casdoor'
-import { getUserByEmail, createUser } from '@/db/queries/users'
+import { getUserByEmail, createUser } from '@/lib/db/queries/users'
 import { createSession } from '@/lib/session'
 
 export async function GET(request: NextRequest) {

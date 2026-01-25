@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createStoryboard, getStoryboardsByProjectId, getStoryboardsBySceneId, updateStoryboard, deleteStoryboard } from '@/db/queries/storyboards'
-import { getProjectById } from '@/db/queries/projects'
+import { createStoryboard, getStoryboardsByProjectId, getStoryboardsBySceneId, updateStoryboard, deleteStoryboard } from '@/lib/db/queries/storyboards'
+import { getProjectById } from '@/lib/db/queries/projects'
 import { auth } from '@/lib/session'
 
 /**

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { callZhipuAIStream, estimateTokens, type ZhipuMessage } from '@/lib/zhipu'
 import { checkUserQuota, useQuota } from '@/lib/quota'
-import { createAIConversation } from '@/db/queries/ai-conversations'
+import { createAIConversation } from '@/lib/db/queries/ai-conversations'
 import { auth } from '@/lib/session'
 
 /**
