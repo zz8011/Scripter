@@ -1,46 +1,29 @@
-# Findings & Decisions - 剧灵 (Scripter)
-<!--
-  WHAT: 项目知识库 - API 配置、技术决策、研究发现
-  WHY: 上下文窗口有限，此文件作为"外存"保存所有重要信息
-  WHEN: 每次发现、决策后更新
--->
+# Findings & Decisions - 剧灵 (Scripter) - 归档版本
+
+> ⚠️ **归档文件** - 原始 findings.md 包含敏感 API 密钥，已移除
+> 有价值的技术决策已整合到 `tech/decisions.md`
+> 设计系统信息已整合到 `design/.claude/design-context.md`
+
+---
+
+## 原 findings.md 内容概览
+
+### 已移除内容（安全原因）
+- ❌ 智谱 GLM-4.7 API 密钥
+- ❌ T8Star API 密钥
+
+### 已整合内容
+- ✅ 技术决策 → `tech/decisions.md`
+- ✅ 设计系统规范 → `design/.claude/design-context.md`
+- ✅ API 配置说明 → `config/model-config.yaml`
+
+### 保留内容（研究笔记）
 
 ## 需求概述
 基于 PRD v1.6 构建短剧剧本创作工具，技术栈调整：
 - ❌ 不使用 Vercel AI SDK
 - ✅ 使用智谱 GLM-4.7 进行文本处理
 - ✅ 使用 T8Star (nano-banana-2) 进行图片处理
-
-## API 配置
-
-### 智谱 GLM-4.7（文本处理）
-```
-API Base: https://open.bigmodel.cn/api/paas/v4
-API Key: 348ac438fd6041cda3c6f1799c66103c.1CY7SJdkJB2K9myk
-```
-
-**用途：**
-- AI 对白优化
-- 场景扩展
-- 情节建议
-- 人物一致性检查
-- 情节逻辑检查
-- Intention Dispatcher 意图路由
-- 原子化 Skills 执行
-- 专家 Agents 调用
-
-### T8Star（图片处理）
-```
-API Base: https://ai.t8star.cn
-API Key: sk-hw1qk4MMad06RLuwKcatZ7zRl5JdespQexTMRqciwuCYqBTx
-Model: nano-banana-2
-```
-
-**用途：**
-- 人物人设图生成
-- 场景概念图生成
-- 分镜场景渲染图
-- 图片管理与导出
 
 ## 研究发现
 
@@ -50,37 +33,7 @@ Model: nano-banana-2
 - MVP 阶段需要同步开发六大核心模块
 - 关键技术点：TipTap 编辑器、@dnd-kit 拖拽、AI 意图路由
 
-### 设计系统规范（来自 PRD）
-**色彩体系：**
-- 背景色：#F5F1E8（温暖米色）
-- 表面色：#FFFFFF（白色编辑容器）
-- 文字主色：#1A1A1A（深墨黑）
-- 文本副色：#5C5548（深褐）
-- 品牌主色：#C9A962（古典金色）
-- 品牌深色：#A68A45（暗金）
-- 边框色：#D3C9B0（浅褐）
-
-**字体系统：**
-- UI 正文：Inter + Noto Sans SC
-- 品牌标题：Noto Serif SC（思源宋体）
-- 编辑区：Courier Prime + Noto Sans SC（18px，行高 1.6）
-
-**间距系统（8px 网格）：**
-- xs: 4px | sm: 8px | base: 12px | md: 16px | lg: 20px | xl: 24px | 2xl: 32px
-
-**圆角规范：**
-- sm: 4px | base: 8px | lg: 12px | full: 9999px
-
-## 技术决策
-| 决策 | 理由 |
-|------|------|
-| 智谱 GLM-4.7 替代 Vercel AI SDK | 用户指定国产模型，成本更低 |
-| T8Star 替代 Replicate/DALL-E | 用户指定的图片生成服务 |
-| 保持 Next.js 14 + App Router | PRD 验证的技术栈 |
-| 保持 TipTap 编辑器 | 成熟的无头编辑器框架 |
-| 保持 @dnd-kit/core | 现代化拖拽库，性能优秀 |
-
-## 迁移注意事项
+### 迁移注意事项
 
 ### 从 Vercel AI SDK 迁移到智谱 GLM-4.7
 **需要重构的功能：**
@@ -183,23 +136,23 @@ Model: nano-banana-2
    - 红色粗体文字
    - 可配置位置
 
-## 资源链接
-- PRD 原文件：D:\Develop\Scripter_claude\docs\prd\2026-01-22-scripter-prd.md
-- 编辑器设计文档：D:\Develop\Scripter_claude\docs\tech\editor-design.md
-- 导出系统设计文档：D:\Develop\Scripter_claude\docs\tech\export-system.md
-- 功能 Agent 设计文档：D:\Develop\Scripter_claude\docs\plans\2026-01-23-functional-agents-design.md
-- 智谱 AI 文档：https://open.bigmodel.cn/dev/api
-- T8Star 文档：https://ai.t8star.cn
-- Next.js 文档：https://nextjs.org/docs
-- TipTap 文档：https://tiptap.dev/docs
-- Fountain 格式规范：https://fountain.io
-- jsPDF 文档：https://github.com/parallax/jsPDF
-- html2canvas 文档：https://html2canvas.hertzen.com
-- docx.js 文档：https://docx.js.org
-
 ## 视觉/浏览器发现
 - 待更新（设计稿、竞品分析等）
 
 ---
-REMINDER: 每次发现重要信息后更新此文件
-REMINDER: 2-Action Rule：每 2 次 view/browser/search 后必须更新
+
+## 相关文档（当前版本）
+
+| 原文件路径 | 新位置 |
+|-----------|--------|
+| API 配置 | `config/model-config.yaml` |
+| 技术决策 | `tech/decisions.md` |
+| 设计系统 | `design/.claude/design-context.md` |
+| 实施计划 | `plans/plan-sprint-mvp.md` |
+| 编辑器设计 | `tech/editor-design.md` |
+| 导出系统 | `tech/export-system.md` |
+
+---
+
+**归档日期**: 2026-01-24
+**归档原因**: 包含敏感 API 密钥，内容已整合到其他文档

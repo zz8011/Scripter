@@ -1,31 +1,47 @@
-# 剧灵 Scripter
+# Scripter (剧灵)
 
-> **剧灵，你的专属 AI 创作伙伴** — 生辰八字决定性格，静默观察不打扰
+> **剧灵，一支懂你的笔** — 让每个有故事的人都能成为编剧
 
 ---
 
-## 产品愿景
+## 📋 文档导航
 
-> **"让每个有故事的人都能成为编剧"**
+### 核心文档（权威来源）
 
-剧灵是一个面向所有有创作梦想的人的 AI 编剧创作平台。通过深度集成的 AI 伙伴系统，我们帮助用户从灵感到成品，完成完整的剧本创作旅程。
+| 文档 | 版本 | 说明 |
+|------|------|------|
+| **[产品定位声明](docs/product-positioning.md)** | v1.0 | **产品定位、愿景、核心价值（权威来源）** |
+| **[商业模式文档](docs/business-model.md)** | v1.0 | **定价策略、收入预测、成本预算（权威来源）** |
+| **[风险分析文档](docs/risk-analysis.md)** | v1.0 | **技术、产品、商业风险分析（权威来源）** |
 
-### 核心理念
+> ⚠️ **重要提示**：产品定位、商业模式、风险分析等定义见上述独立文档。本文档只提供快速概览。
 
-- 🤝 **AI 是创作伙伴，不是工具** — 共创而非替代
+---
+
+## 产品概览
+
+> **剧灵是什么？**
+
+剧灵是一个面向所有有创作梦想的人的 AI 剧本创作平台。通过深度集成的 AI 伙伴系统，我们帮助用户从灵感到成品，完成完整的剧本创作旅程。
+
+**核心价值**：
+- 🤝 **AI 是创作搭档** — 陪伴而非替代，共创而非单向输出
 - 🌱 **创作民主化** — 消除技术门槛，让创意落地
-- ✨ **硅基碳基共生** — 体验人机共创带来的全新可能
+- ⚡ **提升创作效率** — AI 辅助生成、润色、扩展
+- ✅ **保证专业质量** — 符合行业标准格式
+
+> 💡 **详细的产品定位、愿景、目标用户定义请参阅**：[产品定位文档](docs/product-positioning.md)
 
 ---
 
 ## 目标用户
 
-| 用户类型 | 占比 | 核心需求 |
-|---------|------|---------|
-| **业余创作者** | 40% | 降低门槛、实现梦想 |
-| **独立编剧** | 30% | 效率工具、专业提升 |
-| **编剧新人** | 20% | 学习引导、快速入门 |
-| **专业团队** | 10% | 协作、版本管理 |
+| 用户类型 | 占比 | 核心需求 | 使用场景 |
+|---------|------|---------|---------|
+| **业余创作者** | 40% | 降低门槛、实现梦想 | 下班后、周末写故事 |
+| **独立编剧** | 30% | 效率工具、专业提升 | 全职创作 |
+| **编剧新人** | 20% | 学习引导、快速入门 | 学生、转行者 |
+| **专业团队** | 10% | 协作、版本管理 | 工作室、制作公司 |
 
 ---
 
@@ -177,36 +193,97 @@ pnpm preview
 
 ```
 Scripter/
-├── docs/                    # 项目文档
-│   ├── design/             # 设计相关
-│   │   └── .claude/        # 设计系统速查
-│   ├── tech/               # 技术文档
-│   │   ├── decisions.md    # 技术决策历史
-│   │   └── component-conventions.md  # 组件规范
-│   ├── prd/                # 产品需求文档
-│   └── plans/              # 开发计划
-├── config/                 # 配置文件
-├── projects/               # 参考项目
-├── .claude/                # Claude Code 配置
-│   ├── agents/            # 自定义 Agent
-│   ├── templates/         # 开发模板
-│   └── settings.local.json # 插件配置
-└── README.md              # 本文件
+├── docs/                           # 📚 项目文档
+│   ├── README.md                   # 文档中心索引
+│   ├── 📄 核心文档（权威来源）
+│   │   ├── product-positioning.md  # 产品定位声明
+│   │   ├── business-model.md       # 商业模式
+│   │   ├── risk-analysis.md        # 风险分析
+│   │   ├── file-naming-convention.md # 文件命名规范
+│   │   └── scientific-dev-workflow.md # 科学开发工作流
+│   ├── 📋 prd/                     # 产品需求文档
+│   │   ├── prd-v2.5.md            # 当前 PRD（综合整合版）
+│   │   ├── prd-v2.4-legacy.md     # 历史版本
+│   │   ├── prd-v2.2-legacy.md
+│   │   ├── prd-v2.1-legacy.md
+│   │   ├── prd-v1.0-legacy.md
+│   │   ├── prd-archive.md         # 早期版本归档
+│   │   └── prd-changelog.md       # PRD 变更日志
+│   ├── 🎨 design/                  # 设计文档
+│   │   ├── ui-design-system.md    # UI 设计系统
+│   │   ├── v4-implementation-guide.md
+│   │   ├── ai-partner-interaction-design.md
+│   │   ├── behavior-tracking-design.md
+│   │   └── .claude/               # 设计系统速查
+│   ├── 🔧 tech/                    # 技术文档
+│   │   ├── tech-design.md         # 技术架构
+│   │   ├── api-spec.md            # API 规范
+│   │   ├── decisions.md           # 技术决策历史
+│   │   └── component-conventions.md # 组件规范
+│   ├── 📅 plans/                   # 开发计划
+│   │   └── plan-sprint-mvp.md     # MVP Sprint 计划
+│   ├── 📖 guides/                  # 指南文档
+│   │   ├── scientific-dev-workflow.md # 科学开发工作流 v2.1
+│   │   ├── claude-code-optimization-guide.md
+│   │   └── parallel-development-guide.md
+│   ├── 📊 reports/                 # 开发报告
+│   │   ├── sessions/               # 会话总结（自动生成）
+│   │   ├── tasks/                  # 任务完成报告
+│   │   ├── analysis/               # 分析报告
+│   │   ├── reviews/                # 代码审查报告
+│   │   ├── progress/               # 进度报告
+│   │   └── README.md               # 报告索引
+│   ├── 🏢 brand/                   # 品牌文档
+│   │   └── ju-ling-taglines.md    # 品牌金句集
+│   └── 🗃️ .archive/                # 归档文档（过时文件）
+│       ├── progress-legacy.md
+│       ├── task-plan-legacy.md
+│       ├── findings-legacy.md
+│       └── implementation-plan-legacy.md
+├── config/                         # ⚙️ 配置文件
+│   ├── dev-config.yaml             # 开发环境配置
+│   ├── model-config.yaml           # AI 模型配置
+│   ├── agents-config.yaml          # Agent 配置
+│   └── README.md                   # 配置说明
+├── .claude/                        # 🤖 Claude Code 配置
+│   ├── agents/                     # 自定义 Agent
+│   ├── hooks/                      # Hooks 脚本
+│   ├── templates/                  # 开发模板
+│   └── settings.local.json         # 插件配置
+├── scripts/                        # 🔧 脚本工具
+│   ├── parallel-dev-setup.ps1     # 并行开发设置
+│   └── parallel-dev-cleanup.ps1   # 并行开发清理
+├── projects/                       # 参考项目
+│   └── sample-scripts/             # 示例剧本
+└── README.md                       # 本文件
 ```
+
+> 💡 **完整的文档结构说明请参阅**：[docs/README.md](docs/README.md)
 
 ---
 
 ## 文档导航
 
-### 产品文档
-- [PRD v2.4 - 剧灵生辰八字系统版](docs/prd/2026-01-23-scripter-prd-v2.4.md)
-- [PRD v2.2 - 编剧伙伴版](docs/prd/2026-01-22-scripter-prd-v2.2.md)
+> 💡 **完整的文档索引和分类请参阅**：[docs/README.md](docs/README.md)
 
-### 开发文档
-- [科学开发工作流](docs/scientific-dev-workflow.md)
-- [设计实现精准对齐方案](docs/design-implementation-bridge.md)
+### 核心文档（权威来源）
+- **[产品定位声明](docs/product-positioning.md)** — 产品定位、愿景、核心价值、目标用户
+- **[商业模式文档](docs/business-model.md)** — 定价策略、收入预测、成本预算
+- **[风险分析文档](docs/risk-analysis.md)** — 技术、产品、商业风险与应对策略
+
+### 产品文档（PRD）
+- [PRD v2.5 - 综合整合版（当前）](docs/prd/prd-v2.5.md)
+- [PRD v2.4 - 剧灵生辰八字系统版](docs/prd/prd-v2.4-legacy.md)
+- [PRD v2.2 - 编剧伙伴版](docs/prd/prd-v2.2-legacy.md)
+- [PRD 变更日志](docs/prd/prd-changelog.md)
+
+### 开发规范
+- [科学开发工作流](docs/guides/scientific-dev-workflow.md) — Claude Code 开发流程 v2.1
+- [文件命名规范](docs/file-naming-convention.md) — 项目文件管理规范
 - [组件使用约定](docs/tech/component-conventions.md)
 - [技术决策历史](docs/tech/decisions.md)
+- [Claude Code 优化指南](docs/guides/claude-code-optimization-guide.md)
+- [并行开发指南](docs/guides/parallel-development-guide.md)
 
 ### 设计文档
 - [UI 设计系统](docs/design/ui-design-system.md)
@@ -219,6 +296,13 @@ Scripter/
 - [API 规范](docs/tech/api-spec.md)
 - [编辑器设计](docs/tech/editor-design.md)
 - [导出系统设计](docs/tech/export-system.md)
+
+### 开发计划
+- [MVP Sprint 计划](docs/plans/plan-sprint-mvp.md)
+
+### 开发报告
+- [报告索引](docs/reports/README.md) — 所有开发报告的中央索引
+- 会话总结、任务报告、分析报告、代码审查、进度报告
 
 ---
 
@@ -323,6 +407,8 @@ main（生产）
 | **专业版** | ¥999/年 | 20个项目、AI 共创、20000次/月 |
 | **工作室版** | ¥2999/年 | 无限项目、团队协作、专属支持 |
 
+> 💡 **详细的定价策略、收入预测、成本预算请参阅**：[商业模式文档](docs/business-model.md)
+
 ---
 
 ## 贡献指南
@@ -384,6 +470,10 @@ MIT License
 
 ---
 
+---
+
 **让灵感，在剧本中苏醒** ✨
 
-**AI 不是工具，而是创作伙伴** 🤝
+**剧灵，一支懂你的笔** 🖊️
+
+**让创作，更高效专业** 🚀
