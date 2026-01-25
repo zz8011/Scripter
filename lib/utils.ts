@@ -2,6 +2,18 @@
  * 通用工具函数
  */
 
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+/**
+ * 合并 className (用于 Tailwind CSS)
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+
+
 /**
  * 生成随机字符串
  */

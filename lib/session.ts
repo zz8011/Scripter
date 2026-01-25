@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { getUserById } from '@/db/queries/users'
+import { getUserById } from '@/lib/db/queries/users'
 
 const SESSION_COOKIE_NAME = 'scripter_session'
 

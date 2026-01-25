@@ -4,7 +4,7 @@
  * 管理用户的 AI 使用配额
  */
 
-import { checkAIQuota, deductAIQuota, getAIQuotaStatus } from '@/db/queries/users'
+import { checkAIQuota, deductAIQuota, getAIQuotaStatus } from '@/lib/db/queries/users'
 
 export interface QuotaCheckResult {
   allowed: boolean
