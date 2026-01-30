@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProjectById, updateProject, deleteProject } from '@/lib/db/queries'
-import { getSession } from '@/lib/session'
+import { getSession, getDevSession } from '@/lib/session'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -11,18 +11,34 @@ const updateProjectSchema = z.object({
   currentStage: z.enum(['worldview', 'character', 'script', 'optimize', 'production']).optional(),
 })
 
+/**
+ * Helper to get session with dev mode fallback
+ */
+async function getSessionWithDev() {
+  const session = await getSession()
+  if (session) return session
+
+  // Development mode: use test session
+  if (process.env.NODE_ENV === 'development') {
+    return await getDevSession()
+  }
+
+  return null
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const { id } = await params
+    const session = await getSessionWithDev()
 
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const project = await getProjectById(params.id)
+    const project = await getProjectById(id)
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -44,10 +60,11 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const { id } = await params
+    const session = await getSessionWithDev()
 
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -56,7 +73,7 @@ export async function PATCH(
     const body = await request.json()
     const validatedData = updateProjectSchema.parse(body)
 
-    const project = await getProjectById(params.id)
+    const project = await getProjectById(id)
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -66,7 +83,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const updated = await updateProject(params.id, validatedData)
+    const updated = await updateProject(id, validatedData)
 
     return NextResponse.json({ project: updated })
   } catch (error) {
@@ -87,16 +104,17 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const { id } = await params
+    const session = await getSessionWithDev()
 
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const project = await getProjectById(params.id)
+    const project = await getProjectById(id)
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -106,7 +124,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    await deleteProject(params.id, session.user.id)
+    await deleteProject(id, session.user.id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

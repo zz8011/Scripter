@@ -26,7 +26,7 @@ export function MainLayout({ children, header }: MainLayoutProps) {
       />
 
       {/* 主内容区 */}
-      <main className="flex-1 h-full flex flex-col paper-texture overflow-hidden">
+      <main className="flex-1 h-full flex flex-col overflow-hidden">
         {/* 顶部头部 */}
         {header && (
           <header

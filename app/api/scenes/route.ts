@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createScene, getScenesByProjectId, getScenesByEpisode, updateScene, deleteScene } from '@/lib/db/queries/scenes'
 import { getProjectById } from '@/lib/db/queries/projects'
-import { auth } from '@/lib/session'
+import { auth, getDevSession } from '@/lib/session'
+
+/**
+ * Get session with dev mode fallback
+ */
+async function getSessionWithDev() {
+  const session = await auth()
+  if (session) return session
+
+  if (process.env.NODE_ENV === 'development') {
+    return await getDevSession()
+  }
+
+  return null
+}
 
 /**
  * GET /api/scenes?projectId=xxx&episodeNumber=1
@@ -9,7 +23,7 @@ import { auth } from '@/lib/session'
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -48,7 +62,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

@@ -60,24 +60,27 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
           >
             <div
               className="w-8 h-8 rounded flex items-center justify-center border"
-              style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)' }}
+              style={{
+                backgroundColor: 'var(--logo-bg)',
+                borderColor: 'var(--border-color)'
+              }}
             >
               <iconify-icon
                 icon="lucide:feather"
                 className="text-lg"
-                style={{ color: 'var(--brand-gold)' }}
+                style={{ color: 'var(--logo-icon)' }}
               />
             </div>
             <div className="flex flex-col -gap-1">
               <span
                 className="font-display font-bold text-2xl tracking-tighter"
-                style={{ color: 'var(--sidebar-text)' }}
+                style={{ color: 'var(--logo-icon)' }}
               >
                 剧灵
               </span>
               <span
                 className="text-[8px] font-bold tracking-widest uppercase -mt-1 opacity-70"
-                style={{ color: 'var(--brand-gold)' }}
+                style={{ color: 'var(--logo-icon)' }}
               >
                 scripter.art
               </span>

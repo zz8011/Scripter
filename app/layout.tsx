@@ -84,7 +84,7 @@ export default function RootLayout({
         <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
       </head>
       <body
-        className={`${inter.variable} ${notoSansSC.variable} ${notoSerifSC.variable} ${courierPrime.variable} font-ui antialiased`}
+        className={`${inter.variable} ${notoSansSC.variable} ${notoSerifSC.variable} ${courierPrime.variable} font-ui antialiased paper-texture`}
       >
         <ThemeProvider
           defaultTheme="system"

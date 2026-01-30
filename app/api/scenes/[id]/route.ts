@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateScene, deleteScene } from '@/lib/db/queries/scenes'
 import { getProjectById } from '@/lib/db/queries/projects'
-import { auth } from '@/lib/session'
+import { auth, getDevSession } from '@/lib/session'
+
+/**
+ * Get session with dev mode fallback
+ */
+async function getSessionWithDev() {
+  const session = await auth()
+  if (session) return session
+
+  if (process.env.NODE_ENV === 'development') {
+    return await getDevSession()
+  }
+
+  return null
+}
 
 /**
  * PUT /api/scenes/[id]
@@ -9,10 +23,11 @@ import { auth } from '@/lib/session'
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const { id } = await params
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -26,7 +41,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
     }
 
-    const scene = await updateScene(params.id, projectId, body)
+    const scene = await updateScene(id, projectId, body)
     if (!scene) {
       return NextResponse.json({ error: 'Scene not found' }, { status: 404 })
     }
@@ -44,10 +59,11 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const { id } = await params
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -65,7 +81,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
     }
 
-    await deleteScene(params.id, projectId)
+    await deleteScene(id, projectId)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting scene:', error)

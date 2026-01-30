@@ -268,8 +268,6 @@ html {
 
 body {
   background-color: var(--paper-bg);
-  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
-  background-attachment: fixed;
   color: var(--ink-black);
   font-family: var(--font-inter), 'Noto Sans SC', sans-serif;
   letter-spacing: -0.01em;
@@ -293,10 +291,11 @@ body {
   line-height: 1.5;
 }
 
-/* 纸质纹理背景 */
+/* 纸质纹理背景 - 全局纸张纹理 */
 .paper-texture {
   background-color: var(--paper-bg);
   background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  background-attachment: fixed;
 }
 
 /* 白色背景容器 */
@@ -621,16 +620,6 @@ body {
 
 .font-mono-script {
   font-family: var(--font-courier-prime), monospace;
-}
-
-/* 纹理覆盖层 Paper Overlay */
-.paper-overlay {
-  position: fixed;
-  inset: 0;
-  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 50;
 }
 
 /* 渐变网格背景 Gradient Mesh */

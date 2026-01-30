@@ -62,3 +62,49 @@ export async function auth(): Promise<Session | null> {
 
   return session
 }
+
+/**
+ * Development mode: Get or create a test session
+ * This is ONLY used in development when authentication is not configured
+ */
+export async function getDevSession(): Promise<Session> {
+  // Check if real session exists
+  const existingSession = await getSession()
+  if (existingSession) {
+    return existingSession
+  }
+
+  // In development, try to find or create a test user
+  if (process.env.NODE_ENV === 'development') {
+    const { getUserByEmail, createUser } = await import('@/lib/db/queries/users')
+
+    // Try to get existing test user
+    let user = await getUserByEmail('dev@scripter.art')
+
+    // Create test user if doesn't exist
+    if (!user) {
+      user = await createUser({
+        email: 'dev@scripter.art',
+        name: '开发测试用户',
+        plan: 'creator',
+        aiQuota: {
+          monthlyLimit: 2000000,
+          used: 0,
+          resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      })
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      accessToken: 'dev-token-' + user.id,
+    }
+  }
+
+  // Not in development - no session
+  throw new Error('No session available and not in development mode')
+}

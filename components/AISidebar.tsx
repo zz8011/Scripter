@@ -81,20 +81,44 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue("");
     setIsTyping(true);
 
-    // 模拟 AI 响应
-    setTimeout(() => {
+    try {
+      // 调用真实 AI API
+      const res = await fetch('/api/ai/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: currentInput }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: '请求失败' }));
+        throw new Error(errorData.error || '请求失败');
+      }
+
+      const data = await res.json();
+
       const aiMessage: AIMessage = {
         id: `msg_${Date.now() + 1}`,
         role: "assistant",
-        content: `收到你的请求：「${userMessage.content}」\n\n让我来帮你处理这个问题... \n\n（这是 AI 助手的模拟响应，实际项目中将连接智谱 GLM-4.7 API）`,
+        content: data.content,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      // 错误处理
+      const errorMessage: AIMessage = {
+        id: `msg_${Date.now() + 1}`,
+        role: "assistant",
+        content: `抱歉，AI 服务暂时无法响应：${error instanceof Error ? error.message : '未知错误'}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   // 快捷操作

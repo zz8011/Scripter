@@ -121,6 +121,7 @@ export function ScriptEditor({
 
   // 只在客户端初始化编辑器
   const editor = useEditor({
+    immediatelyRender: false, // 避免 SSR hydration 错误
     extensions: [
       StarterKit.configure({
         heading: false,
