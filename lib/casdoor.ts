@@ -3,11 +3,11 @@ export async function getCasdoorSDK() {
   const CasdoorSDK = await import('casdoor-js-sdk')
 
   const config = {
-    endpoint: process.env.CASDOOR_ENDPOINT!,
+    serverUrl: process.env.CASDOOR_ENDPOINT!,
     clientId: process.env.CASDOOR_CLIENT_ID!,
     clientSecret: process.env.CASDOOR_CLIENT_SECRET!,
     appName: 'scripter',
-    organization: 'scripter',
+    organizationName: 'scripter',
   }
 
   return new CasdoorSDK.default(config)
