@@ -15,6 +15,7 @@ import { getScenes, type Scene } from '@/lib/api/scenes';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { ExportDialog } from '@/components/export/ExportDialog';
 
 /* ==================================================
    Editor 页面组件 Editor Page Component
@@ -69,6 +70,9 @@ export default function EditorPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 导出对话框状态
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   /* ==================================================
      加载项目数据 Load Project Data
@@ -152,8 +156,7 @@ export default function EditorPage() {
   };
 
   const handleExport = () => {
-    // TODO: 导出剧本
-    console.log('Exporting script...');
+    setExportDialogOpen(true);
   };
 
   const handlePrint = () => {
@@ -354,187 +357,199 @@ export default function EditorPage() {
      ================================================== */
 
   return (
-    <MainLayout header={header}>
-      <div className="flex h-full">
-        {/* 主编辑区 */}
-        <div className="flex-1 overflow-hidden">
-          <ScriptEditor
-            content={plainText || ''}
-            onChange={updatePlainText}
-            className="h-full"
-          />
-        </div>
-
-        {/* 右侧统计面板 */}
-        <div
-          className="w-64 border-l p-4 overflow-y-auto"
-          style={{
-            borderColor: 'var(--border-color)',
-            backgroundColor: 'var(--white-bg)',
-          }}
-        >
-          <h3
-            className="font-semibold mb-4"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            剧本统计
-          </h3>
-
-          {/* 统计列表 */}
-          <div className="space-y-4">
-            {/* 字数 */}
-            <div>
-              <p
-                className="text-xs mb-1"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                总字数
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: 'var(--ink-black)' }}
-              >
-                {wordCount.toLocaleString()}
-              </p>
-            </div>
-
-            {/* 场景数 */}
-            <div>
-              <p
-                className="text-xs mb-1"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                场景数
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: 'var(--ink-black)' }}
-              >
-                {sceneCount}
-              </p>
-            </div>
-
-            {/* 对白段落数 */}
-            <div>
-              <p
-                className="text-xs mb-1"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                对白段落数
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: 'var(--ink-black)' }}
-              >
-                {dialogueCount}
-              </p>
-            </div>
-
-            {/* 项目信息 */}
-            {project && (
-              <>
-                <div
-                  className="h-px my-4"
-                  style={{ backgroundColor: 'var(--border-color)' }}
-                />
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <p
-                      className="text-xs"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      类型
-                    </p>
-                    <p style={{ color: 'var(--ink-black)' }}>
-                      {project.scriptType === 'short-drama' ? '短剧' : project.scriptType === 'movie' ? '电影' : '连续剧'}
-                    </p>
-                  </div>
-                  <div>
-                    <p
-                      className="text-xs"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      目标集数
-                    </p>
-                    <p style={{ color: 'var(--ink-black)' }}>
-                      {project.targetEpisodes} 集
-                    </p>
-                  </div>
-                  <div>
-                    <p
-                      className="text-xs"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      当前阶段
-                    </p>
-                    <p style={{ color: 'var(--ink-black)' }}>
-                      {project.currentStage === 'worldview' && '世界观'}
-                      {project.currentStage === 'character' && '人物'}
-                      {project.currentStage === 'script' && '剧本'}
-                      {project.currentStage === 'optimize' && '优化'}
-                      {project.currentStage === 'production' && '制作'}
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* 分隔线 */}
-            <div
-              className="h-px my-4"
-              style={{ backgroundColor: 'var(--border-color)' }}
+    <>
+      <MainLayout header={header}>
+        <div className="flex h-full">
+          {/* 主编辑区 */}
+          <div className="flex-1 overflow-hidden">
+            <ScriptEditor
+              content={plainText || ''}
+              onChange={updatePlainText}
+              className="h-full"
             />
+          </div>
 
-            {/* 快捷键提示 */}
-            <div>
-              <p
-                className="text-xs font-semibold mb-2"
-                style={{ color: 'var(--ink-black)' }}
-              >
-                快捷键
-              </p>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span style={{ color: 'var(--text-muted)' }}>切换格式</span>
-                  <kbd
-                    className="px-1.5 py-0.5 rounded border"
-                    style={{
-                      backgroundColor: 'var(--hover-bg)',
-                      borderColor: 'var(--border-color)',
-                    }}
-                  >
-                    Tab
-                  </kbd>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: 'var(--text-muted)' }}>保存</span>
-                  <kbd
-                    className="px-1.5 py-0.5 rounded border"
-                    style={{
-                      backgroundColor: 'var(--hover-bg)',
-                      borderColor: 'var(--border-color)',
-                    }}
-                  >
-                    Ctrl S
-                  </kbd>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: 'var(--text-muted)' }}>撤销</span>
-                  <kbd
-                    className="px-1.5 py-0.5 rounded border"
-                    style={{
-                      backgroundColor: 'var(--hover-bg)',
-                      borderColor: 'var(--border-color)',
-                    }}
-                  >
-                    Ctrl Z
-                  </kbd>
+          {/* 右侧统计面板 */}
+          <div
+            className="w-64 border-l p-4 overflow-y-auto"
+            style={{
+              borderColor: 'var(--border-color)',
+              backgroundColor: 'var(--white-bg)',
+            }}
+          >
+            <h3
+              className="font-semibold mb-4"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              剧本统计
+            </h3>
+
+            {/* 统计列表 */}
+            <div className="space-y-4">
+              {/* 字数 */}
+              <div>
+                <p
+                  className="text-xs mb-1"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  总字数
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--ink-black)' }}
+                >
+                  {wordCount.toLocaleString()}
+                </p>
+              </div>
+
+              {/* 场景数 */}
+              <div>
+                <p
+                  className="text-xs mb-1"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  场景数
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--ink-black)' }}
+                >
+                  {sceneCount}
+                </p>
+              </div>
+
+              {/* 对白段落数 */}
+              <div>
+                <p
+                  className="text-xs mb-1"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  对白段落数
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--ink-black)' }}
+                >
+                  {dialogueCount}
+                </p>
+              </div>
+
+              {/* 项目信息 */}
+              {project && (
+                <>
+                  <div
+                    className="h-px my-4"
+                    style={{ backgroundColor: 'var(--border-color)' }}
+                  />
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p
+                        className="text-xs"
+                        style={{ color: 'var(--text-muted)' }}
+                      >
+                        类型
+                      </p>
+                      <p style={{ color: 'var(--ink-black)' }}>
+                        {project.scriptType === 'short-drama' ? '短剧' : project.scriptType === 'movie' ? '电影' : '连续剧'}
+                      </p>
+                    </div>
+                    <div>
+                      <p
+                        className="text-xs"
+                        style={{ color: 'var(--text-muted)' }}
+                      >
+                        目标集数
+                      </p>
+                      <p style={{ color: 'var(--ink-black)' }}>
+                        {project.targetEpisodes} 集
+                      </p>
+                    </div>
+                    <div>
+                      <p
+                        className="text-xs"
+                        style={{ color: 'var(--text-muted)' }}
+                      >
+                        当前阶段
+                      </p>
+                      <p style={{ color: 'var(--ink-black)' }}>
+                        {project.currentStage === 'worldview' && '世界观'}
+                        {project.currentStage === 'character' && '人物'}
+                        {project.currentStage === 'script' && '剧本'}
+                        {project.currentStage === 'optimize' && '优化'}
+                        {project.currentStage === 'production' && '制作'}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* 分隔线 */}
+              <div
+                className="h-px my-4"
+                style={{ backgroundColor: 'var(--border-color)' }}
+              />
+
+              {/* 快捷键提示 */}
+              <div>
+                <p
+                  className="text-xs font-semibold mb-2"
+                  style={{ color: 'var(--ink-black)' }}
+                >
+                  快捷键
+                </p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span style={{ color: 'var(--text-muted)' }}>切换格式</span>
+                    <kbd
+                      className="px-1.5 py-0.5 rounded border"
+                      style={{
+                        backgroundColor: 'var(--hover-bg)',
+                        borderColor: 'var(--border-color)',
+                      }}
+                    >
+                      Tab
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: 'var(--text-muted)' }}>保存</span>
+                    <kbd
+                      className="px-1.5 py-0.5 rounded border"
+                      style={{
+                        backgroundColor: 'var(--hover-bg)',
+                        borderColor: 'var(--border-color)',
+                      }}
+                    >
+                      Ctrl S
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: 'var(--text-muted)' }}>撤销</span>
+                    <kbd
+                      className="px-1.5 py-0.5 rounded border"
+                      style={{
+                        backgroundColor: 'var(--hover-bg)',
+                        borderColor: 'var(--border-color)',
+                      }}
+                    >
+                      Ctrl Z
+                    </kbd>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+
+      {/* 导出对话框 */}
+      {project && (
+        <ExportDialog
+          projectId={project.id}
+          projectName={project.name}
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+        />
+      )}
+    </>
   );
 }
