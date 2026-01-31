@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProjectsByUserId, createProject } from '@/lib/db/queries'
-import { getSession, getDevSession } from '@/lib/session'
+import { getSessionWithDev } from '@/lib/session'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -12,21 +12,6 @@ const createProjectSchema = z.object({
   targetEpisodes: z.number().min(1).default(1),
   genre: z.array(z.string()).default([]),
 })
-
-/**
- * Helper to get session with dev mode fallback
- */
-async function getSessionWithDev() {
-  const session = await getSession()
-  if (session) return session
-
-  // Development mode: use test session
-  if (process.env.NODE_ENV === 'development') {
-    return await getDevSession()
-  }
-
-  return null
-}
 
 export async function GET(request: NextRequest) {
   try {

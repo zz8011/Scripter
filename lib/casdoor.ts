@@ -25,6 +25,11 @@ export const casdoor = {
     // @ts-ignore
     return sdk.getAuthToken(...args)
   },
+  parseJwtToken: async (...args: any[]) => {
+    const sdk = await getCasdoorSDK()
+    // @ts-ignore
+    return sdk.parseJwtToken(...args)
+  },
 }
 
 export function getOAuthURL(codeChallenge: string) {
@@ -35,8 +40,8 @@ export function getOAuthURL(codeChallenge: string) {
   )
 }
 
-export async function exchangeToken(code: string, state: string) {
-  return await casdoor.getOAuthToken(code, state)
+export async function exchangeToken(code: string, state: string, codeVerifier?: string) {
+  return await casdoor.getAuthToken(code, state, codeVerifier)
 }
 
 export async function getUserInfo(token: string) {

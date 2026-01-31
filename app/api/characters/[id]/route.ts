@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateCharacter, deleteCharacter } from '@/lib/db/queries/characters'
 import { getProjectById } from '@/lib/db/queries/projects'
-import { auth } from '@/lib/session'
+import { getSessionWithDev } from '@/lib/session'
 
 /**
  * PUT /api/characters/[id]
@@ -12,7 +12,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -47,7 +47,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

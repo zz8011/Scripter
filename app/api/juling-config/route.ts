@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrCreateJulingConfig, updateJulingConfig } from '@/lib/db/queries/juling-configs'
-import { auth } from '@/lib/session'
+import { getSessionWithDev } from '@/lib/session'
 
 /**
  * GET /api/juling-config
@@ -8,7 +8,7 @@ import { auth } from '@/lib/session'
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

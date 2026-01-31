@@ -7,7 +7,7 @@ import { auth, getDevSession } from '@/lib/session'
  * Get session with dev mode fallback
  */
 async function getSessionWithDev() {
-  const session = await auth()
+  const session = await getSessionWithDev()
   if (session) return session
 
   if (process.env.NODE_ENV === 'development') {

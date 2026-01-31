@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { callZhipuAI, estimateTokens, type ZhipuMessage } from '@/lib/zhipu'
 import { checkUserQuota, useQuota } from '@/lib/quota'
 import { createAIConversation, addMessageToConversation } from '@/lib/db/queries/ai-conversations'
-import { auth } from '@/lib/session'
+import { getSessionWithDev } from '@/lib/session'
 
 /**
  * POST /api/ai/chat
@@ -10,7 +10,7 @@ import { auth } from '@/lib/session'
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

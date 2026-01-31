@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { getUserById } from '@/lib/db/queries/users'
+import { getUserById, getUserByEmail, createUser } from '@/lib/db/queries/users'
 
 const SESSION_COOKIE_NAME = 'scripter_session'
 
@@ -76,8 +76,6 @@ export async function getDevSession(): Promise<Session> {
 
   // In development, try to find or create a test user
   if (process.env.NODE_ENV === 'development') {
-    const { getUserByEmail, createUser } = await import('@/lib/db/queries/users')
-
     // Try to get existing test user
     let user = await getUserByEmail('dev@scripter.art')
 
@@ -107,4 +105,25 @@ export async function getDevSession(): Promise<Session> {
 
   // Not in development - no session
   throw new Error('No session available and not in development mode')
+}
+
+/**
+ * Unified session helper for API routes
+ * Tries to get real session first, falls back to dev session in development mode
+ */
+export async function getSessionWithDev(): Promise<Session | null> {
+  const session = await auth()
+  if (session) return session
+
+  // Development mode: use test session
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      return await getDevSession()
+    } catch (error) {
+      console.error('Failed to get dev session:', error)
+      return null
+    }
+  }
+
+  return null
 }

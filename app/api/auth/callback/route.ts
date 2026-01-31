@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=missing_verifier', request.url))
     }
 
-    // Exchange code for token
-    const token = await exchangeToken(code, state)
+    // Exchange code for token (with code verifier for PKCE)
+    const token = await exchangeToken(code, state, codeVerifier)
 
     // Get user info from token
     const userInfo = await getUserInfo(token.accessToken)
@@ -53,8 +53,11 @@ export async function GET(request: NextRequest) {
       accessToken: token.accessToken,
     })
 
-    // Redirect to dashboard
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    // Clear code verifier cookie
+    const response = NextResponse.redirect(new URL('/dashboard', request.url))
+    response.cookies.delete('code_verifier')
+
+    return response
   } catch (error) {
     console.error('Auth callback error:', error)
     return NextResponse.redirect(new URL('/login?error=auth_failed', request.url))

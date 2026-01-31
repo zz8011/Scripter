@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory, updateWorldviewItem, deleteWorldviewItem } from '@/lib/db/queries/worldview'
 import { getProjectById } from '@/lib/db/queries/projects'
-import { auth } from '@/lib/session'
+import { getSessionWithDev } from '@/lib/session'
 
 /**
  * GET /api/worldview?projectId=xxx&category=era
@@ -9,7 +9,7 @@ import { auth } from '@/lib/session'
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getSessionWithDev()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
