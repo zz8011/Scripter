@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 /* 导航菜单配置 */
 const NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "控制台", href: "/dashboard", icon: "lucide:layout-dashboard" },
+  { id: "agents", label: "Agent 工作台", href: "/agents", icon: "lucide:bot" },
   { id: "editor", label: "剧本", href: "/editor", icon: "lucide:scroll" },
   { id: "characters", label: "人物", href: "/characters", icon: "lucide:users" },
   { id: "scenes", label: "场景", href: "/scenes", icon: "lucide:clapperboard" },
