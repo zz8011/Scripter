@@ -5,3 +5,6 @@
 
 export * from './Skill';
 export * from './SkillRegistry';
+export * from './FormatFixSkill';
+export * from './DialoguePolishSkill';
+export * from './SceneExpandSkill';
