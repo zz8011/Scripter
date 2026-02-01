@@ -6,6 +6,23 @@
 
 import React from 'react';
 
+// 扩展 JSX IntrinsicElements 以支持 iconify-icon
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'iconify-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        icon?: string;
+        iconSet?: string;
+        width?: string | number;
+        height?: string | number;
+        rotate?: number;
+        flip?: string;
+        inline?: boolean;
+      }, HTMLElement>;
+    }
+  }
+}
+
 interface IconifyIconProps extends React.HTMLAttributes<HTMLElement> {
   icon: string;
   iconSet?: string;

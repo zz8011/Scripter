@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import { AIMessage, UserInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/app/providers/theme-provider";
+import { IconifyIcon } from "./IconifyIcon";
 
 interface AISidebarProps {
   collapsed: boolean;
@@ -155,7 +156,7 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
           }}
           aria-label={collapsed ? "展开 AI 助手" : "折叠 AI 助手"}
         >
-          <iconify-icon icon={collapsed ? "lucide:chevron-left" : "lucide:chevron-right"} className="text-sm" />
+          <IconifyIcon icon={collapsed ? "lucide:chevron-left" : "lucide:chevron-right"} className="text-sm" />
         </button>
       </div>
 
@@ -236,7 +237,7 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
                 title={actualTheme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
               >
-                <iconify-icon icon={actualTheme === "dark" ? "lucide:sun" : "lucide:moon"} />
+                <IconifyIcon icon={actualTheme === "dark" ? "lucide:sun" : "lucide:moon"} />
               </button>
               {/* 用户设置按钮 */}
               <button
@@ -245,7 +246,7 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ink-black)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
               >
-                <iconify-icon icon="lucide:settings" />
+                <IconifyIcon icon="lucide:settings" />
               </button>
             </div>
           </div>
@@ -345,7 +346,7 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
                 }}
                 title={action.label}
               >
-                <iconify-icon
+                <IconifyIcon
                   icon={action.icon}
                   className="text-lg"
                   style={{ color: 'var(--ink-secondary)', transition: 'color 0.2s' }}
@@ -421,7 +422,7 @@ export function AISidebar({ collapsed, onToggle }: AISidebarProps) {
                 }
               }}
             >
-              <iconify-icon icon="lucide:send" className="text-lg" />
+              <IconifyIcon icon="lucide:send" className="text-lg" />
             </button>
           </div>
         </div>
