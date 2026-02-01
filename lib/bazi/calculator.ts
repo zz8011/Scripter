@@ -383,7 +383,7 @@ export function calculateBazi(date: Date, hour?: number): BaziInfo {
     pattern: '', // 稍后填充
     zodiac,
     solarTerms: {
-      current: jieQi || '',
+      current: jieQi?.getName() || '',
       next: nextJieQi?.getName() || '',
     },
   };
