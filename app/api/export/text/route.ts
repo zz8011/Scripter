@@ -4,8 +4,8 @@
    ================================================== */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getProject } from '@/lib/db/queries/projects';
-import { getScenes } from '@/lib/db/queries/scenes';
+import { getProjectById } from '@/lib/db/queries/projects';
+import { getScenesByProjectId } from '@/lib/db/queries/scenes';
 import { toPlainText, toFountain } from '@/lib/utils/script-export';
 import { getSessionWithDev } from '@/lib/session';
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 获取项目数据
-    const project = await getProject(projectId);
+    const project = await getProjectById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: '项目不存在' },
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 获取场景数据
-    const scenes = await getScenes(projectId);
+    const scenes = await getScenesByProjectId(projectId);
 
     let content: string;
     let fileName: string;

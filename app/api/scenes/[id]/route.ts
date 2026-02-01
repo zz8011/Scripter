@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateScene, deleteScene } from '@/lib/db/queries/scenes'
 import { getProjectById } from '@/lib/db/queries/projects'
-import { auth, getDevSession } from '@/lib/session'
-
-/**
- * Get session with dev mode fallback
- */
-async function getSessionWithDev() {
-  const session = await getSessionWithDev()
-  if (session) return session
-
-  if (process.env.NODE_ENV === 'development') {
-    return await getDevSession()
-  }
-
-  return null
-}
+import { getSessionWithDev } from '@/lib/session'
 
 /**
  * PUT /api/scenes/[id]
