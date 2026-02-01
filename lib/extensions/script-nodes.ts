@@ -4,7 +4,6 @@
    ================================================== */
 
 import { Node, mergeAttributes } from '@tiptap/core';
-import type { EditorCommands } from '@tiptap/react';
 
 /* ==================================================
    扩展 TipTap 命令类型 Extend TipTap Commands

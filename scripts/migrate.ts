@@ -40,7 +40,7 @@ async function showStatus() {
     )
   `)
 
-  const hasTable = result.rows[0].exists
+  const hasTable = (result as any).rows[0].exists
 
   if (!hasTable) {
     console.log('❌ No migrations table found. Run "pnpm migrate" to set up the database.')
@@ -52,8 +52,8 @@ async function showStatus() {
     SELECT hash FROM _drizzle_migrations ORDER BY created_at DESC
   `)
 
-  console.log(`✅ Applied migrations: ${applied.rows.length}\n`)
-  applied.rows.forEach((row: any, i: number) => {
+  console.log(`✅ Applied migrations: ${(applied as any).rows.length}\n`)
+  ;(applied as any).rows.forEach((row: any, i: number) => {
     console.log(`  ${i + 1}. ${row.hash}`)
   })
 }
@@ -92,7 +92,7 @@ async function applyMigration(name: string) {
     SELECT id FROM _drizzle_migrations WHERE hash = ${name}
   `)
 
-  if (existing.rows.length > 0) {
+  if ((existing as any).rows.length > 0) {
     console.log(`  ⏭️  Already applied, skipping`)
     return
   }

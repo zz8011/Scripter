@@ -109,13 +109,13 @@ export function paginate<T>(
  * 格式化日期
  */
 export function formatDate(date: Date, format: 'short' | 'medium' | 'long' = 'medium'): string {
-  const options: Intl.DateTimeFormatOptions = {
+  const options: Record<string, Intl.DateTimeFormatOptions> = {
     short: { year: 'numeric', month: '2-digit', day: '2-digit' },
     medium: { year: 'numeric', month: 'short', day: 'numeric' },
     long: { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' },
-  }[format]
+  }
 
-  return date.toLocaleDateString('zh-CN', options)
+  return date.toLocaleDateString('zh-CN', options[format])
 }
 
 /**

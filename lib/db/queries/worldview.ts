@@ -94,7 +94,7 @@ export async function getWorldviewItemsGrouped(projectId: string) {
   }
 
   for (const item of allItems) {
-    grouped[item.category].push(item)
+    (grouped as any)[item.category].push(item)
   }
 
   return grouped
