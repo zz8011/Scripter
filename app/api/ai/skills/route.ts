@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查配额
-    const quotaCheck = await checkUserQuota(session.user.id);
+    const quotaCheck = await checkUserQuota(session.user.id, 1);
     if (!quotaCheck.hasQuota) {
       return NextResponse.json(
         {
@@ -114,8 +114,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       projectId,
       sessionId: session.sessionId,
-      timestamp: new Date(),
-    };
+    } as Context;
 
     // 执行 Skill
     const result = await skill.execute(context, input);

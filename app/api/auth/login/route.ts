@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   response.cookies.set('code_verifier', codeVerifier, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    path: '/api/auth',
   })
 
   return response

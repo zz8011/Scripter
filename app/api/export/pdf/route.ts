@@ -1,4 +1,4 @@
-/* ==================================================
+﻿/* ==================================================
    PDF 导出 API 路由
    PDF Export API Route
    ================================================== */
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       });
 
       // 等待字体加载
-      await page.waitForTimeout(1000);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 生成 PDF
       const pdfBuffer = await page.pdf({
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       const encodedFileName = encodeURIComponent(fileName);
 
       // 返回 PDF 文件
-      return new NextResponse(pdfBuffer, {
+      return new NextResponse(pdfBuffer as unknown as BodyInit, {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
@@ -132,3 +132,5 @@ export async function POST(request: NextRequest) {
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 最大执行时间 60 秒
+
+

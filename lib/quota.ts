@@ -8,6 +8,7 @@ import { checkAIQuota, deductAIQuota, getAIQuotaStatus } from '@/lib/db/queries/
 
 export interface QuotaCheckResult {
   allowed: boolean
+  hasQuota: boolean
   reason?: string
   remaining?: number
   resetAt?: Date
@@ -24,17 +25,19 @@ export async function checkUserQuota(userId: string, tokensNeeded: number): Prom
       const status = await getAIQuotaStatus(userId)
       return {
         allowed: false,
+        hasQuota: false,
         reason: 'AI_QUOTA_EXCEEDED',
         remaining: status.remaining,
         resetAt: status.resetAt,
       }
     }
 
-    return { allowed: true }
+    return { allowed: true, hasQuota: true }
   } catch (error) {
     console.error('Error checking user quota:', error)
     return {
       allowed: false,
+      hasQuota: false,
       reason: 'QUOTA_CHECK_ERROR',
     }
   }

@@ -15,7 +15,7 @@ export interface Scene {
   content: any // TipTap JSON format
   duration: number
   status: 'draft' | 'completed'
-  createdAt: string
+  createdAt: Date | string
 }
 
 export interface CreateSceneInput {

@@ -12,7 +12,7 @@ import { IconifyIcon } from '@/components/IconifyIcon';
 import { useEditorStore } from '@/lib/stores/editorStore';
 import { getProject, type Project } from '@/lib/api/projects';
 import { getScenes, type Scene } from '@/lib/api/scenes';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from '@/components/export/ExportDialog';
@@ -56,7 +56,7 @@ function extractTextFromTipTap(json: any): string {
   return '';
 }
 
-export default function EditorPage() {
+function EditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('projectId');
@@ -551,5 +551,24 @@ export default function EditorPage() {
         />
       )}
     </>
+  );
+}
+
+/* ==================================================
+   页面导出 Page Export
+   ================================================== */
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <IconifyIcon icon="lucide:loader-2" className="text-4xl mx-auto mb-4 animate-spin" style={{ color: 'var(--brand-gold)' }} />
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>加载中...</p>
+        </div>
+      </div>
+    }>
+      <EditorContent />
+    </Suspense>
   );
 }

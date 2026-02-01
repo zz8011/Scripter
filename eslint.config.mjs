@@ -20,6 +20,10 @@ const eslintConfig = [
       '@next/next/no-img-element': 'warn',
     },
   },
+  {
+    // 构建时允许 ESLint 警告
+    ignores: ['.next/**/*', 'node_modules/**/*'],
+  },
 ];
 
 export default eslintConfig;

@@ -34,6 +34,7 @@ export async function POST() {
 
     // 创建会话
     await createSession({
+      sessionId: 'dev-session-' + user.id,
       user: {
         id: user.id,
         email: user.email,

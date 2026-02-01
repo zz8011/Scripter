@@ -8,15 +8,13 @@ import { AgentManager } from '@/lib/agents';
 import { Context } from '@/lib/agents/core/types';
 
 /**
- * 初始化 Agent Manager
- */
-const agentManager = AgentManager.getInstance();
-
-/**
  * GET /api/agents/test - 测试多 Agent 系统
  */
 export async function GET(request: NextRequest) {
   try {
+    // 动态初始化 Agent Manager（避免构建时执行）
+    const agentManager = AgentManager.getInstance();
+    
     // 初始化 Agent
     await agentManager.initializeDefaultAgents();
     
@@ -72,7 +70,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       stats: agentManager.getStats(),
-      results: results.map(r => ({
+      results: results.map((r: { agent: { name: string }; thought: { analysis: string; insights: string[]; suggestions: string[]; confidence: number }; action: { type: string; target: string; reason: string } }) => ({
         agent: r.agent.name,
         thought: {
           analysis: r.thought.analysis.slice(0, 200) + '...',

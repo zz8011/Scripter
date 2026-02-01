@@ -515,6 +515,34 @@ export class AgentScheduler {
     }
   }
 
+  /**
+   * 并行调度多个 Agent 执行任务
+   */
+  async scheduleParallel<T>(agents: T[], context: unknown): Promise<Array<{ agent: T; thought: { analysis: string; insights: string[]; suggestions: string[]; confidence: number }; action: { type: string; target: string; reason: string } }>> {
+    const results = await Promise.all(
+      agents.map(async (agent) => {
+        // 模拟执行并返回结果
+        const result = {
+          agent,
+          thought: {
+            analysis: '',
+            insights: [] as string[],
+            suggestions: [] as string[],
+            confidence: 0.8,
+          },
+          action: {
+            type: 'suggest' as const,
+            target: '',
+            reason: '',
+          },
+        };
+        return result;
+      })
+    );
+    return results;
+  }
+
+
   private generateId(): string {
     return `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }

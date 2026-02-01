@@ -9,7 +9,7 @@ import { getSessionWithDev } from '@/lib/session'
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSessionWithDev()
@@ -17,6 +17,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { projectId } = body
 
@@ -26,7 +27,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
     }
 
-    const character = await updateCharacter(params.id, projectId, body)
+    const character = await updateCharacter(id, projectId, body)
     if (!character) {
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
@@ -44,7 +45,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSessionWithDev()
@@ -52,6 +53,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const searchParams = request.nextUrl.searchParams
     const projectId = searchParams.get('projectId')
 
@@ -65,7 +67,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
     }
 
-    await deleteCharacter(params.id, projectId)
+    await deleteCharacter(id, projectId)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting character:', error)

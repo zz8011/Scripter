@@ -13,8 +13,8 @@ export interface Project {
   targetEpisodes: number
   genre: string[]
   currentStage: 'worldview' | 'character' | 'script' | 'optimize' | 'production'
-  createdAt: string
-  updatedAt: string
+  createdAt: Date | string
+  updatedAt: Date | string
 }
 
 export interface CreateProjectInput {

@@ -124,6 +124,7 @@ export interface Feedback {
  * 上下文
  */
 export interface Context {
+  sessionId?: string;
   taskId: string;
   projectId: string;
   userId: string;

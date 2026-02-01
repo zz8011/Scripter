@@ -4,6 +4,7 @@ import { getUserById, getUserByEmail, createUser } from '@/lib/db/queries/users'
 const SESSION_COOKIE_NAME = 'scripter_session'
 
 export interface Session {
+  sessionId: string
   user: {
     id: string
     email: string
@@ -75,7 +76,8 @@ export async function getDevSession(): Promise<Session> {
   }
 
   // In development, try to find or create a test user
-  if (process.env.NODE_ENV === 'development') {
+  // Extra check: ensure VERCEL_ENV is also 'development' to prevent accidental bypass in production
+  if (process.env.NODE_ENV === 'development' && process.env.VERCEL_ENV === 'development') {
     // Try to get existing test user
     let user = await getUserByEmail('dev@scripter.art')
 
@@ -94,6 +96,7 @@ export async function getDevSession(): Promise<Session> {
     }
 
     return {
+      sessionId: crypto.randomUUID(),
       user: {
         id: user.id,
         email: user.email,

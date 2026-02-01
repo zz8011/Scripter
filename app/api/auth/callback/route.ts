@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
 
     // Create session
     await createSession({
+      sessionId: crypto.randomUUID(),
       user: {
         id: user.id,
         email: user.email,
