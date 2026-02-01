@@ -5,9 +5,9 @@
  *   pnpm tsx scripts/seed.ts
  */
 
-import { db } from '../src/db'
-import { users, projects, characters, scenes } from '../src/db/schema'
-import { createUser } from '../src/db/queries/users'
+import { db } from '../lib/db'
+import { users, projects, characters, scenes } from '../lib/db/schema'
+import { createUser } from '../lib/db/queries/users'
 
 async function main() {
   console.log('🌱 Seeding database...\n')
