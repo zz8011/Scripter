@@ -205,6 +205,6 @@ ${script.content.slice(0, 2000)}
       water: '水（灵活、深邃）',
     };
     
-    return `五行：${elementNames[element]}，说话风格：${speakingStyle.formal > 0.7 ? '正式' : '随意'}，决策风格：${decisionStyle.analytical > 0.7 ? '分析型' : '直觉型'}`;
+    return `五行：${elementNames[element as keyof typeof elementNames]}，说话风格：${speakingStyle.formal > 0.7 ? '正式' : '随意'}，决策风格：${decisionStyle.analytical > 0.7 ? '分析型' : '直觉型'}`;
   }
 }

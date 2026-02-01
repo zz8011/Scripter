@@ -147,7 +147,7 @@ export class WorldBuilderAgent extends Agent {
 剧本类型：${projectSettings?.genre?.join('、') || '未知'}
 
 剧本内容（前 2000 字）：
-${script?.slice(0, 2000) || ''}
+${typeof script === 'string' ? script.slice(0, 2000) : script?.content?.slice(0, 2000) || ''}
 
 请以 JSON 格式返回分析结果：
 {
@@ -217,7 +217,7 @@ ${script?.slice(0, 2000) || ''}
    * 获取个性描述
    */
   private getPersonalityDescription(): string {
-    const { element, speakingStyle, decisionStyle } = this.getPersonality();
+    const { element, speakingStyle, decisionStyle } = this.personality;
 
     const elementNames: Record<string, string> = {
       wood: '木（生长、创造）',
