@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory, updateWorldviewItem, deleteWorldviewItem } from '@/lib/db/queries/worldview'
+import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory } from '@/lib/db/queries/worldview'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
 
@@ -68,3 +68,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create worldview item' }, { status: 500 })
   }
 }
+

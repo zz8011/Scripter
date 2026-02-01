@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Agent, AgentType, Message } from '../types';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Stethoscope, 
@@ -249,3 +249,5 @@ export function CollaborationVisualization({
     </Card>
   );
 }
+
+

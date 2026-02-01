@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createStoryboard, getStoryboardsByProjectId, getStoryboardsBySceneId, updateStoryboard, deleteStoryboard } from '@/lib/db/queries/storyboards'
+import { createStoryboard, getStoryboardsByProjectId, getStoryboardsBySceneId } from '@/lib/db/queries/storyboards'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
 
@@ -67,3 +67,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create storyboard' }, { status: 500 })
   }
 }
+

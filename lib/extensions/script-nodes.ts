@@ -51,7 +51,6 @@ export const SceneHeading = Node.create({
         // 检测以"场景"开头或全大写的段落
         tag: 'p',
         getAttrs: (node) => {
-          const html = (node as HTMLElement).innerHTML;
           const text = (node as HTMLElement).textContent || '';
 
           // 以"场景"开头
@@ -71,7 +70,7 @@ export const SceneHeading = Node.create({
   },
 
   // 渲染 HTML
-  renderHTML({ node }) {
+  renderHTML() {
     return [
       'div',
       mergeAttributes({
@@ -85,7 +84,7 @@ export const SceneHeading = Node.create({
   // 添加命令
   addCommands() {
     return {
-      setSceneHeading: () => ({ commands }: any) => {
+      setSceneHeading: () => ({ commands }: { commands: { setNode: (name: string) => boolean } }) => {
         return commands.setNode(this.name);
       },
     };
@@ -140,7 +139,7 @@ export const Character = Node.create({
     ];
   },
 
-  renderHTML({ node }) {
+  renderHTML() {
     return [
       'div',
       mergeAttributes({
@@ -153,7 +152,7 @@ export const Character = Node.create({
 
   addCommands() {
     return {
-      setCharacter: () => ({ commands }: any) => {
+      setCharacter: () => ({ commands }: { commands: { setNode: (name: string) => boolean } }) => {
         return commands.setNode(this.name);
       },
     };
@@ -187,7 +186,7 @@ export const Dialogue = Node.create({
     ];
   },
 
-  renderHTML({ node }) {
+  renderHTML() {
     return [
       'div',
       mergeAttributes({
@@ -200,7 +199,7 @@ export const Dialogue = Node.create({
 
   addCommands() {
     return {
-      setDialogue: () => ({ commands }: any) => {
+      setDialogue: () => ({ commands }: { commands: { setNode: (name: string) => boolean } }) => {
         return commands.setNode(this.name);
       },
     };
@@ -249,7 +248,7 @@ export const Action = Node.create({
     ];
   },
 
-  renderHTML({ node }) {
+  renderHTML() {
     return [
       'div',
       mergeAttributes({
@@ -262,7 +261,7 @@ export const Action = Node.create({
 
   addCommands() {
     return {
-      setAction: () => ({ commands }: any) => {
+      setAction: () => ({ commands }: { commands: { setNode: (name: string) => boolean } }) => {
         return commands.setNode(this.name);
       },
     };
@@ -309,7 +308,7 @@ export const Parenthetical = Node.create({
     ];
   },
 
-  renderHTML({ node }) {
+  renderHTML() {
     return [
       'div',
       mergeAttributes({
@@ -322,7 +321,7 @@ export const Parenthetical = Node.create({
 
   addCommands() {
     return {
-      setParenthetical: () => ({ commands }: any) => {
+      setParenthetical: () => ({ commands }: { commands: { setNode: (name: string) => boolean } }) => {
         return commands.setNode(this.name);
       },
     };

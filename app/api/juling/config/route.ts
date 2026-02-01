@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionWithDev } from '@/lib/session'
-import { getJulingConfigByUserId, updateJulingConfig, getOrCreateJulingConfig } from '@/lib/db/queries/juling-configs'
+import {  updateJulingConfig, getOrCreateJulingConfig } from '@/lib/db/queries/juling-configs'
 import { logger } from '@/lib/logger'
 
 /**
@@ -140,3 +140,4 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+

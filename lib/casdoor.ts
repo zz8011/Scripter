@@ -14,20 +14,21 @@ export async function getCasdoorSDK() {
 }
 
 // For backward compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const casdoor = {
-  getOAuthLink: async (...args: any[]) => {
+  getOAuthLink: async (...args: unknown[]) => {
     const sdk = await getCasdoorSDK()
-    // @ts-ignore
+    // @ts-expect-error - Casdoor SDK types are incomplete
     return sdk.getOAuthLink(...args)
   },
-  getAuthToken: async (...args: any[]) => {
+  getAuthToken: async (...args: unknown[]) => {
     const sdk = await getCasdoorSDK()
-    // @ts-ignore
+    // @ts-expect-error - Casdoor SDK types are incomplete
     return sdk.getAuthToken(...args)
   },
-  parseJwtToken: async (...args: any[]) => {
+  parseJwtToken: async (...args: unknown[]) => {
     const sdk = await getCasdoorSDK()
-    // @ts-ignore
+    // @ts-expect-error - Casdoor SDK types are incomplete
     return sdk.parseJwtToken(...args)
   },
 }

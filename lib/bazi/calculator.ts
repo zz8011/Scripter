@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 八字计算模块 (Bazi Calculator)
  * 
  * 功能:
@@ -572,3 +572,4 @@ export default {
   isValidDate,
   getShiChen,
 };
+

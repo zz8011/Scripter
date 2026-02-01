@@ -187,7 +187,7 @@ export const useEditorStore = create<EditorState>()(
       updateContent: (content) => {
         const paragraphs = extractParagraphs(content);
         const plainText = content
-          ?.content?.map((node: any) => node.content?.map((c: any) => c.text).join('')).join('\n') || '';
+          ?.content?.map((node: unknown) => (node as { content?: Array<{ text?: string }> })?.content?.map((c) => c.text).join('')).join('\n') || '';
 
         set({
           content,

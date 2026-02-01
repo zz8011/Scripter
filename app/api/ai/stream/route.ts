@@ -1,8 +1,10 @@
 import { NextRequest } from 'next/server'
 import { callZhipuAIStream, estimateTokens, type ZhipuMessage } from '@/lib/zhipu'
-import { checkUserQuota, useQuota } from '@/lib/quota'
+import { checkUserQuota, deductQuota } from '@/lib/quota'
 import { createAIConversation } from '@/lib/db/queries/ai-conversations'
 import { auth } from '@/lib/session'
+
+
 
 /**
  * POST /api/ai/stream
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Deduct quota (approximate)
-          await useQuota(session.user.id, estimatedTokens + tokenCount)
+          await deductQuota(session.user.id, estimatedTokens + tokenCount)
 
           // Save conversation
           if (projectId) {
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
                   timestamp: new Date(),
                   metadata: { tokensUsed: tokenCount },
                 },
-              ] as any,
+              ],
             })
           }
 
@@ -108,3 +110,5 @@ export async function POST(request: NextRequest) {
     return new Response('Failed to setup stream', { status: 500 })
   }
 }
+
+

@@ -10,7 +10,7 @@ import { Context } from '@/lib/agents/core/types';
 /**
  * GET /api/agents/test - 测试多 Agent 系统
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // 动态初始化 Agent Manager（避免构建时执行）
     const agentManager = AgentManager.getInstance();
@@ -96,3 +96,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

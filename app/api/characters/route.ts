@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createCharacter, getCharactersByProjectId, updateCharacter, deleteCharacter } from '@/lib/db/queries/characters'
+import { createCharacter, getCharactersByProjectId } from '@/lib/db/queries/characters'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
 
@@ -61,3 +61,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create character' }, { status: 500 })
   }
 }
+

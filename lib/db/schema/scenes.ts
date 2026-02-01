@@ -9,7 +9,7 @@ export const scenes = pgTable('scenes', {
   location: text('location').notNull(),
   timeOfDay: text('time_of_day').notNull(),
   intExt: text('int_ext').notNull(),
-  content: jsonb('content').$type<any>().notNull(), // TipTap JSON 格式
+  content: jsonb('content').$type<unknown>().notNull(), // TipTap JSON 格式
   duration: integer('duration').notNull().default(0),
   status: text('status', {
     enum: ['draft', 'completed']

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { callZhipuAI, estimateTokens, type ZhipuMessage } from '@/lib/zhipu'
-import { checkUserQuota, useQuota } from '@/lib/quota'
+import { checkUserQuota, deductQuota } from '@/lib/quota'
 import { createAIConversation, addMessageToConversation } from '@/lib/db/queries/ai-conversations'
 import { getSessionWithDev } from '@/lib/session'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MessageMetadata = Record<string, any>
 
 /**
  * POST /api/ai/chat
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // Deduct quota
     const actualTokens = response.usage.total_tokens
-    await useQuota(session.user.id, actualTokens)
+    await deductQuota(session.user.id, actualTokens)
 
     // Create or update conversation
     const assistantMessage = response.choices[0].message
@@ -60,13 +63,13 @@ export async function POST(request: NextRequest) {
         role: 'user',
         content: messages[messages.length - 1].content,
         timestamp: new Date(),
-        metadata: { tokensUsed: response.usage.prompt_tokens },
+        metadata: { tokensUsed: response.usage.prompt_tokens } as MessageMetadata,
       })
       conversation = await addMessageToConversation(conversationId, session.user.id, {
         role: 'assistant',
         content: assistantMessage.content,
         timestamp: new Date(),
-        metadata: { tokensUsed: response.usage.completion_tokens },
+        metadata: { tokensUsed: response.usage.completion_tokens } as MessageMetadata,
       })
     } else if (projectId) {
       conversation = await createAIConversation({
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
             timestamp: new Date(),
             metadata: { tokensUsed: response.usage.completion_tokens },
           },
-        ] as any,
+        ],
       })
     }
 

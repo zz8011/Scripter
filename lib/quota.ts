@@ -45,14 +45,23 @@ export async function checkUserQuota(userId: string, tokensNeeded: number): Prom
 
 /**
  * 扣除用户 AI 配额
+ * 注意：这不是 React Hook，只是普通的异步函数
  */
-export async function useQuota(userId: string, tokensUsed: number): Promise<void> {
+export async function deductQuota(userId: string, tokensUsed: number): Promise<void> {
   try {
     await deductAIQuota(userId, tokensUsed)
   } catch (error) {
     console.error('Error deducting quota:', error)
     throw error
   }
+}
+
+/**
+ * 扣除用户 AI 配额（兼容旧名称）
+ * @deprecated 请使用 deductQuota 替代
+ */
+export async function useQuota(userId: string, tokensUsed: number): Promise<void> {
+  return deductQuota(userId, tokensUsed)
 }
 
 /**

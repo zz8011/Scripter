@@ -13,7 +13,7 @@ const createProjectSchema = z.object({
   genre: z.array(z.string()).default([]),
 })
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSessionWithDev()
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const session = await getSessionWithDev()
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await _request.json()
     const validatedData = createProjectSchema.parse(body)
 
     const project = await createProject({
@@ -66,3 +66,5 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+

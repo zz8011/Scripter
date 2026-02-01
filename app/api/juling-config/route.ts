@@ -6,7 +6,7 @@ import { getSessionWithDev } from '@/lib/session'
  * GET /api/juling-config
  * Get user's Juling config
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSessionWithDev()
     if (!session?.user) {
@@ -40,3 +40,5 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update Juling config' }, { status: 500 })
   }
 }
+
+

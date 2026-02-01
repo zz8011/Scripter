@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getOAuthURL } from '@/lib/casdoor'
 import { generateCodeVerifier, generateCodeChallenge } from '@/lib/pkce'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const codeVerifier = generateCodeVerifier()
   const codeChallenge = generateCodeChallenge(codeVerifier)
 
@@ -19,3 +19,4 @@ export async function GET(request: NextRequest) {
 
   return response
 }
+

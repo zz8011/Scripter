@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionWithDev } from '@/lib/session';
-import { checkUserQuota, useQuota } from '@/lib/quota';
+import { checkUserQuota, deductQuota } from '@/lib/quota';
 import {
   SkillRegistry,
   FormatFixSkill,
@@ -18,7 +18,8 @@ import { Context } from '@/lib/agents/core/types';
  * GET /api/ai/skills
  * 获取所有可用的 Skills
  */
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSessionWithDev();
     if (!session) {
@@ -55,7 +56,8 @@ export async function GET(request: NextRequest) {
  * POST /api/ai/skills
  * 执行指定的 Skill
  */
-export async function POST(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function POST(_request: NextRequest) {
   try {
     const session = await getSessionWithDev();
     if (!session) {
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 解析请求体
-    const body = await request.json();
+    const body = await _request.json();
     const { skillId, skillName, input, projectId } = body;
 
     if (!skillId && !skillName) {
@@ -120,7 +122,7 @@ export async function POST(request: NextRequest) {
     const result = await skill.execute(context, input);
 
     // 扣除配额
-    await useQuota(session.user.id, 1);
+    await deductQuota(session.user.id, 1);
 
     return NextResponse.json({
       success: true,
@@ -167,3 +169,5 @@ function initializeSkills() {
   skillsInitialized = true;
   console.log('[Skills API] Skills 初始化完成');
 }
+
+

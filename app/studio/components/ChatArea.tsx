@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { Message, Agent, AgentType } from '../types';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
+
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { 
@@ -197,3 +197,4 @@ export function ChatArea({ messages, agents }: ChatAreaProps) {
     </Card>
   );
 }
+

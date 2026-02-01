@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '@/components/MainLayout';
 import { Button } from '@/components/ui/button';
 import { IconifyIcon } from '@/components/IconifyIcon';
@@ -397,3 +397,4 @@ export default function AgentDashboardPage() {
     </MainLayout>
   );
 }
+

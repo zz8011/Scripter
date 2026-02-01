@@ -237,3 +237,4 @@ export abstract class Agent {
     return `${this.name} (${this.role}) - ${this.state}`;
   }
 }
+

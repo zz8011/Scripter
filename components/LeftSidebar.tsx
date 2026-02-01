@@ -172,3 +172,4 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
     </>
   );
 }
+

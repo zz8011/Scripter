@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Storyboard } from '@/lib/types';
+// import type { Storyboard } from '@/lib/types';
 
 /* ==================================================
    扩展分镜类型 Extended Storyboard Types
@@ -149,7 +149,7 @@ const suggestCameraMovement = (visualDescription: string): string[] => {
   const description = visualDescription.toLowerCase();
 
   // 遍历所有运镜类型，匹配关键词
-  for (const [key, movement] of Object.entries(CAMERA_MOVEMENTS)) {
+  for (const movement of Object.values(CAMERA_MOVEMENTS)) {
     if (movement.keywords.some((keyword) => description.includes(keyword))) {
       suggestions.push(movement.name);
     }

@@ -60,7 +60,7 @@ function EditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('projectId');
-  const mode = searchParams.get('mode');
+  // const mode = searchParams.get('mode'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   // 编辑器状态
   const { plainText, wordCount, sceneCount, dialogueCount, updatePlainText, isDirty, setPlainText } = useEditorStore();
@@ -572,3 +572,5 @@ export default function EditorPage() {
     </Suspense>
   );
 }
+
+

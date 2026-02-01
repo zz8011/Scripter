@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   solarToLunar,
   calculateBazi,
@@ -378,3 +378,4 @@ describe('Bazi Calculator', () => {
     });
   });
 });
+

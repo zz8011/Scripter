@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createScene, getScenesByProjectId, getScenesByEpisode, updateScene, deleteScene } from '@/lib/db/queries/scenes'
+import { createScene, getScenesByProjectId, getScenesByEpisode } from '@/lib/db/queries/scenes'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
 
@@ -68,3 +68,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create scene' }, { status: 500 })
   }
 }
+
