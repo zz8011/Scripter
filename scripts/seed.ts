@@ -5,15 +5,16 @@
  *   pnpm tsx scripts/seed.ts
  */
 
-import { db } from '../lib/db'
+import { getDb } from '../lib/db'
 import { users, projects, characters, scenes } from '../lib/db/schema'
-import { createUser } from '../lib/db/queries/users'
 
 async function main() {
   console.log('🌱 Seeding database...\n')
+  
+  const db = getDb()
 
   // Create test user
-  const testUser = await createUser({
+  const [testUser] = await db.insert(users).values({
     email: 'test@scripter.art',
     name: '测试用户',
     plan: 'creator',
@@ -22,7 +23,7 @@ async function main() {
       used: 0,
       resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
-  })
+  }).returning()
   console.log(`✅ Created user: ${testUser.email}`)
 
   // Create test project

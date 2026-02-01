@@ -6,7 +6,7 @@
  *   pnpm tsx scripts/migrate.ts status  # 查看迁移状态
  */
 
-import { db } from '../src/db'
+import { db } from '../lib/db'
 import { sql } from 'drizzle-orm'
 
 const migrations = [
