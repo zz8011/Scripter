@@ -1,4 +1,4 @@
-import { db } from '../index'
+import { getDb } from '../index'
 import { worldviewItems } from '../schema/worldview'
 import { eq, and, desc, asc } from 'drizzle-orm'
 import type { NewWorldviewItem } from '../schema/worldview'
@@ -7,6 +7,7 @@ import type { NewWorldviewItem } from '../schema/worldview'
  * Create a new worldview item
  */
 export async function createWorldviewItem(data: NewWorldviewItem) {
+  const db = getDb()
   const [item] = await db.insert(worldviewItems).values(data).returning()
   return item
 }
@@ -15,6 +16,7 @@ export async function createWorldviewItem(data: NewWorldviewItem) {
  * Get worldview item by ID
  */
 export async function getWorldviewItemById(id: string) {
+  const db = getDb()
   const item = await db.query.worldviewItems.findFirst({
     where: eq(worldviewItems.id, id),
   })
@@ -25,6 +27,7 @@ export async function getWorldviewItemById(id: string) {
  * Get worldview items by project ID
  */
 export async function getWorldviewItemsByProjectId(projectId: string) {
+  const db = getDb()
   const items = await db.query.worldviewItems.findMany({
     where: eq(worldviewItems.projectId, projectId),
     orderBy: [asc(worldviewItems.order)],
@@ -39,6 +42,7 @@ export async function getWorldviewItemsByCategory(
   projectId: string,
   category: 'era' | 'geography' | 'social' | 'mystery' | 'culture' | 'economy' | 'custom'
 ) {
+  const db = getDb()
   const items = await db.query.worldviewItems.findMany({
     where: and(eq(worldviewItems.projectId, projectId), eq(worldviewItems.category, category)),
     orderBy: [asc(worldviewItems.order)],
@@ -50,6 +54,7 @@ export async function getWorldviewItemsByCategory(
  * Update worldview item
  */
 export async function updateWorldviewItem(id: string, projectId: string, data: Partial<NewWorldviewItem>) {
+  const db = getDb()
   const [item] = await db
     .update(worldviewItems)
     .set(data)
@@ -62,6 +67,7 @@ export async function updateWorldviewItem(id: string, projectId: string, data: P
  * Delete worldview item
  */
 export async function deleteWorldviewItem(id: string, projectId: string) {
+  const db = getDb()
   await db
     .delete(worldviewItems)
     .where(and(eq(worldviewItems.id, id), eq(worldviewItems.projectId, projectId)))

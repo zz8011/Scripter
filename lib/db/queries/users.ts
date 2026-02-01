@@ -1,14 +1,16 @@
-import { db } from '../index'
+import { getDb } from '../index'
 import { users } from '../schema/users'
 import { eq } from 'drizzle-orm'
 import type { NewUser } from '../schema/users'
 
 export async function createUser(data: NewUser) {
+  const db = getDb()
   const [user] = await db.insert(users).values(data).returning()
   return user
 }
 
 export async function getUserById(id: string) {
+  const db = getDb()
   const user = await db.query.users.findFirst({
     where: eq(users.id, id),
   })
@@ -16,6 +18,7 @@ export async function getUserById(id: string) {
 }
 
 export async function getUserByEmail(email: string) {
+  const db = getDb()
   const user = await db.query.users.findFirst({
     where: eq(users.email, email),
   })
@@ -23,6 +26,7 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function updateUserQuota(userId: string, used: number) {
+  const db = getDb()
   const [user] = await db
     .update(users)
     .set({
@@ -68,6 +72,7 @@ export async function resetAIQuota(userId: string) {
   const newResetDate = new Date()
   newResetDate.setMonth(newResetDate.getMonth() + 1)
 
+  const db = getDb()
   const [updated] = await db
     .update(users)
     .set({
