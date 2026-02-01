@@ -77,7 +77,6 @@ export class CodeReviewerAgent extends Agent {
    * 行动：提供代码改进建议
    */
   public async act(context: Context, thought: Thought): Promise<Action> {
- {
     this.setState('acting' as any);
     
     console.log(`[${this.name}] 生成改进建议...`);
@@ -114,18 +113,14 @@ export class CodeReviewerAgent extends Agent {
     
     // 如果是负面反馈，变得更谨慎
     if (feedback.type === 'negative') {
-      {
-        this.personality.decisionStyle.cautious = Math.min(1, this.personality.decisionStyle.cautious + 0.1);
-        this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
-      }
+      this.personality.decisionStyle.cautious = Math.min(1, this.personality.decisionStyle.cautious + 0.1);
+      this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
     }
     
     // 如果是正面反馈，增强信心
     if (feedback.type === 'positive') {
-      {
-        this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
-        this.personality.speakingStyle.direct = Math.min(1, this.personality.speakingStyle.direct + 0.05);
-      }
+      this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
+      this.personality.speakingStyle.direct = Math.min(1, this.personality.speakingStyle.direct + 0.05);
     }
   }
   
