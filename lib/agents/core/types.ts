@@ -14,6 +14,8 @@ export enum AgentRole {
   SCREENWRITER = 'screenwriter',        // 编剧
   READER = 'reader',                    // 读者
   PRODUCER = 'producer',                // 制片人
+  PLOT_PLANNER = 'plot-planner', // 情节策划
+  WORLD_BUILDER = 'world-builder', // 世界观构建
 }
 
 /**

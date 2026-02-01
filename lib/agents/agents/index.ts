@@ -5,3 +5,6 @@
 
 export * from './ScriptDoctorAgent';
 export * from './CharacterCoachAgent';
+export * from './PlotPlannerAgent';
+export * from './SceneDesignerAgent';
+export * from './WorldBuilderAgent';
