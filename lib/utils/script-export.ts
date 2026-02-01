@@ -136,10 +136,7 @@ export function exportToFountain(
   
   // 标题页
   if (options.includeTitlePage !== false) {
-    lines.push(`Title: ${project.title}`);
-    if (project.description) {
-      lines.push(`Description: ${project.description}`);
-    }
+    lines.push(`Title: ${project.name}`);
     lines.push('');
   }
   
@@ -166,13 +163,9 @@ export function exportToPlainText(
   
   // 标题
   if (options.includeTitlePage !== false) {
-    lines.push(project.title);
-    lines.push('='.repeat(project.title.length));
+    lines.push(project.name);
+    lines.push('='.repeat(project.name.length));
     lines.push('');
-    if (project.description) {
-      lines.push(project.description);
-      lines.push('');
-    }
   }
   
   // 场景内容
@@ -199,12 +192,8 @@ export function exportToMarkdown(
   
   // 标题页
   if (options.includeTitlePage !== false) {
-    lines.push(`# ${project.title}`);
+    lines.push(`# ${project.name}`);
     lines.push('');
-    if (project.description) {
-      lines.push(project.description);
-      lines.push('');
-    }
   }
   
   // 场景内容
@@ -259,7 +248,7 @@ export function exportToPDF(
   lines.push('<!DOCTYPE html>');
   lines.push('<html><head>');
   lines.push('<meta charset="UTF-8">');
-  lines.push('<title>' + project.title + '</title>');
+  lines.push('<title>' + project.name + '</title>');
   lines.push('<style>');
   lines.push(`
     @page {
@@ -302,10 +291,7 @@ export function exportToPDF(
   // 标题页
   if (options.includeTitlePage !== false) {
     lines.push('<div class="title-page">');
-    lines.push(`<h1>${project.title}</h1>`);
-    if (project.description) {
-      lines.push(`<p>${project.description}</p>`);
-    }
+    lines.push(`<h1>${project.name}</h1>`);
     lines.push('</div>');
   }
   
