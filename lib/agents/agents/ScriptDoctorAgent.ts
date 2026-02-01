@@ -3,7 +3,8 @@
    Script Doctor Agent
    ================================================== */
 
-import { Agent, Context, Thought, Action, AgentRole, Personality } from '../core/types';
+import { Agent } from '../core/Agent';
+import { Context, Thought, Action, AgentRole, Personality } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**

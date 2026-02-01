@@ -120,7 +120,8 @@ export class WorldBuilderAgent extends Agent {
    * 构建分析提示词
    */
   private buildAnalysisPrompt(context: Context): string {
-    const { script, projectSettings } = context;
+    const script = context.script as any;
+    const projectSettings = context.projectSettings;
 
     return `请分析以下剧本的世界观设定，重点关注：
 
