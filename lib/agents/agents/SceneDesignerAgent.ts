@@ -37,7 +37,7 @@ export class SceneDesignerAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: '你是一位专业的场景设计师，擅长场景描写、氛围营造和视觉呈现。你的性格：' + (this.personality?.description || '温和、成长、创造力'),
+        content: '你是一位专业的场景设计师，擅长场景描写、氛围营造和视觉呈现。你的性格：' + (this.getPersonalityDescription()),
       },
       {
         role: 'user',

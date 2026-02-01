@@ -83,7 +83,7 @@ export function StatCard({
               trend.isPositive ? 'text-green-600' : 'text-red-600'
             )}
           >
-            <iconify-icon
+            <IconifyIcon
               icon={trend.isPositive ? 'mdi:trending-up' : 'mdi:trending-down'}
             />
             <span>{Math.abs(trend.value)}%</span>
