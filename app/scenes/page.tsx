@@ -277,12 +277,11 @@ export default function ScenesPage() {
                   </div>
 
                   {/* 场景卡片网格 */}
-                  <SceneSortable
+                  <SceneSortable<Scene>
                     items={episodeScenes}
                     onChange={handleReorderScenes}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                  >
-                    {(scene) => (
+                    renderItem={(scene: Scene) => (
                       <div key={scene.id} className="group pl-8">
                         <SceneCard
                           scene={scene}
@@ -291,19 +290,18 @@ export default function ScenesPage() {
                         />
                       </div>
                     )}
-                  </SceneSortable>
+                  />
                 </div>
               ))}
           </div>
         ) : (
           /* 列表视图 - 拖拽排序 */
           <div className="max-w-4xl mx-auto">
-            <SceneSortable
+            <SceneSortable<Scene>
               items={filteredScenes}
               onChange={handleReorderScenes}
               className="space-y-3"
-            >
-              {(scene) => (
+              renderItem={(scene: Scene) => (
                 <div key={scene.id} className="group pl-8">
                   <SceneCard
                     scene={scene}
@@ -312,7 +310,7 @@ export default function ScenesPage() {
                   />
                 </div>
               )}
-            </SceneSortable>
+            />
           </div>
         )}
 
@@ -328,3 +326,4 @@ export default function ScenesPage() {
     </MainLayout>
   );
 }
+
