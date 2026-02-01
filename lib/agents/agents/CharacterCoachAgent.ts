@@ -27,7 +27,7 @@ export class CharacterCoachAgent extends Agent {
   public async think(context: Context): Promise<Thought> {
     this.setState(AgentState.THINKING);
     
-    console.log([] 开始分析人物和对白...);
+    console.log('[角色教练] 开始分析人物和对白...');
     
     // 构建分析提示词
     const prompt = this.buildAnalysisPrompt(context);
@@ -36,7 +36,7 @@ export class CharacterCoachAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: 你是一位专业的角色教练，擅长人物塑造、对白优化和一致性检查。你的性格：,
+        content: '你是一位专业的角色教练，擅长人物塑造、对白优化和一致性检查。你的性格：' + (this.personality?.motto || '智慧、灵活、深邃'),
       },
       {
         role: 'user',
@@ -61,7 +61,7 @@ export class CharacterCoachAgent extends Agent {
     
     this.thinkingHistory.push(thought);
     
-    console.log([] 分析完成，置信度: );
+    console.log('[角色教练] 分析完成，置信度:', confidence);
     
     return thought;
   }
@@ -72,7 +72,7 @@ export class CharacterCoachAgent extends Agent {
   public async act(context: Context, thought: Thought): Promise<Action> {
     this.setState(AgentState.ACTING);
     
-    console.log([] 生成人物优化建议...);
+    console.log('[角色教练] 生成人物优化建议...');
     
     // 根据思考结果生成行动
     const action: Action = {
@@ -84,13 +84,13 @@ export class CharacterCoachAgent extends Agent {
         suggestions: thought.suggestions,
         focus: this.determineFocus(thought),
       },
-      reason: 基于人物分析，发现  个可以优化的地方,
+      reason: '基于人物分析，发现 ' + thought.suggestions.length + ' 个可以优化的地方',
       timestamp: new Date(),
     };
     
     this.actionHistory.push(action);
     
-    console.log([] 行动建议生成完成);
+    console.log('[角色教练] 行动建议生成完成');
     
     return action;
   }
@@ -101,7 +101,7 @@ export class CharacterCoachAgent extends Agent {
   public async learn(feedback: any): Promise<void> {
     this.feedbackHistory.push(feedback);
     
-    console.log([] 学习反馈: );
+    console.log('[角色教练] 学习反馈:', feedback);
     
     // 如果是负面反馈，调整对白优化策略
     if (feedback.type === 'negative') {
@@ -121,7 +121,7 @@ export class CharacterCoachAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
     
-    return 请分析以下剧本中的人物和对白，重点关注：
+    return `请分析以下剧本中的人物和对白，重点关注：
 
 1. **人物塑造**：
    - 人物性格是否鲜明？
@@ -138,19 +138,18 @@ export class CharacterCoachAgent extends Agent {
    - 人物说话风格是否一致？
    - 人物关系是否清晰？
 
-剧本类型：
-类型：
+剧本类型：${projectSettings?.genre?.join('、') || '未知'}
 
 剧本内容（前 2000 字）：
-
+${script?.slice(0, 2000) || ''}
 
 请以 JSON 格式返回分析结果：
 {
-   analysis: 详细分析...,
-  insights: [洞察1, 洞察2, ...],
-  suggestions: [建议1, 建议2, ...],
-  confidence: 0.85
-};
+  "analysis": "详细分析...",
+  "insights": ["洞察1", "洞察2", ...],
+  "suggestions": ["建议1", "建议2", ...],
+  "confidence": 0.85
+}`;
   }
   
   /**
@@ -173,7 +172,7 @@ export class CharacterCoachAgent extends Agent {
         };
       }
     } catch (e) {
-      console.warn([] 解析分析结果失败，使用默认值);
+      console.warn('[角色教练] 解析分析结果失败，使用默认值');
     }
     
     // 解析失败，返回默认值
@@ -218,6 +217,6 @@ export class CharacterCoachAgent extends Agent {
       water: '水（灵活、深邃）',
     };
     
-    return 五行：，说话风格：，决策风格：;
+    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle.formal > 0.7 ? '正式' : '随意'}，决策风格：${decisionStyle.creative > 0.7 ? '创造型' : '分析型'}`;
   }
 }
