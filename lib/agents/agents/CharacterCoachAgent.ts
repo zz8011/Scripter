@@ -3,7 +3,8 @@
    Character Coach Agent
    ================================================== */
 
-import { Agent, Context, Thought, Action, AgentRole, Personality } from '../core/types';
+import { Agent } from '../core/Agent';
+import { Context, Thought, Action, AgentRole, Personality, AgentState } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -24,9 +25,9 @@ export class CharacterCoachAgent extends Agent {
    * 思考：分析人物和对白
    */
   public async think(context: Context): Promise<Thought> {
-    this.setState(AgentRole.CHARACTER_COACH as any);
+    this.setState(AgentState.THINKING);
     
-    console.log(`[${this.name}] 开始分析人物和对白...`);
+    console.log([] 开始分析人物和对白...);
     
     // 构建分析提示词
     const prompt = this.buildAnalysisPrompt(context);
@@ -35,7 +36,7 @@ export class CharacterCoachAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: `你是一位专业的角色教练，擅长人物塑造、对白优化和一致性检查。你的性格：${this.getPersonalityDescription()}`,
+        content: 你是一位专业的角色教练，擅长人物塑造、对白优化和一致性检查。你的性格：,
       },
       {
         role: 'user',
@@ -60,7 +61,7 @@ export class CharacterCoachAgent extends Agent {
     
     this.thinkingHistory.push(thought);
     
-    console.log(`[${this.name}] 分析完成，置信度: ${confidence}`);
+    console.log([] 分析完成，置信度: );
     
     return thought;
   }
@@ -69,9 +70,9 @@ export class CharacterCoachAgent extends Agent {
    * 行动：提出人物优化建议
    */
   public async act(context: Context, thought: Thought): Promise<Action> {
-    this.setState('acting' as any);
+    this.setState(AgentState.ACTING);
     
-    console.log(`[${this.name}] 生成人物优化建议...`);
+    console.log([] 生成人物优化建议...);
     
     // 根据思考结果生成行动
     const action: Action = {
@@ -83,13 +84,13 @@ export class CharacterCoachAgent extends Agent {
         suggestions: thought.suggestions,
         focus: this.determineFocus(thought),
       },
-      reason: `基于人物分析，发现 ${thought.suggestions.length} 个可以优化的地方`,
+      reason: 基于人物分析，发现  个可以优化的地方,
       timestamp: new Date(),
     };
     
     this.actionHistory.push(action);
     
-    console.log(`[${this.name}] 行动建议生成完成`);
+    console.log([] 行动建议生成完成);
     
     return action;
   }
@@ -100,7 +101,7 @@ export class CharacterCoachAgent extends Agent {
   public async learn(feedback: any): Promise<void> {
     this.feedbackHistory.push(feedback);
     
-    console.log(`[${this.name}] 学习反馈: ${feedback.type}`);
+    console.log([] 学习反馈: );
     
     // 如果是负面反馈，调整对白优化策略
     if (feedback.type === 'negative') {
@@ -120,7 +121,7 @@ export class CharacterCoachAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
     
-    return `请分析以下剧本中的人物和对白，重点关注：
+    return 请分析以下剧本中的人物和对白，重点关注：
 
 1. **人物塑造**：
    - 人物性格是否鲜明？
@@ -137,19 +138,19 @@ export class CharacterCoachAgent extends Agent {
    - 人物说话风格是否一致？
    - 人物关系是否清晰？
 
-剧本类型：${projectSettings.scriptType}
-类型：${projectSettings.genre.join(', ')}
+剧本类型：
+类型：
 
 剧本内容（前 2000 字）：
-${script.content.slice(0, 2000)}
+
 
 请以 JSON 格式返回分析结果：
 {
-  "analysis": "详细分析...",
-  "insights": ["洞察1", "洞察2", ...],
-  "suggestions": ["建议1", "建议2", ...],
-  "confidence": 0.85
-}`;
+   analysis: 详细分析...,
+  insights: [洞察1, 洞察2, ...],
+  suggestions: [建议1, 建议2, ...],
+  confidence: 0.85
+};
   }
   
   /**
@@ -172,7 +173,7 @@ ${script.content.slice(0, 2000)}
         };
       }
     } catch (e) {
-      console.warn(`[${this.name}] 解析分析结果失败，使用默认值`);
+      console.warn([] 解析分析结果失败，使用默认值);
     }
     
     // 解析失败，返回默认值
@@ -209,7 +210,7 @@ ${script.content.slice(0, 2000)}
   private getPersonalityDescription(): string {
     const { element, speakingStyle, decisionStyle } = this.personality;
     
-    const elementNames = {
+    const elementNames: Record<string, string> = {
       wood: '木（生长、创造）',
       fire: '火（热情、活跃）',
       earth: '土（稳重、可靠）',
@@ -217,6 +218,6 @@ ${script.content.slice(0, 2000)}
       water: '水（灵活、深邃）',
     };
     
-    return `五行：${elementNames[element]}，说话风格：${speakingStyle.poetic > 0.7 ? '诗意' : '直接'}，决策风格：${decisionStyle.creative > 0.7 ? '创造型' : '分析型'}`;
+    return 五行：，说话风格：，决策风格：;
   }
 }

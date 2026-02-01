@@ -1,7 +1,7 @@
 import { db } from '../index'
 import { storyboards } from '../schema/storyboards'
 import { eq, and, asc, desc } from 'drizzle-orm'
-import type { NewStoryboard } from '../schema/storyboards'
+import type { NewStoryboard, Storyboard } from '../schema/storyboards'
 
 /**
  * Create a new storyboard
@@ -15,9 +15,9 @@ export async function createStoryboard(data: NewStoryboard) {
  * Get storyboard by ID
  */
 export async function getStoryboardById(id: string) {
-  const storyboard = await db.query.storyboards.findFirst({
-    where: eq(storyboards.id, id),
-  })
+  const [storyboard] = await db.select().from(storyboards)
+    .where(eq(storyboards.id, id))
+    .limit(1)
   return storyboard
 }
 
@@ -25,10 +25,9 @@ export async function getStoryboardById(id: string) {
  * Get storyboards by project ID
  */
 export async function getStoryboardsByProjectId(projectId: string) {
-  const projectStoryboards = await db.query.storyboards.findMany({
-    where: eq(storyboards.projectId, projectId),
-    orderBy: [asc(storyboards.order)],
-  })
+  const projectStoryboards = await db.select().from(storyboards)
+    .where(eq(storyboards.projectId, projectId))
+    .orderBy(asc(storyboards.order))
   return projectStoryboards
 }
 
@@ -36,10 +35,9 @@ export async function getStoryboardsByProjectId(projectId: string) {
  * Get storyboards by scene ID
  */
 export async function getStoryboardsBySceneId(sceneId: string) {
-  const sceneStoryboards = await db.query.storyboards.findMany({
-    where: eq(storyboards.sceneId, sceneId),
-    orderBy: [asc(storyboards.order)],
-  })
+  const sceneStoryboards = await db.select().from(storyboards)
+    .where(eq(storyboards.sceneId, sceneId))
+    .orderBy(asc(storyboards.order))
   return sceneStoryboards
 }
 
@@ -78,6 +76,6 @@ export async function reorderStoryboards(sceneId: string, storyboardIds: string[
  * Get total duration for a scene
  */
 export async function getSceneStoryboardDuration(sceneId: string) {
-  const sceneStoryboards = await getStoryboardsBySceneId(sceneId)
+  const sceneStoryboards: Storyboard[] = await getStoryboardsBySceneId(sceneId)
   return sceneStoryboards.reduce((total, sb) => total + sb.duration, 0)
 }

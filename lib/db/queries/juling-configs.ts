@@ -7,9 +7,9 @@ import type { NewJulingConfig } from '../schema/juling-configs'
  * Create or get Juling config for user
  */
 export async function getOrCreateJulingConfig(userId: string) {
-  const existing = await db.query.julingConfigs.findFirst({
-    where: eq(julingConfigs.userId, userId),
-  })
+  const [existing] = await db.select().from(julingConfigs)
+    .where(eq(julingConfigs.userId, userId))
+    .limit(1)
 
   if (existing) {
     return existing
@@ -23,9 +23,9 @@ export async function getOrCreateJulingConfig(userId: string) {
  * Get Juling config by user ID
  */
 export async function getJulingConfigByUserId(userId: string) {
-  const config = await db.query.julingConfigs.findFirst({
-    where: eq(julingConfigs.userId, userId),
-  })
+  const [config] = await db.select().from(julingConfigs)
+    .where(eq(julingConfigs.userId, userId))
+    .limit(1)
   return config
 }
 

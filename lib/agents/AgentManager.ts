@@ -52,7 +52,7 @@ export class AgentManager {
     );
     this.registerAgent(characterCoach);
     
-    console.log(`[AgentManager] 默认 Agent 初始化完成，共 ${this.agents.size} 个`);
+    console.log([AgentManager] 默认 Agent 初始化完成，共  个);
   }
   
   /**
@@ -60,8 +60,13 @@ export class AgentManager {
    */
   public registerAgent(agent: any): void {
     this.agents.set(agent.id, agent);
-    this.agentBus.register(agent);
-    console.log(`[AgentManager] Agent 注册: ${agent.name} (${agent.id})`);
+    this.agentBus.registerAgent({
+      id: agent.id,
+      name: agent.name,
+      capabilities: agent.getAllSkills?.().map((s: any) => s.id) || [],
+      maxConcurrentTasks: 3,
+    });
+    console.log([AgentManager] Agent 注册:  ());
   }
   
   /**
@@ -71,8 +76,8 @@ export class AgentManager {
     const agent = this.agents.get(agentId);
     if (agent) {
       this.agents.delete(agentId);
-      this.agentBus.unregister(agentId);
-      console.log(`[AgentManager] Agent 注销: ${agent.name} (${agentId})`);
+      this.agentBus.unregisterAgent(agentId);
+      console.log([AgentManager] Agent 注销:  ());
     }
   }
   
@@ -123,7 +128,7 @@ export class AgentManager {
         role: agent.role,
         state: agent.getState(),
       })),
-      busStats: this.agentBus.getStats(),
+      busStats: this.agentBus.getQueueStatus(),
     };
   }
   

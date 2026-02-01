@@ -15,9 +15,9 @@ export async function createScene(data: NewScene) {
  * Get scene by ID
  */
 export async function getSceneById(id: string) {
-  const scene = await db.query.scenes.findFirst({
-    where: eq(scenes.id, id),
-  })
+  const [scene] = await db.select().from(scenes)
+    .where(eq(scenes.id, id))
+    .limit(1)
   return scene
 }
 
@@ -25,21 +25,22 @@ export async function getSceneById(id: string) {
  * Get scenes by project ID
  */
 export async function getScenesByProjectId(projectId: string) {
-  const projectScenes = await db.query.scenes.findMany({
-    where: eq(scenes.projectId, projectId),
-    orderBy: [asc(scenes.episodeNumber), asc(scenes.sceneNumber)],
-  })
+  const projectScenes = await db.select().from(scenes)
+    .where(eq(scenes.projectId, projectId))
+    .orderBy(asc(scenes.episodeNumber), asc(scenes.sceneNumber))
   return projectScenes
 }
+
+// Alias for backward compatibility
+export const getScenes = getScenesByProjectId
 
 /**
  * Get scenes by episode number
  */
 export async function getScenesByEpisode(projectId: string, episodeNumber: number) {
-  const episodeScenes = await db.query.scenes.findMany({
-    where: and(eq(scenes.projectId, projectId), eq(scenes.episodeNumber, episodeNumber)),
-    orderBy: [asc(scenes.sceneNumber)],
-  })
+  const episodeScenes = await db.select().from(scenes)
+    .where(and(eq(scenes.projectId, projectId), eq(scenes.episodeNumber, episodeNumber)))
+    .orderBy(asc(scenes.sceneNumber))
   return episodeScenes
 }
 

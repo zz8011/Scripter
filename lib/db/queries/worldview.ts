@@ -1,7 +1,7 @@
 import { getDb } from '../index'
 import { worldviewItems } from '../schema/worldview'
 import { eq, and, desc, asc } from 'drizzle-orm'
-import type { NewWorldviewItem } from '../schema/worldview'
+import type { NewWorldviewItem, WorldviewItem } from '../schema/worldview'
 
 /**
  * Create a new worldview item
@@ -17,9 +17,9 @@ export async function createWorldviewItem(data: NewWorldviewItem) {
  */
 export async function getWorldviewItemById(id: string) {
   const db = getDb()
-  const item = await db.query.worldviewItems.findFirst({
-    where: eq(worldviewItems.id, id),
-  })
+  const [item] = await db.select().from(worldviewItems)
+    .where(eq(worldviewItems.id, id))
+    .limit(1)
   return item
 }
 
@@ -28,10 +28,9 @@ export async function getWorldviewItemById(id: string) {
  */
 export async function getWorldviewItemsByProjectId(projectId: string) {
   const db = getDb()
-  const items = await db.query.worldviewItems.findMany({
-    where: eq(worldviewItems.projectId, projectId),
-    orderBy: [asc(worldviewItems.order)],
-  })
+  const items = await db.select().from(worldviewItems)
+    .where(eq(worldviewItems.projectId, projectId))
+    .orderBy(asc(worldviewItems.order))
   return items
 }
 
@@ -43,10 +42,9 @@ export async function getWorldviewItemsByCategory(
   category: 'era' | 'geography' | 'social' | 'mystery' | 'culture' | 'economy' | 'custom'
 ) {
   const db = getDb()
-  const items = await db.query.worldviewItems.findMany({
-    where: and(eq(worldviewItems.projectId, projectId), eq(worldviewItems.category, category)),
-    orderBy: [asc(worldviewItems.order)],
-  })
+  const items = await db.select().from(worldviewItems)
+    .where(and(eq(worldviewItems.projectId, projectId), eq(worldviewItems.category, category)))
+    .orderBy(asc(worldviewItems.order))
   return items
 }
 
@@ -87,16 +85,16 @@ export async function reorderWorldviewItems(projectId: string, itemIds: string[]
  * Get worldview items grouped by category
  */
 export async function getWorldviewItemsGrouped(projectId: string) {
-  const allItems = await getWorldviewItemsByProjectId(projectId)
+  const allItems: WorldviewItem[] = await getWorldviewItemsByProjectId(projectId)
 
   const grouped = {
-    era: [] as typeof allItems,
-    geography: [] as typeof allItems,
-    social: [] as typeof allItems,
-    mystery: [] as typeof allItems,
-    culture: [] as typeof allItems,
-    economy: [] as typeof allItems,
-    custom: [] as typeof allItems,
+    era: [] as WorldviewItem[],
+    geography: [] as WorldviewItem[],
+    social: [] as WorldviewItem[],
+    mystery: [] as WorldviewItem[],
+    culture: [] as WorldviewItem[],
+    economy: [] as WorldviewItem[],
+    custom: [] as WorldviewItem[],
   }
 
   for (const item of allItems) {

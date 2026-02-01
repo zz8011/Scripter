@@ -1,7 +1,7 @@
 import { db } from '../index'
 import { creativeMilestones } from '../schema/creative-milestones'
 import { eq, and, desc } from 'drizzle-orm'
-import type { NewCreativeMilestone } from '../schema/creative-milestones'
+import type { NewCreativeMilestone, CreativeMilestone } from '../schema/creative-milestones'
 
 /**
  * Create a creative milestone
@@ -15,9 +15,9 @@ export async function createCreativeMilestone(data: NewCreativeMilestone) {
  * Get milestone by ID
  */
 export async function getCreativeMilestoneById(id: string) {
-  const milestone = await db.query.creativeMilestones.findFirst({
-    where: eq(creativeMilestones.id, id),
-  })
+  const [milestone] = await db.select().from(creativeMilestones)
+    .where(eq(creativeMilestones.id, id))
+    .limit(1)
   return milestone
 }
 
@@ -25,10 +25,9 @@ export async function getCreativeMilestoneById(id: string) {
  * Get milestones by user ID
  */
 export async function getMilestonesByUserId(userId: string) {
-  const milestones = await db.query.creativeMilestones.findMany({
-    where: eq(creativeMilestones.userId, userId),
-    orderBy: [desc(creativeMilestones.achievedAt)],
-  })
+  const milestones = await db.select().from(creativeMilestones)
+    .where(eq(creativeMilestones.userId, userId))
+    .orderBy(desc(creativeMilestones.achievedAt))
   return milestones
 }
 
@@ -36,10 +35,9 @@ export async function getMilestonesByUserId(userId: string) {
  * Get milestones by project ID
  */
 export async function getMilestonesByProjectId(projectId: string) {
-  const milestones = await db.query.creativeMilestones.findMany({
-    where: eq(creativeMilestones.projectId, projectId),
-    orderBy: [desc(creativeMilestones.achievedAt)],
-  })
+  const milestones = await db.select().from(creativeMilestones)
+    .where(eq(creativeMilestones.projectId, projectId))
+    .orderBy(desc(creativeMilestones.achievedAt))
   return milestones
 }
 
@@ -47,12 +45,12 @@ export async function getMilestonesByProjectId(projectId: string) {
  * Get milestone by type for project
  */
 export async function getMilestoneByType(projectId: string, type: 'first_scene' | 'first_episode' | 'completed') {
-  const milestone = await db.query.creativeMilestones.findFirst({
-    where: and(
+  const [milestone] = await db.select().from(creativeMilestones)
+    .where(and(
       eq(creativeMilestones.projectId, projectId),
       eq(creativeMilestones.type, type)
-    ),
-  })
+    ))
+    .limit(1)
   return milestone
 }
 
@@ -99,7 +97,7 @@ export async function recordMilestone(
  * Get user's AI contribution stats
  */
 export async function getUserAIContributionStats(userId: string) {
-  const milestones = await getMilestonesByUserId(userId)
+  const milestones: CreativeMilestone[] = await getMilestonesByUserId(userId)
 
   const stats = {
     totalProjects: new Set(milestones.map(m => m.projectId)).size,

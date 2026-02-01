@@ -9,17 +9,19 @@ export async function createProject(data: NewProject) {
 }
 
 export async function getProjectById(id: string) {
-  const project = await db.query.projects.findFirst({
-    where: eq(projects.id, id),
-  })
+  const [project] = await db.select().from(projects)
+    .where(eq(projects.id, id))
+    .limit(1)
   return project
 }
 
+// Alias for backward compatibility
+export const getProject = getProjectById
+
 export async function getProjectsByUserId(userId: string) {
-  const userProjects = await db.query.projects.findMany({
-    where: eq(projects.userId, userId),
-    orderBy: [desc(projects.updatedAt)],
-  })
+  const userProjects = await db.select().from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(desc(projects.updatedAt))
   return userProjects
 }
 

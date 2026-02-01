@@ -3,7 +3,8 @@
    Plot Planner Agent
    ================================================== */
 
-import { Agent, Context, Thought, Action, AgentRole, Personality } from '../core/types';
+import { Agent } from '../core/Agent';
+import { Context, Thought, Action, AgentRole, Personality, AgentState } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -25,7 +26,7 @@ export class PlotPlannerAgent extends Agent {
    * 思考：分析剧情和构思反转
    */
   public async think(context: Context): Promise<Thought> {
-    this.setState('thinking' as any);
+    this.setState(AgentState.THINKING);
 
     console.log('[情节策划] 开始策划剧情...');
 
@@ -36,7 +37,7 @@ export class PlotPlannerAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: '你是一位专业的情节策划师，擅长剧情设计、冲突构建和反转构思。你的性格：' + (this.personality?.description || '热情、大胆、启发'),
+        content: '你是一位专业的情节策划师，擅长剧情设计、冲突构建和反转构思。你的性格：' + (this.personality?.motto || '热情、大胆、启发'),
       },
       {
         role: 'user',
@@ -70,7 +71,7 @@ export class PlotPlannerAgent extends Agent {
    * 行动：提出剧情优化建议
    */
   public async act(context: Context, thought: Thought): Promise<Action> {
-    this.setState('acting' as any);
+    this.setState(AgentState.ACTING);
 
     console.log('[情节策划] 生成剧情建议...');
 
@@ -122,7 +123,7 @@ export class PlotPlannerAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
 
-    return `请分析以下剧本的剧情设计，重点关注：
+    return 请分析以下剧本的剧情设计，重点关注：
 
 1. **剧情结构**：
    - 激励事件是否明确？
@@ -152,12 +153,12 @@ export class PlotPlannerAgent extends Agent {
 
 请以 JSON 格式返回分析结果：
 {
-   analysis: 详细分析...,
+    analysis: 详细分析...,
   insights: [洞察1, 洞察2, ...],
   suggestions: [建议1, 建议2, ...],
   confidence: 0.85
-};
-`  }
+}
+  }
 
   /**
    * 解析分析结果
@@ -226,6 +227,6 @@ export class PlotPlannerAgent extends Agent {
       water: '水（灵活、深邃）',
     };
 
-    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle}，决策风格：${decisionStyle}`;
+    return 五行：，说话风格：，决策风格：;
   }
 }

@@ -29,7 +29,7 @@ export abstract class Agent {
   public readonly personality: Personality;
   
   // 状态
-  protected state: AgentState = AgentState.ID;
+  protected state: AgentState = AgentState.IDLE;
   protected skills: Map<string, Skill> = new Map();
   protected messageQueue: Message[] = [];
   protected thinkingHistory: Thought[] = [];
@@ -123,8 +123,10 @@ export abstract class Agent {
       id: uuidv4(),
       from: this.id,
       to,
-      ...message,
+      type: message.type,
+      content: message.content,
       timestamp: new Date(),
+      metadata: message.metadata,
     };
     
     await this.agentBus.send(this.id, to, fullMessage);
@@ -147,7 +149,7 @@ export abstract class Agent {
    */
   protected async handleMessage(message: Message): Promise<void> {
     // 子类可以重写此方法
-    console.log(`[${this.name}] 收到消息:`, message.type);
+    console.log(`[${this.name}] 收到消息: ${message.type}`);
   }
   
   /**
@@ -232,6 +234,6 @@ export abstract class Agent {
    * 获取描述
    */
   public getDescription(): string {
-    return `${this.name} (${this.role}) - ${this.personality.motto || '无诗号'}`;
+    return `${this.name} (${this.role}) - ${this.state}`;
   }
 }

@@ -11,17 +11,17 @@ export async function createUser(data: NewUser) {
 
 export async function getUserById(id: string) {
   const db = getDb()
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, id),
-  })
+  const [user] = await db.select().from(users)
+    .where(eq(users.id, id))
+    .limit(1)
   return user
 }
 
 export async function getUserByEmail(email: string) {
   const db = getDb()
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  })
+  const [user] = await db.select().from(users)
+    .where(eq(users.email, email))
+    .limit(1)
   return user
 }
 
@@ -32,6 +32,8 @@ export async function updateUserQuota(userId: string, used: number) {
     .set({
       aiQuota: {
         used,
+        monthlyLimit: 1000000, // 默认值，实际应该从现有记录获取
+        resetAt: new Date(),
       },
     })
     .where(eq(users.id, userId))

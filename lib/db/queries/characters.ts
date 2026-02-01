@@ -1,7 +1,7 @@
 import { db } from '../index'
 import { characters } from '../schema/characters'
 import { eq, and, desc, asc } from 'drizzle-orm'
-import type { NewCharacter } from '../schema/characters'
+import type { NewCharacter, Character } from '../schema/characters'
 
 /**
  * Create a new character
@@ -15,9 +15,9 @@ export async function createCharacter(data: NewCharacter) {
  * Get character by ID
  */
 export async function getCharacterById(id: string) {
-  const character = await db.query.characters.findFirst({
-    where: eq(characters.id, id),
-  })
+  const [character] = await db.select().from(characters)
+    .where(eq(characters.id, id))
+    .limit(1)
   return character
 }
 
@@ -25,10 +25,9 @@ export async function getCharacterById(id: string) {
  * Get characters by project ID
  */
 export async function getCharactersByProjectId(projectId: string) {
-  const projectCharacters = await db.query.characters.findMany({
-    where: eq(characters.projectId, projectId),
-    orderBy: [desc(characters.createdAt)],
-  })
+  const projectCharacters = await db.select().from(characters)
+    .where(eq(characters.projectId, projectId))
+    .orderBy(desc(characters.createdAt))
   return projectCharacters
 }
 
@@ -112,7 +111,7 @@ export async function updateRelationship(
  * Search characters by name
  */
 export async function searchCharactersByName(projectId: string, searchTerm: string) {
-  const allCharacters = await getCharactersByProjectId(projectId)
+  const allCharacters: Character[] = await getCharactersByProjectId(projectId)
   return allCharacters.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   )

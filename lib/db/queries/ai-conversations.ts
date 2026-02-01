@@ -15,9 +15,9 @@ export async function createAIConversation(data: NewAIConversation) {
  * Get AI conversation by ID
  */
 export async function getAIConversationById(id: string) {
-  const conversation = await db.query.aiConversations.findFirst({
-    where: eq(aiConversations.id, id),
-  })
+  const [conversation] = await db.select().from(aiConversations)
+    .where(eq(aiConversations.id, id))
+    .limit(1)
   return conversation
 }
 
@@ -25,11 +25,10 @@ export async function getAIConversationById(id: string) {
  * Get AI conversations by user ID
  */
 export async function getAIConversationsByUserId(userId: string, limit = 50) {
-  const conversations = await db.query.aiConversations.findMany({
-    where: eq(aiConversations.userId, userId),
-    orderBy: [desc(aiConversations.updatedAt)],
-    limit,
-  })
+  const conversations = await db.select().from(aiConversations)
+    .where(eq(aiConversations.userId, userId))
+    .orderBy(desc(aiConversations.updatedAt))
+    .limit(limit)
   return conversations
 }
 
@@ -37,11 +36,10 @@ export async function getAIConversationsByUserId(userId: string, limit = 50) {
  * Get AI conversations by project ID
  */
 export async function getAIConversationsByProjectId(projectId: string, limit = 100) {
-  const conversations = await db.query.aiConversations.findMany({
-    where: eq(aiConversations.projectId, projectId),
-    orderBy: [desc(aiConversations.updatedAt)],
-    limit,
-  })
+  const conversations = await db.select().from(aiConversations)
+    .where(eq(aiConversations.projectId, projectId))
+    .orderBy(desc(aiConversations.updatedAt))
+    .limit(limit)
   return conversations
 }
 
@@ -49,11 +47,10 @@ export async function getAIConversationsByProjectId(projectId: string, limit = 1
  * Get AI conversations by agent
  */
 export async function getAIConversationsByAgent(userId: string, agent: string, limit = 50) {
-  const conversations = await db.query.aiConversations.findMany({
-    where: and(eq(aiConversations.userId, userId), eq(aiConversations.agent, agent)),
-    orderBy: [desc(aiConversations.updatedAt)],
-    limit,
-  })
+  const conversations = await db.select().from(aiConversations)
+    .where(and(eq(aiConversations.userId, userId), eq(aiConversations.agent, agent)))
+    .orderBy(desc(aiConversations.updatedAt))
+    .limit(limit)
   return conversations
 }
 

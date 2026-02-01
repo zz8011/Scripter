@@ -10,15 +10,21 @@
 
 export {
   AgentBus,
+  agentBus,
+} from './AgentBus';
+
+export type {
   Message,
   MessageType,
   MessagePriority,
   AgentRegistration,
-  agentBus,
 } from './AgentBus';
 
 export {
   AgentScheduler,
+} from './AgentScheduler';
+
+export type {
   Task,
   TaskStatus,
   TaskPriority,
@@ -28,6 +34,9 @@ export {
 
 export {
   IntentRouter,
+} from './IntentRouter';
+
+export type {
   Intent,
   Entity,
   IntentDefinition,
@@ -38,6 +47,10 @@ export {
 
 export {
   ContextManager,
+  contextManager,
+} from './ContextManager';
+
+export type {
   Session,
   SessionStatus,
   SessionContext,
@@ -45,5 +58,4 @@ export {
   MessageRecord,
   ContextSnapshot,
   ContextOptions,
-  contextManager,
 } from './ContextManager';
