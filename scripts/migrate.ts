@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 /**
  * 数据库迁移脚本
  *
@@ -6,7 +7,7 @@
  *   pnpm tsx scripts/migrate.ts status  # 查看迁移状态
  */
 
-import { db } from '../lib/db'
+import { getDb } from '../lib/db'
 import { sql } from 'drizzle-orm'
 
 const migrations = [
@@ -27,6 +28,8 @@ async function main() {
 
 async function showStatus() {
   console.log('Checking migration status...\n')
+  
+  const db = getDb()
 
   // Check if _migrations table exists
   const result = await db.execute(sql`
@@ -57,6 +60,8 @@ async function showStatus() {
 
 async function runMigrations() {
   console.log('Running migrations...\n')
+  
+  const db = getDb()
 
   // Create migrations table if not exists
   await db.execute(sql`
@@ -79,6 +84,8 @@ async function runMigrations() {
 
 async function applyMigration(name: string) {
   console.log(`Applying: ${name}`)
+  
+  const db = getDb()
 
   // Check if already applied
   const existing = await db.execute(sql`

@@ -183,7 +183,9 @@ async function checkDatabaseConnection(): Promise<boolean> {
   log('\n🔍 检查数据库连接...', 'blue');
 
   try {
-    const { db } = await import('@/lib/db');
+    const { getDb } = await import('@/lib/db');
+    const db = getDb();
+    const { sql } = await import('drizzle-orm');
     await db.execute(sql`SELECT 1`);
     log('✅ 数据库连接成功', 'green');
     return true;
