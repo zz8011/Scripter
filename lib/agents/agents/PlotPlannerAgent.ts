@@ -123,7 +123,7 @@ export class PlotPlannerAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
 
-    return 请分析以下剧本的剧情设计，重点关注：
+    return `请分析以下剧本的剧情设计，重点关注：
 
 1. **剧情结构**：
    - 激励事件是否明确？
@@ -145,19 +145,18 @@ export class PlotPlannerAgent extends Agent {
    - 是否有拖沓或跳跃？
    - 悬念设置是否得当？
 
-剧本类型：
-类型：
+剧本类型：${projectSettings?.genre?.join('、') || '未知'}
 
 剧本内容（前 2000 字）：
-
+${script?.slice(0, 2000) || ''}
 
 请以 JSON 格式返回分析结果：
 {
-    analysis: 详细分析...,
-  insights: [洞察1, 洞察2, ...],
-  suggestions: [建议1, 建议2, ...],
-  confidence: 0.85
-}
+  "analysis": "详细分析...",
+  "insights": ["洞察1", "洞察2", ...],
+  "suggestions": ["建议1", "建议2", ...],
+  "confidence": 0.85
+}`;
   }
 
   /**
@@ -227,6 +226,6 @@ export class PlotPlannerAgent extends Agent {
       water: '水（灵活、深邃）',
     };
 
-    return 五行：，说话风格：，决策风格：;
+    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle.formal > 0.7 ? '正式' : '随意'}，决策风格：${decisionStyle.creative > 0.7 ? '创造型' : '分析型'}`;
   }
 }
