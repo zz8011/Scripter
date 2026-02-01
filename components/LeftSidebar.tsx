@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { IconifyIcon } from "@/components/IconifyIcon";
 
 /* 导航菜单配置 */
 const NAV_ITEMS: NavItem[] = [
@@ -45,7 +46,7 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
         {/* 装饰背景 - 发光羽毛笔 */}
         <div className="sidebar-decoration">
           <div className="sidebar-glow" />
-          <iconify-icon
+          <IconifyIcon
             icon="lucide:feather"
             className="sidebar-feather animate-float-glow"
           />
@@ -66,11 +67,7 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
                 borderColor: 'var(--border-color)'
               }}
             >
-              <iconify-icon
-                icon="lucide:feather"
-                className="text-lg"
-                style={{ color: 'var(--logo-icon)' }}
-              />
+              <IconifyIcon icon="lucide:feather" className="text-lg" style={{ color: 'var(--logo-icon)' }} />
             </div>
             <div className="flex flex-col -gap-1">
               <span
@@ -122,7 +119,7 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
                     }
                   }}
                 >
-                  <iconify-icon icon={item.icon} className="text-xl" />
+                  <IconifyIcon icon={item.icon} className="text-xl" />
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
               );
@@ -169,7 +166,7 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
           }}
           aria-label={collapsed ? "展开导航" : "折叠导航"}
         >
-          <iconify-icon icon={collapsed ? "lucide:chevron-right" : "lucide:chevron-left"} className="text-sm" />
+          <IconifyIcon icon={collapsed ? "lucide:chevron-right" : "lucide:chevron-left"} className="text-sm" />
         </button>
       </div>
     </>
