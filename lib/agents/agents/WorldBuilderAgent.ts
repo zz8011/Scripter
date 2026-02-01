@@ -27,7 +27,7 @@ export class WorldBuilderAgent extends Agent {
   public async think(context: Context): Promise<Thought> {
     this.setState('thinking' as any);
 
-    console.log([] 开始构建世界观...);
+    console.log('[世界观构建] 开始构建世界观...');
 
     // 构建分析提示词
     const prompt = this.buildAnalysisPrompt(context);
@@ -36,7 +36,7 @@ export class WorldBuilderAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: 你是一位专业的世界观构建师，擅长设定整理、一致性检查和背景完善。你的性格：,
+        content: '你是一位专业的世界观构建师，擅长设定整理、一致性检查和背景完善。你的性格：' + (this.personality?.description || '稳重、可靠、包容'),
       },
       {
         role: 'user',
@@ -61,7 +61,7 @@ export class WorldBuilderAgent extends Agent {
 
     this.thinkingHistory.push(thought);
 
-    console.log([] 世界观分析完成，置信度: );
+    console.log('[世界观构建] 世界观分析完成，置信度:', confidence);
 
     return thought;
   }
@@ -72,7 +72,7 @@ export class WorldBuilderAgent extends Agent {
   public async act(context: Context, thought: Thought): Promise<Action> {
     this.setState('acting' as any);
 
-    console.log([] 生成世界观建议...);
+    console.log('[世界观构建] 生成世界观建议...');
 
     // 根据思考结果生成行动
     const action: Action = {
@@ -85,13 +85,13 @@ export class WorldBuilderAgent extends Agent {
         inconsistencies: this.identifyInconsistencies(thought),
         missingElements: this.identifyMissingElements(thought),
       },
-      reason: 基于世界观分析，发现  个需要完善的地方,
+      reason: '基于世界观分析，发现 ' + thought.suggestions.length + ' 个需要完善的地方',
       timestamp: new Date(),
     };
 
     this.actionHistory.push(action);
 
-    console.log([] 世界观建议生成完成);
+    console.log('[世界观构建] 世界观建议生成完成');
 
     return action;
   }
@@ -102,7 +102,7 @@ export class WorldBuilderAgent extends Agent {
   public async learn(feedback: any): Promise<void> {
     this.feedbackHistory.push(feedback);
 
-    console.log([] 学习反馈: );
+    console.log('[世界观构建] 学习反馈:', feedback);
 
     // 如果是负面反馈，变得更严谨
     if (feedback.type === 'negative') {
@@ -122,7 +122,7 @@ export class WorldBuilderAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
 
-    return 请分析以下剧本的世界观设定，重点关注：
+    return `请分析以下剧本的世界观设定，重点关注：
 
 1. **设定整理**：
    - 世界规则是否清晰？
@@ -157,7 +157,7 @@ export class WorldBuilderAgent extends Agent {
   suggestions: [建议1, 建议2, ...],
   confidence: 0.85
 };
-  }
+`  }
 
   /**
    * 解析分析结果
@@ -179,7 +179,7 @@ export class WorldBuilderAgent extends Agent {
         };
       }
     } catch (e) {
-      console.warn([] 解析分析结果失败，使用默认值);
+      console.warn('[世界观构建] 解析分析结果失败，使用默认值');
     }
 
     // 解析失败，返回默认值
@@ -228,6 +228,6 @@ export class WorldBuilderAgent extends Agent {
       water: '水（灵活、深邃）',
     };
 
-    return 五行：，说话风格：，决策风格：;
+    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle}，决策风格：${decisionStyle}`;
   }
 }

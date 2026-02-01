@@ -27,7 +27,7 @@ export class SceneDesignerAgent extends Agent {
   public async think(context: Context): Promise<Thought> {
     this.setState('thinking' as any);
 
-    console.log([] 开始设计场景...);
+    console.log('[场景设计] 开始设计场景...');
 
     // 构建分析提示词
     const prompt = this.buildAnalysisPrompt(context);
@@ -36,7 +36,7 @@ export class SceneDesignerAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: 你是一位专业的场景设计师，擅长场景描写、氛围营造和视觉呈现。你的性格：,
+        content: '你是一位专业的场景设计师，擅长场景描写、氛围营造和视觉呈现。你的性格：' + (this.personality?.description || '温和、成长、创造力'),
       },
       {
         role: 'user',
@@ -61,7 +61,7 @@ export class SceneDesignerAgent extends Agent {
 
     this.thinkingHistory.push(thought);
 
-    console.log([] 场景设计完成，置信度: );
+    console.log('[场景设计] 场景设计完成，置信度:', confidence);
 
     return thought;
   }
@@ -72,7 +72,7 @@ export class SceneDesignerAgent extends Agent {
   public async act(context: Context, thought: Thought): Promise<Action> {
     this.setState('acting' as any);
 
-    console.log([] 生成场景建议...);
+    console.log('[场景设计] 生成场景建议...');
 
     // 根据思考结果生成行动
     const action: Action = {
@@ -85,13 +85,13 @@ export class SceneDesignerAgent extends Agent {
         atmosphere: this.extractAtmosphere(thought),
         visualElements: this.extractVisualElements(thought),
       },
-      reason: 基于场景分析，发现  个可以优化的地方,
+      reason: '基于场景分析，发现 ' + thought.suggestions.length + ' 个可以优化的地方',
       timestamp: new Date(),
     };
 
     this.actionHistory.push(action);
 
-    console.log([] 场景建议生成完成);
+    console.log('[场景设计] 场景建议生成完成');
 
     return action;
   }
@@ -102,7 +102,7 @@ export class SceneDesignerAgent extends Agent {
   public async learn(feedback: any): Promise<void> {
     this.feedbackHistory.push(feedback);
 
-    console.log([] 学习反馈: );
+    console.log('[场景设计] 学习反馈:', feedback);
 
     // 如果是负面反馈，调整场景设计策略
     if (feedback.type === 'negative') {
@@ -122,7 +122,7 @@ export class SceneDesignerAgent extends Agent {
   private buildAnalysisPrompt(context: Context): string {
     const { script, projectSettings } = context;
 
-    return 请分析以下剧本的场景设计，重点关注：
+    return `请分析以下剧本的场景设计，重点关注：
 
 1. **场景描写**：
    - 场景是否清晰可感？
@@ -157,7 +157,7 @@ export class SceneDesignerAgent extends Agent {
   suggestions: [建议1, 建议2, ...],
   confidence: 0.85
 };
-  }
+`  }
 
   /**
    * 解析分析结果
@@ -179,7 +179,7 @@ export class SceneDesignerAgent extends Agent {
         };
       }
     } catch (e) {
-      console.warn([] 解析分析结果失败，使用默认值);
+      console.warn('[场景设计] 解析分析结果失败，使用默认值');
     }
 
     // 解析失败，返回默认值
@@ -227,6 +227,6 @@ export class SceneDesignerAgent extends Agent {
       water: '水（灵活、深邃）',
     };
 
-    return 五行：，说话风格：，决策风格：;
+    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle}，决策风格：${decisionStyle}`;
   }
 }
