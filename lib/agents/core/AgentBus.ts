@@ -1,173 +1,326 @@
-/* ==================================================
-   Agent 通信总线
-   Agent Communication Bus
-   ================================================== */
-
-import { v4 as uuidv4 } from 'uuid';
-import { Message, MessageType } from './types';
-
 /**
- * Agent 通信总线
- * 负责 Agent 之间的消息传递
+ * AgentBus - Agent 间消息总线
+ * 负责 Agent 之间的消息传递和通信协调
  */
+
+export interface Message {
+  id: string;
+  from: string;
+  to: string | string[] | 'broadcast';
+  type: MessageType;
+  payload: unknown;
+  timestamp: number;
+  correlationId?: string;
+  priority?: MessagePriority;
+}
+
+export enum MessageType {
+  TASK = 'task',
+  RESPONSE = 'response',
+  EVENT = 'event',
+  ERROR = 'error',
+  HEARTBEAT = 'heartbeat',
+  CONTROL = 'control',
+}
+
+export enum MessagePriority {
+  LOW = 1,
+  NORMAL = 2,
+  HIGH = 3,
+  CRITICAL = 4,
+}
+
+export interface AgentRegistration {
+  id: string;
+  name: string;
+  capabilities: string[];
+  maxConcurrentTasks: number;
+  metadata?: Record<string, unknown>;
+}
+
+type MessageHandler = (message: Message) => void | Promise<void>;
+type FilterPredicate = (message: Message) => boolean;
+
+interface Subscription {
+  id: string;
+  agentId: string;
+  handler: MessageHandler;
+  filter?: FilterPredicate;
+}
+
 export class AgentBus {
-  private agents: Map<string, any> = new Map(); // Agent ID -> Agent
+  private agents: Map<string, AgentRegistration> = new Map();
+  private subscriptions: Map<string, Subscription[]> = new Map();
+  private messageQueue: Message[] = [];
+  private readonly maxQueueSize: number;
+  private readonly maxAgents: number;
   private messageHistory: Message[] = [];
-  private subscriptions: Map<string, Set<string>> = new Map(); // Agent ID -> Topics
-  
-  /**
-   * 注册 Agent
-   */
-  public register(agent: any): void {
-    this.agents.set(agent.id, agent);
-    console.log(`[AgentBus] Agent 注册: ${agent.name} (${agent.id})`);
+  private readonly maxHistorySize: number;
+  private isProcessing: boolean = false;
+
+  constructor(options: { maxQueueSize?: number; maxAgents?: number; maxHistorySize?: number } = {}) {
+    this.maxQueueSize = options.maxQueueSize ?? 1000;
+    this.maxAgents = options.maxAgents ?? 5;
+    this.maxHistorySize = options.maxHistorySize ?? 100;
   }
-  
+
+  /**
+   * 注册 Agent 到总线
+   */
+  registerAgent(agent: AgentRegistration): boolean {
+    if (this.agents.size >= this.maxAgents && !this.agents.has(agent.id)) {
+      throw new Error(`Maximum number of agents (${this.maxAgents}) reached`);
+    }
+
+    if (this.agents.has(agent.id)) {
+      console.warn(`Agent ${agent.id} is already registered, updating registration`);
+    }
+
+    this.agents.set(agent.id, agent);
+    this.subscriptions.set(agent.id, []);
+    console.log(`Agent registered: ${agent.name} (${agent.id})`);
+    return true;
+  }
+
   /**
    * 注销 Agent
    */
-  public unregister(agentId: string): void {
+  unregisterAgent(agentId: string): boolean {
+    if (!this.agents.has(agentId)) {
+      return false;
+    }
+
     this.agents.delete(agentId);
     this.subscriptions.delete(agentId);
-    console.log(`[AgentBus] Agent 注销: ${agentId}`);
+    console.log(`Agent unregistered: ${agentId}`);
+    return true;
   }
-  
+
   /**
-   * 获取 Agent
+   * 订阅消息
    */
-  public getAgent(agentId: string): any | undefined {
-    return this.agents.get(agentId);
-  }
-  
-  /**
-   * 获取所有 Agent
-   */
-  public getAllAgents(): any[] {
-    return Array.from(this.agents.values());
-  }
-  
-  /**
-   * 发送消息（点对点）
-   */
-  public async send(from: string, to: string, message: Message): Promise<void> {
-    // 记录消息历史
-    this.messageHistory.push(message);
-    
-    // 查找接收者
-    const toAgent = this.agents.get(to);
-    if (!toAgent) {
-      console.warn(`[AgentBus] Agent 不存在: ${to}`);
-      return;
+  subscribe(
+    agentId: string,
+    handler: MessageHandler,
+    filter?: FilterPredicate
+  ): string {
+    if (!this.agents.has(agentId)) {
+      throw new Error(`Agent ${agentId} is not registered`);
     }
-    
-    // 发送消息
-    await toAgent.receiveMessage(message);
-    
-    console.log(`[AgentBus] 消息发送: ${from} -> ${to} (${message.type})`);
-  }
-  
-  /**
-   * 广播消息（发送给所有 Agent）
-   */
-  public async broadcast(from: string, message: Omit<Message, 'id' | 'from' | 'timestamp' | 'to'>): Promise<void> {
-    const fullMessage: Message = {
-      id: uuidv4(),
-      from,
-      to: 'broadcast',
-      ...message,
-      timestamp: new Date(),
+
+    const subscriptionId = this.generateId();
+    const subscription: Subscription = {
+      id: subscriptionId,
+      agentId,
+      handler,
+      filter,
     };
-    
-    // 记录消息历史
-    this.messageHistory.push(fullMessage);
-    
-    // 发送给所有 Agent（除了发送者）
-    for (const [agentId, agent] of this.agents) {
-      if (agentId !== from) {
-        await agent.receiveMessage(fullMessage);
-      }
-    }
-    
-    console.log(`[AgentBus] 广播消息: ${from} -> all (${message.type})`);
+
+    const subs = this.subscriptions.get(agentId) || [];
+    subs.push(subscription);
+    this.subscriptions.set(agentId, subs);
+
+    return subscriptionId;
   }
-  
-  /**
-   * 订阅主题
-   */
-  public subscribe(agentId: string, topic: string): void {
-    if (!this.subscriptions.has(agentId)) {
-      this.subscriptions.set(agentId, new Set());
-    }
-    this.subscriptions.get(agentId)!.add(topic);
-    console.log(`[AgentBus] Agent ${agentId} 订阅主题: ${topic}`);
-  }
-  
+
   /**
    * 取消订阅
    */
-  public unsubscribe(agentId: string, topic: string): void {
-    const topics = this.subscriptions.get(agentId);
-    if (topics) {
-      topics.delete(topic);
-      console.log(`[AgentBus] Agent ${agentId} 取消订阅: ${topic}`);
-    }
+  unsubscribe(agentId: string, subscriptionId: string): boolean {
+    const subs = this.subscriptions.get(agentId);
+    if (!subs) return false;
+
+    const index = subs.findIndex((s) => s.id === subscriptionId);
+    if (index === -1) return false;
+
+    subs.splice(index, 1);
+    return true;
   }
-  
+
   /**
-   * 发布主题消息
+   * 发送消息
    */
-  public async publish(topic: string, message: Omit<Message, 'id' | 'from' | 'timestamp' | 'to'>): Promise<void> {
-    // 找到订阅该主题的所有 Agent
-    for (const [agentId, agent] of this.agents) {
-      const topics = this.subscriptions.get(agentId);
-      if (topics && topics.has(topic)) {
-        const fullMessage: Message = {
-          id: uuidv4(),
-          from: 'system',
-          to: agentId,
-          ...message,
-          timestamp: new Date(),
-        };
-        
-        await agent.receiveMessage(fullMessage);
-      }
+  async send(message: Omit<Message, 'id' | 'timestamp'>): Promise<string> {
+    const fullMessage: Message = {
+      ...message,
+      id: this.generateId(),
+      timestamp: Date.now(),
+    };
+
+    // 检查队列容量
+    if (this.messageQueue.length >= this.maxQueueSize) {
+      throw new Error('Message queue is full');
     }
-    
-    console.log(`[AgentBus] 发布主题: ${topic}`);
+
+    this.messageQueue.push(fullMessage);
+    this.addToHistory(fullMessage);
+
+    // 立即处理高优先级消息
+    if (fullMessage.priority === MessagePriority.CRITICAL) {
+      await this.processMessage(fullMessage);
+    }
+
+    // 启动消息处理循环
+    if (!this.isProcessing) {
+      this.startProcessing();
+    }
+
+    return fullMessage.id;
   }
-  
+
+  /**
+   * 广播消息给所有 Agent
+   */
+  async broadcast(
+    from: string,
+    type: MessageType,
+    payload: unknown,
+    options: { priority?: MessagePriority; correlationId?: string } = {}
+  ): Promise<string> {
+    return this.send({
+      from,
+      to: 'broadcast',
+      type,
+      payload,
+      priority: options.priority ?? MessagePriority.NORMAL,
+      correlationId: options.correlationId,
+    });
+  }
+
+  /**
+   * 获取已注册的 Agent 列表
+   */
+  getAgents(): AgentRegistration[] {
+    return Array.from(this.agents.values());
+  }
+
+  /**
+   * 获取特定 Agent 信息
+   */
+  getAgent(agentId: string): AgentRegistration | undefined {
+    return this.agents.get(agentId);
+  }
+
   /**
    * 获取消息历史
    */
-  public getMessageHistory(): Message[] {
-    return this.messageHistory;
+  getMessageHistory(limit?: number): Message[] {
+    const history = [...this.messageHistory];
+    if (limit) {
+      return history.slice(-limit);
+    }
+    return history;
   }
-  
+
   /**
-   * 获取指定 Agent 的消息历史
+   * 获取队列状态
    */
-  public getMessageHistoryForAgent(agentId: string): Message[] {
-    return this.messageHistory.filter(m => m.from === agentId || m.to === agentId);
-  }
-  
-  /**
-   * 清理消息历史
-   */
-  public clearMessageHistory(): void {
-    this.messageHistory = [];
-  }
-  
-  /**
-   * 获取统计信息
-   */
-  public getStats() {
+  getQueueStatus(): { size: number; maxSize: number; isProcessing: boolean } {
     return {
-      agentCount: this.agents.size,
-      messageCount: this.messageHistory.length,
-      subscriptions: Array.from(this.subscriptions.entries()).map(([agentId, topics]) => ({
-        agentId,
-        topics: Array.from(topics),
-      })),
+      size: this.messageQueue.length,
+      maxSize: this.maxQueueSize,
+      isProcessing: this.isProcessing,
     };
   }
+
+  /**
+   * 清空消息队列
+   */
+  clearQueue(): void {
+    this.messageQueue = [];
+    console.log('Message queue cleared');
+  }
+
+  /**
+   * 清空历史记录
+   */
+  clearHistory(): void {
+    this.messageHistory = [];
+    console.log('Message history cleared');
+  }
+
+  private async startProcessing(): Promise<void> {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+
+    try {
+      while (this.messageQueue.length > 0) {
+        // 按优先级排序
+        this.messageQueue.sort((a, b) => (b.priority ?? 2) - (a.priority ?? 2));
+        
+        const message = this.messageQueue.shift();
+        if (message) {
+          await this.processMessage(message);
+        }
+      }
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  private async processMessage(message: Message): Promise<void> {
+    const targets = this.resolveTargets(message);
+
+    for (const agentId of targets) {
+      const subs = this.subscriptions.get(agentId) || [];
+      
+      for (const sub of subs) {
+        try {
+          // 应用过滤器
+          if (sub.filter && !sub.filter(message)) {
+            continue;
+          }
+
+          await sub.handler(message);
+        } catch (error) {
+          console.error(`Error handling message in agent ${agentId}:`, error);
+          
+          // 发送错误消息给发送方
+          await this.send({
+            from: 'system',
+            to: message.from,
+            type: MessageType.ERROR,
+            payload: {
+              originalMessageId: message.id,
+              error: error instanceof Error ? error.message : String(error),
+              agentId,
+            },
+            priority: MessagePriority.HIGH,
+            correlationId: message.correlationId,
+          });
+        }
+      }
+    }
+  }
+
+  private resolveTargets(message: Message): string[] {
+    if (message.to === 'broadcast') {
+      // 广播给所有 Agent（除了发送者）
+      return Array.from(this.agents.keys()).filter((id) => id !== message.from);
+    }
+
+    if (Array.isArray(message.to)) {
+      return message.to.filter((id) => this.agents.has(id));
+    }
+
+    if (this.agents.has(message.to)) {
+      return [message.to];
+    }
+
+    return [];
+  }
+
+  private addToHistory(message: Message): void {
+    this.messageHistory.push(message);
+    if (this.messageHistory.length > this.maxHistorySize) {
+      this.messageHistory.shift();
+    }
+  }
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
 }
+
+// 导出单例实例
+export const agentBus = new AgentBus();
