@@ -58,7 +58,9 @@ export async function POST(request: NextRequest) {
     const scenes = await getScenesByProjectId(projectId);
 
     // 转换为 Word 段落结构
-    const paragraphData = toWordParagraphs(project, scenes, {
+    const paragraphData = toWordParagraphs(
+      { ...project, createdAt: project.createdAt.toISOString(), updatedAt: project.updatedAt.toISOString() },
+      scenes.map(s => ({ ...s, createdAt: s.createdAt.toISOString() })), {
       includeTitlePage: options.includeTitlePage ?? true,
       includeSceneNumbers: options.includeSceneNumbers ?? true,
     });
@@ -215,7 +217,7 @@ export async function POST(request: NextRequest) {
     const encodedFileName = encodeURIComponent(fileName);
 
     // 返回 Word 文件
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

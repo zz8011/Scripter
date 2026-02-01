@@ -53,9 +53,10 @@ export interface CollaborationSession {
 
 // WebSocket 消息
 export interface WebSocketMessage {
-  type: 'agent_status' | 'agent_message' | 'collaboration_start' | 'collaboration_end' | 'user_message' | 'error';
+  type: 'agent_status' | 'agent_message' | 'collaboration_start' | 'collaboration_end' | 'user_message' | 'collaboration_control' | 'error';
   payload: unknown;
 }
 
 // 控制操作
 export type ControlAction = 'pause' | 'resume' | 'intervene' | 'skip' | 'reset';
+

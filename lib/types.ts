@@ -8,6 +8,7 @@ export interface AIMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  type?: 'text' | 'image' | 'file';
 }
 
 // 用户信息类型
@@ -114,3 +115,6 @@ export interface NavItem {
   href: string;
   icon: string;
 }
+
+
+

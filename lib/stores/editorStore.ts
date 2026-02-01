@@ -38,6 +38,8 @@ export interface EditorParagraph {
    ================================================== */
 
 interface EditorState {
+  // 设置纯文本内容（直接设置，不标记脏）
+  setPlainText: (text: string) => void;
   // TipTap JSON 内容
   content: TipTapContent | null;
 
@@ -107,7 +109,6 @@ interface EditorState {
   startSaving: () => void;
 
   // 完成保存
-  finishSaving: () => void;
 
   // 重置编辑器
   resetEditor: () => void;
@@ -295,6 +296,11 @@ export const useEditorStore = create<EditorState>()(
         isDirty: false,
       }),
 
+      setPlainText: (text) => {
+        set({ plainText: text });
+        get().updateStats();
+      },
+
       resetEditor: () => set({
         content: null,
         plainText: '',
@@ -344,3 +350,4 @@ export const selectIsDirty = (state: EditorState) => state.isDirty;
 
 // 是否正在保存
 export const selectIsSaving = (state: EditorState) => state.isSaving;
+

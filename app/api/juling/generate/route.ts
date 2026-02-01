@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('Error generating Juling Bazi:', error)
+    logger.error('Error generating Juling Bazi:', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '生成八字时发生错误' },
       { status: 500 }

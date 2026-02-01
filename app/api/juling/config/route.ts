@@ -36,7 +36,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    logger.error('Error fetching Juling config:', error)
+    logger.error('Error fetching Juling config:', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '获取剧灵配置时发生错误' },
       { status: 500 }
@@ -133,7 +133,7 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('Error updating Juling config:', error)
+    logger.error('Error updating Juling config:', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '更新剧灵配置时发生错误' },
       { status: 500 }

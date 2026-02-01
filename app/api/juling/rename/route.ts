@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('Error renaming Juling:', error)
+    logger.error('Error renaming Juling:', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '重命名剧灵时发生错误' },
       { status: 500 }
