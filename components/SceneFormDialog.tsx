@@ -282,8 +282,8 @@ export function SceneFormDialog({
               </label>
               <Select
                 value={formData.environment}
-                onValueChange={(value: Scene['environment']) =>
-                  setFormData({ ...formData, environment: value })
+                onValueChange={(value: string) =>
+                  setFormData({ ...formData, environment: value as Scene['environment'] })
                 }
               >
                 <SelectTrigger>
