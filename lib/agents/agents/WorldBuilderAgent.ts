@@ -3,7 +3,8 @@
    World Builder Agent
    ================================================== */
 
-import { Agent, Context, Thought, Action, AgentRole, Personality } from '../core/types';
+import { Agent } from '../core/Agent';
+import { Context, Thought, Action, AgentRole, Personality, AgentState } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -25,7 +26,7 @@ export class WorldBuilderAgent extends Agent {
    * 思考：分析世界观和设定
    */
   public async think(context: Context): Promise<Thought> {
-    this.setState('thinking' as any);
+    this.setState(AgentState.THINKING);
 
     console.log('[世界观构建] 开始构建世界观...');
 
@@ -36,7 +37,7 @@ export class WorldBuilderAgent extends Agent {
     const response = await callZhipuAI([
       {
         role: 'system',
-        content: '你是一位专业的世界观构建师，擅长设定整理、一致性检查和背景完善。你的性格：' + (this.personality?.description || '稳重、可靠、包容'),
+        content: '你是一位专业的世界观构建师，擅长设定整理、一致性检查和背景完善。你的性格：' + (this.getPersonalityDescription()),
       },
       {
         role: 'user',
@@ -70,7 +71,7 @@ export class WorldBuilderAgent extends Agent {
    * 行动：提出世界观优化建议
    */
   public async act(context: Context, thought: Thought): Promise<Action> {
-    this.setState('acting' as any);
+    this.setState(AgentState.ACTING);
 
     console.log('[世界观构建] 生成世界观建议...');
 
@@ -107,12 +108,11 @@ export class WorldBuilderAgent extends Agent {
     // 如果是负面反馈，变得更严谨
     if (feedback.type === 'negative') {
       this.personality.decisionStyle.cautious = Math.min(1, this.personality.decisionStyle.cautious + 0.05);
-      this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
     }
 
     // 如果是正面反馈，增强系统性
     if (feedback.type === 'positive') {
-      this.personality.decisionStyle.analytical = Math.min(1, this.personality.decisionStyle.analytical + 0.05);
+      this.personality.decisionStyle.creative = Math.min(1, this.personality.decisionStyle.creative + 0.05);
     }
   }
 
@@ -144,20 +144,19 @@ export class WorldBuilderAgent extends Agent {
    - 有哪些背景可以展开？
    - 有哪些元素可以增加真实感？
 
-剧本类型：
-类型：
+剧本类型：${projectSettings?.genre?.join('、') || '未知'}
 
 剧本内容（前 2000 字）：
-
+${script?.slice(0, 2000) || ''}
 
 请以 JSON 格式返回分析结果：
 {
-   analysis: 详细分析...,
-  insights: [洞察1, 洞察2, ...],
-  suggestions: [建议1, 建议2, ...],
-  confidence: 0.85
-};
-`  }
+  "analysis": "详细分析...",
+  "insights": ["洞察1", "洞察2", ...],
+  "suggestions": ["建议1", "建议2", ...],
+  "confidence": 0.85
+}`;
+  }
 
   /**
    * 解析分析结果
@@ -218,7 +217,7 @@ export class WorldBuilderAgent extends Agent {
    * 获取个性描述
    */
   private getPersonalityDescription(): string {
-    const { element, speakingStyle, decisionStyle } = this.personality;
+    const { element, speakingStyle, decisionStyle } = this.getPersonality();
 
     const elementNames: Record<string, string> = {
       wood: '木（生长、创造）',
@@ -228,6 +227,6 @@ export class WorldBuilderAgent extends Agent {
       water: '水（灵活、深邃）',
     };
 
-    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle}，决策风格：${decisionStyle}`;
+    return `五行：${elementNames[element] || element}，说话风格：${speakingStyle.formal > 0.7 ? '正式' : '随意'}，决策风格：${decisionStyle.creative > 0.7 ? '创造型' : '分析型'}`;
   }
 }
