@@ -76,3 +76,11 @@ tmp.*
 # package-lock.json
 # pnpm-lock.yaml
 # yarn.lock
+
+# Temporary fix scripts (auto-added by cleanup)
+fix*.js
+fix*.py
+check.js
+*-renderitem.js
+*.updated
+tmpclaude-*
