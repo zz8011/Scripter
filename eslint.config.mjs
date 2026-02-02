@@ -10,7 +10,11 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends(
+    "next/core-web-vitals",
+    "next/typescript",
+    "prettier" // 禁用与 Prettier 冲突的 ESLint 规则
+  ),
   {
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -18,11 +22,12 @@ const eslintConfig = [
       '@next/next/no-sync-scripts': 'warn',
       'react/no-unescaped-entities': 'warn',
       '@next/next/no-img-element': 'warn',
+      'prettier/prettier': 'warn', // 将 Prettier 问题报告为警告
     },
   },
   {
-    // 构建时允许 ESLint 警告
-    ignores: ['.next/**/*', 'node_modules/**/*'],
+    // 忽略的文件
+    ignores: ['.next/**/*', 'node_modules/**/*', 'drizzle/**/*', 'dist/**/*'],
   },
 ];
 
