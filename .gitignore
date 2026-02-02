@@ -84,3 +84,6 @@ check.js
 *-renderitem.js
 *.updated
 tmpclaude-*
+
+# Prototype (保留本地，不提交到Git)
+prototype/
