@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { getUserById, getUserByEmail, createUser } from '@/lib/db/queries/users'
 import type { CookieSession as Session } from '@/lib/types'
+import { logger } from './logger'
 
 const SESSION_COOKIE_NAME = 'scripter_session'
 
@@ -120,7 +121,7 @@ export async function getSessionWithDev(): Promise<Session | null> {
     try {
       return await getDevSession()
     } catch (error) {
-      console.error('Failed to get dev session:', error)
+      logger.error('Failed to get dev session:', error instanceof Error ? error : undefined)
       return null
     }
   }

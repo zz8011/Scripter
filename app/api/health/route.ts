@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sql } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/health
@@ -15,7 +16,7 @@ export async function GET() {
   try {
     // 检查数据库连接
     const result = await db.execute(sql`SELECT 1 as test`)
-    console.log('[Health] Database query result:', result)
+    logger.debug('[Health] Database query result', { result })
 
     const duration = Date.now() - startTime
 
@@ -31,7 +32,7 @@ export async function GET() {
     })
   } catch (error) {
     const duration = Date.now() - startTime
-    console.error('[Health] Database error:', error)
+    logger.error('[Health] Database error', error instanceof Error ? error : undefined)
 
     return NextResponse.json({
       status: 'unhealthy',

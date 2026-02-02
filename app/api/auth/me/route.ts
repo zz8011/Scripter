@@ -4,7 +4,7 @@
    ================================================== */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth';
 
 /**
  * GET /api/auth/me
@@ -12,7 +12,7 @@ import { auth } from '@/lib/auth';
  */
 export async function GET(_request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await requireAuth(_request);
 
     if (!session) {
       return NextResponse.json(

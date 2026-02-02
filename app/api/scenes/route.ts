@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createScene, getScenesByProjectId, getScenesByEpisode } from '@/lib/db/queries/scenes'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/scenes?projectId=xxx&episodeNumber=1
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ scenes })
   } catch (error) {
-    console.error('Error fetching scenes:', error)
+    logger.error('Error fetching scenes:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to fetch scenes' }, { status: 500 })
   }
 }
@@ -64,8 +65,7 @@ export async function POST(request: NextRequest) {
     const scene = await createScene(body)
     return NextResponse.json({ scene }, { status: 201 })
   } catch (error) {
-    console.error('Error creating scene:', error)
+    logger.error('Error creating scene:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to create scene' }, { status: 500 })
   }
 }
-

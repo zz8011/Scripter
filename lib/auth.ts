@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from './session'
 import { getUserById } from './db/queries/users'
 import { getProjectById } from './db/queries/projects'
+import { logger } from './logger'
 
 /**
  * 会话类型 - 用于 API 路由认证
@@ -47,7 +48,7 @@ export function withAuth(
           { status: error.statusCode }
         )
       }
-      console.error('Auth middleware error:', error)
+      logger.error('Auth middleware error:', error instanceof Error ? error : undefined)
       return NextResponse.json(
         { error: 'INTERNAL_ERROR', message: '服务器内部错误' },
         { status: 500 }
@@ -160,7 +161,9 @@ export async function requireAdmin(
   // 目前简单检查，后续可添加 roles 字段
   const user = await getUserById(session.userId)
   
-  if (!user || user.plan !== 'admin') {
+  // 临时：检查是否是特定管理员邮箱
+  const ADMIN_EMAILS = ['admin@scripter.art', 'dev@scripter.art']
+  if (!user || !ADMIN_EMAILS.includes(user.email)) {
     throw new AuthError('需要管理员权限', 'ADMIN_REQUIRED', 403)
   }
   
@@ -193,7 +196,7 @@ export function withProjectAuth(
           { status: error.statusCode }
         )
       }
-      console.error('Project auth middleware error:', error)
+      logger.error('Project auth middleware error:', error instanceof Error ? error : undefined)
       return NextResponse.json(
         { error: 'INTERNAL_ERROR', message: '服务器内部错误' },
         { status: 500 }

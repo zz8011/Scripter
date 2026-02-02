@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createCharacter, getCharactersByProjectId } from '@/lib/db/queries/characters'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/characters?projectId=xxx
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     const characters = await getCharactersByProjectId(projectId)
     return NextResponse.json({ characters })
   } catch (error) {
-    console.error('Error fetching characters:', error)
+    logger.error('Error fetching characters:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to fetch characters' }, { status: 500 })
   }
 }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     const character = await createCharacter(body)
     return NextResponse.json({ character }, { status: 201 })
   } catch (error) {
-    console.error('Error creating character:', error)
+    logger.error('Error creating character:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to create character' }, { status: 500 })
   }
 }

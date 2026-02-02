@@ -10,6 +10,7 @@ import { getProjectById } from '@/lib/db/queries/projects';
 import { getScenesByProjectId } from '@/lib/db/queries/scenes';
 import { toHTML } from '@/lib/utils/script-export';
 import { getSessionWithDev } from '@/lib/session';
+import { logger } from '@/lib/logger';
 
 /* ==================================================
    POST /api/export/pdf
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('PDF export error:', error);
+    logger.error('PDF export error:', error instanceof Error ? error : undefined);
     
     return NextResponse.json(
       { 

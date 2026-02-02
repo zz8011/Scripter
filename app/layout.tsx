@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_SC, Noto_Serif_SC, Courier_Prime } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/app/providers/theme-provider";
+import { AppProviders } from "@/app/providers/AppProviders";
 
 /* ==================================================
    字体配置 Font Configuration
@@ -86,12 +86,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${notoSansSC.variable} ${notoSerifSC.variable} ${courierPrime.variable} font-ui antialiased paper-texture`}
       >
-        <ThemeProvider
-          defaultTheme="system"
-          storageKey="scripter-theme"
-        >
+        <AppProviders>
           {children}
-        </ThemeProvider>
+        </AppProviders>
       </body>
     </html>
   );

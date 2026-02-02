@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProjectsByUserId, createProject } from '@/lib/db/queries'
 import { withAuth } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +23,7 @@ export const GET = withAuth(async (_request: NextRequest, session) => {
     const projects = await getProjectsByUserId(session.userId)
     return NextResponse.json({ projects })
   } catch (error) {
-    console.error('Get projects error:', error)
+    logger.error('Get projects error:', error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '获取项目列表失败' },
       { status: 500 }
@@ -54,7 +55,7 @@ export const POST = withAuth(async (request: NextRequest, session) => {
       )
     }
 
-    console.error('Create project error:', error)
+    logger.error('Create project error:', error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: '创建项目失败' },
       { status: 500 }
