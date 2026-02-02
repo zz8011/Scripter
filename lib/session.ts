@@ -1,17 +1,11 @@
 import { cookies } from 'next/headers'
 import { getUserById, getUserByEmail, createUser } from '@/lib/db/queries/users'
+import type { CookieSession as Session } from '@/lib/types'
 
 const SESSION_COOKIE_NAME = 'scripter_session'
 
-export interface Session {
-  sessionId: string
-  user: {
-    id: string
-    email: string
-    name: string
-  }
-  accessToken: string
-}
+// 为了向后兼容，重新导出类型
+export type { CookieSession as Session } from '@/lib/types'
 
 export async function createSession(session: Session) {
   const cookieStore = await cookies()
@@ -24,7 +18,10 @@ export async function createSession(session: Session) {
   })
 }
 
-export async function getSession(): Promise<Session | null> {
+export async function getSession(): Promise<Session | null>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getSession(_req?: Request): Promise<Session | null>
+export async function getSession(_req?: Request): Promise<Session | null> {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 

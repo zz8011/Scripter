@@ -4,24 +4,12 @@
    ================================================== */
 
 import { ApiError } from '@/lib/api/projects';
+import type { ExportOptions, ExportFormat, ExportProgress } from '@/lib/types';
 
 /* ==================================================
-   类型定义
+   类型重导出（保持向后兼容）
    ================================================== */
-
-export interface ExportOptions {
-  includeTitlePage?: boolean;
-  includeSceneNumbers?: boolean;
-  pageSize?: 'A4' | 'US-Letter';
-}
-
-export type ExportFormat = 'pdf' | 'word' | 'txt' | 'fountain';
-
-export interface ExportProgress {
-  status: 'idle' | 'preparing' | 'generating' | 'downloading' | 'completed' | 'error';
-  progress: number; // 0-100
-  message: string;
-}
+export type { ExportOptions, ExportFormat, ExportProgress } from '@/lib/types';
 
 /* ==================================================
    导出函数

@@ -1,12 +1,12 @@
 /* ==================================================
-   登录页面 Login Page
+   注册页面 Register Page
    剧灵 Scripter - 一支懂你的笔
    ================================================== */
 
 'use client';
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Card,
@@ -17,14 +17,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { IconifyIcon } from '@/components/IconifyIcon';
 import {
-  useLoginForm,
-  parseUrlError,
+  useRegisterForm,
   getFriendlyErrorMessage,
+  getPasswordStrengthColor,
 } from '@/lib/auth-client';
 
 /* ==================================================
@@ -34,7 +32,6 @@ import {
 function Logo() {
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Logo 图标 */}
       <div
         className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg"
         style={{
@@ -44,8 +41,6 @@ function Logo() {
       >
         <IconifyIcon icon="lucide:feather" className="text-3xl text-white" />
       </div>
-      
-      {/* 品牌名和标语 */}
       <div className="text-center">
         <h1
           className="text-3xl font-bold tracking-tight"
@@ -54,13 +49,13 @@ function Logo() {
             color: 'var(--ink-black)',
           }}
         >
-          剧灵
+          创建账号
         </h1>
         <p
           className="text-sm mt-1"
           style={{ color: 'var(--text-muted)' }}
         >
-          一支懂你的笔
+          开启你的剧本创作之旅
         </p>
       </div>
     </div>
@@ -68,34 +63,49 @@ function Logo() {
 }
 
 /* ==================================================
-   邮箱输入组件 Email Input
+   输入框组件 Input Components
    ================================================== */
 
-interface EmailInputProps {
+interface FormInputProps {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder: string;
   value: string;
   onChange: (value: string) => void;
   error?: string;
   disabled?: boolean;
+  icon: string;
 }
 
-function EmailInput({ value, onChange, error, disabled }: EmailInputProps) {
+function FormInput({
+  id,
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  error,
+  disabled,
+  icon,
+}: FormInputProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor="email" className="text-sm font-medium">
-        邮箱
+      <Label htmlFor={id} className="text-sm font-medium">
+        {label}
       </Label>
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
           <IconifyIcon
-            icon="lucide:mail"
+            icon={icon}
             className="text-lg"
             style={{ color: error ? 'var(--error-red)' : 'var(--text-muted)' }}
           />
         </div>
         <Input
-          id="email"
-          type="email"
-          placeholder="请输入邮箱地址"
+          id={id}
+          type={type}
+          placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
@@ -116,27 +126,81 @@ function EmailInput({ value, onChange, error, disabled }: EmailInputProps) {
 }
 
 /* ==================================================
-   密码输入组件 Password Input
+   密码强度指示器 Password Strength Indicator
+   ================================================== */
+
+interface PasswordStrengthIndicatorProps {
+  strength: 'weak' | 'medium' | 'strong';
+  score: number;
+  message: string;
+}
+
+function PasswordStrengthIndicator({
+  strength,
+  score,
+  message,
+}: PasswordStrengthIndicatorProps) {
+  const color = getPasswordStrengthColor(strength);
+  
+  return (
+    <div className="space-y-2">
+      {/* 进度条 */}
+      <div className="flex gap-1 h-1">
+        <div
+          className="flex-1 rounded-full transition-all duration-300"
+          style={{
+            backgroundColor: score >= 25 ? color : 'var(--border-color)',
+          }}
+        />
+        <div
+          className="flex-1 rounded-full transition-all duration-300"
+          style={{
+            backgroundColor: score >= 50 ? color : 'var(--border-color)',
+          }}
+        />
+        <div
+          className="flex-1 rounded-full transition-all duration-300"
+          style={{
+            backgroundColor: score >= 75 ? color : 'var(--border-color)',
+          }}
+        />
+      </div>
+      
+      {/* 文字说明 */}
+      <div className="flex items-center justify-between text-xs">
+        <span style={{ color }}>{message}</span>
+        <span style={{ color: 'var(--text-muted)' }}>{score}/100</span>
+      </div>
+    </div>
+  );
+}
+
+/* ==================================================
+   密码输入框（带显示/隐藏切换）Password Input
    ================================================== */
 
 interface PasswordInputProps {
+  id: string;
+  label: string;
+  placeholder: string;
   value: string;
   onChange: (value: string) => void;
   error?: string;
   disabled?: boolean;
-  label?: string;
-  placeholder?: string;
-  id?: string;
+  showStrength?: boolean;
+  strength?: PasswordStrengthIndicatorProps;
 }
 
-function PasswordInput({
+function PasswordInputWithToggle({
+  id,
+  label,
+  placeholder,
   value,
   onChange,
   error,
   disabled,
-  label = '密码',
-  placeholder = '请输入密码',
-  id = 'password',
+  showStrength,
+  strength,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -184,80 +248,31 @@ function PasswordInput({
           {error}
         </p>
       )}
+      {showStrength && strength && (
+        <PasswordStrengthIndicator {...strength} />
+      )}
     </div>
   );
 }
 
 /* ==================================================
-   错误提示组件 Error Alert
+   注册表单组件 Register Form
    ================================================== */
 
-interface ErrorAlertProps {
-  message: string;
-  onClose?: () => void;
-}
-
-function ErrorAlert({ message, onClose }: ErrorAlertProps) {
-  return (
-    <Alert
-      variant="destructive"
-      className="border"
-      style={{
-        backgroundColor: 'rgba(201, 98, 98, 0.08)',
-        borderColor: 'rgba(201, 98, 98, 0.2)',
-      }}
-    >
-      <div className="flex items-start gap-2">
-        <IconifyIcon
-          icon="lucide:alert-circle"
-          className="shrink-0 mt-0.5"
-          style={{ color: 'var(--error-red)' }}
-        />
-        <AlertDescription className="flex-1 text-sm" style={{ color: 'var(--error-red)' }}>
-          {message}
-        </AlertDescription>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="shrink-0 p-1 rounded hover:bg-red-100 transition-colors"
-          >
-            <IconifyIcon icon="lucide:x" className="text-sm" style={{ color: 'var(--error-red)' }} />
-          </button>
-        )}
-      </div>
-    </Alert>
-  );
-}
-
-/* ==================================================
-   登录表单组件 Login Form
-   ================================================== */
-
-function LoginForm() {
+function RegisterForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const {
     formData,
     errors,
     isLoading,
     serverError,
+    passwordStrength,
     setIsLoading,
     setServerError,
     validateForm,
     updateField,
-  } = useLoginForm();
+  } = useRegisterForm();
   const [mounted, setMounted] = useState(false);
-
-  // 获取重定向URL
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
-
-  // 检查 URL 错误参数
-  useEffect(() => {
-    const urlError = parseUrlError(searchParams);
-    if (urlError) {
-      setServerError(urlError);
-    }
-  }, [searchParams, setServerError]);
 
   // 入场动画
   useEffect(() => {
@@ -265,9 +280,9 @@ function LoginForm() {
   }, []);
 
   /**
-   * 处理邮箱密码登录
+   * 处理注册提交
    */
-  const handleEmailLogin = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -278,13 +293,14 @@ function LoginForm() {
     setServerError(null);
 
     try {
-      // TODO: 实现邮箱密码登录 API
-      // const response = await fetch('/api/auth/login/email', {
+      // TODO: 实现注册 API
+      // const response = await fetch('/api/auth/register', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({
       //     email: formData.email,
       //     password: formData.password,
+      //     name: formData.nickname,
       //   }),
       // });
 
@@ -294,92 +310,26 @@ function LoginForm() {
       // }
 
       // 目前使用模拟延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 如果选择了记住我，存储到 localStorage
-      if (formData.rememberMe) {
-        localStorage.setItem('scripter_remember_email', formData.email);
-      } else {
-        localStorage.removeItem('scripter_remember_email');
-      }
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      router.push(redirectUrl);
+      // 注册成功，跳转到登录页
+      router.push('/login?registered=true');
     } catch (err) {
       const errorCode = err instanceof Error ? err.message : 'default';
       setServerError(getFriendlyErrorMessage(errorCode));
     } finally {
       setIsLoading(false);
     }
-  }, [formData, validateForm, router, redirectUrl, setIsLoading, setServerError]);
-
-  /**
-   * 处理 Casdoor OAuth 登录
-   */
-  const handleCasdoorLogin = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setServerError(null);
-
-      const response = await fetch('/api/auth/login');
-      const data = await response.json();
-
-      if (data.url) {
-        // 存储重定向 URL 到 sessionStorage，登录成功后跳转
-        sessionStorage.setItem('scripter_redirect_after_login', redirectUrl);
-        window.location.href = data.url;
-      } else {
-        setServerError('无法获取登录链接，请稍后重试');
-      }
-    } catch {
-      setServerError(getFriendlyErrorMessage('network_error'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [redirectUrl, setIsLoading, setServerError]);
-
-  /**
-   * 处理开发模式快速登录
-   */
-  const handleDevLogin = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setServerError(null);
-
-      const response = await fetch('/api/auth/dev-login', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        router.push(redirectUrl);
-      } else {
-        setServerError('开发模式登录失败');
-      }
-    } catch {
-      setServerError(getFriendlyErrorMessage('network_error'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router, redirectUrl, setIsLoading, setServerError]);
-
-  // 检查是否开发模式
-  const isDev = process.env.NODE_ENV === 'development';
-
-  // 加载记住的邮箱
-  useEffect(() => {
-    const rememberedEmail = localStorage.getItem('scripter_remember_email');
-    if (rememberedEmail) {
-      updateField('email', rememberedEmail);
-      updateField('rememberMe', true);
-    }
-  }, [updateField]);
+  }, [formData, validateForm, router, setIsLoading, setServerError]);
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4 transition-all duration-500`}
+      className="min-h-screen flex items-center justify-center p-4 py-8"
       style={{
         backgroundColor: 'var(--paper-bg)',
         opacity: mounted ? 1 : 0,
         transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'all 0.5s ease-out',
       }}
     >
       <Card
@@ -393,65 +343,86 @@ function LoginForm() {
           <Logo />
         </CardHeader>
 
-        <CardContent className="space-y-6 pt-6">
+        <CardContent className="space-y-5 pt-6">
           {/* 服务器错误提示 */}
           {serverError && (
-            <ErrorAlert
-              message={serverError}
-              onClose={() => setServerError(null)}
-            />
+            <Alert
+              variant="destructive"
+              className="border"
+              style={{
+                backgroundColor: 'rgba(201, 98, 98, 0.08)',
+                borderColor: 'rgba(201, 98, 98, 0.2)',
+              }}
+            >
+              <div className="flex items-start gap-2">
+                <IconifyIcon
+                  icon="lucide:alert-circle"
+                  className="shrink-0 mt-0.5"
+                  style={{ color: 'var(--error-red)' }}
+                />
+                <AlertDescription className="flex-1 text-sm" style={{ color: 'var(--error-red)' }}>
+                  {serverError}
+                </AlertDescription>
+              </div>
+            </Alert>
           )}
 
-          {/* 邮箱密码登录表单 */}
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <EmailInput
+          {/* 注册表单 */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* 昵称 */}
+            <FormInput
+              id="nickname"
+              label="昵称"
+              placeholder="请输入昵称"
+              value={formData.nickname}
+              onChange={(value) => updateField('nickname', value)}
+              error={errors.nickname}
+              disabled={isLoading}
+              icon="lucide:user"
+            />
+
+            {/* 邮箱 */}
+            <FormInput
+              id="email"
+              label="邮箱"
+              type="email"
+              placeholder="请输入邮箱地址"
               value={formData.email}
               onChange={(value) => updateField('email', value)}
               error={errors.email}
               disabled={isLoading}
+              icon="lucide:mail"
             />
 
-            <PasswordInput
+            {/* 密码 */}
+            <PasswordInputWithToggle
+              id="password"
+              label="密码"
+              placeholder="请输入密码（至少8位，包含字母和数字）"
               value={formData.password}
               onChange={(value) => updateField('password', value)}
               error={errors.password}
               disabled={isLoading}
+              showStrength={formData.password.length > 0}
+              strength={passwordStrength}
             />
 
-            {/* 记住我和忘记密码 */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember"
-                  checked={formData.rememberMe}
-                  onCheckedChange={(checked) =>
-                    updateField('rememberMe', checked as boolean)
-                  }
-                  disabled={isLoading}
-                />
-                <Label
-                  htmlFor="remember"
-                  className="text-sm cursor-pointer"
-                  style={{ color: 'var(--ink-secondary)' }}
-                >
-                  记住我
-                </Label>
-              </div>
+            {/* 确认密码 */}
+            <PasswordInputWithToggle
+              id="confirmPassword"
+              label="确认密码"
+              placeholder="请再次输入密码"
+              value={formData.confirmPassword}
+              onChange={(value) => updateField('confirmPassword', value)}
+              error={errors.confirmPassword}
+              disabled={isLoading}
+            />
 
-              <Link
-                href="/forgot-password"
-                className="text-sm hover:underline transition-colors"
-                style={{ color: 'var(--brand-gold)' }}
-              >
-                忘记密码？
-              </Link>
-            </div>
-
-            {/* 登录按钮 */}
+            {/* 注册按钮 */}
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 text-base font-medium"
+              className="w-full h-11 text-base font-medium mt-6"
               style={{
                 backgroundColor: 'var(--brand-gold)',
                 color: 'var(--button-text-on-dark)',
@@ -460,65 +431,31 @@ function LoginForm() {
               {isLoading ? (
                 <>
                   <IconifyIcon icon="lucide:loader-2" className="animate-spin mr-2" />
-                  登录中...
+                  注册中...
                 </>
               ) : (
-                '登 录'
+                '创 建 账 号'
               )}
             </Button>
           </form>
 
-          {/* 注册链接 */}
-          <div className="text-center">
-            <span style={{ color: 'var(--text-muted)' }}>还没有账号？</span>
+          {/* 登录链接 */}
+          <div className="text-center pt-2">
+            <span style={{ color: 'var(--text-muted)' }}>已有账号？</span>
             <Link
-              href="/register"
+              href="/login"
               className="ml-1 font-medium hover:underline transition-colors"
               style={{ color: 'var(--brand-gold)' }}
             >
-              立即注册 →
+              立即登录 →
             </Link>
           </div>
-
-          <Separator className="my-4">
-            <span
-              className="px-2 text-xs uppercase tracking-wider"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              或使用
-            </span>
-          </Separator>
-
-          {/* OAuth 登录按钮 */}
-          <Button
-            onClick={handleCasdoorLogin}
-            disabled={isLoading}
-            variant="outline"
-            className="w-full h-11 text-base"
-            style={{ borderColor: 'var(--border-color)' }}
-          >
-            <IconifyIcon icon="lucide:shield-check" className="mr-2" />
-            使用 Casdoor 登录
-          </Button>
-
-          {/* 开发模式快速登录 */}
-          {isDev && (
-            <Button
-              onClick={handleDevLogin}
-              disabled={isLoading}
-              variant="ghost"
-              className="w-full h-11 text-base"
-            >
-              <IconifyIcon icon="lucide:zap" className="mr-2" style={{ color: 'var(--warning-orange)' }} />
-              <span style={{ color: 'var(--warning-orange)' }}>开发模式快速登录</span>
-            </Button>
-          )}
         </CardContent>
 
         <CardFooter className="flex-col gap-4 pt-0">
           {/* 服务条款 */}
           <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-            登录即表示您同意我们的
+            注册即表示您同意我们的
             <Link href="/terms" className="hover:underline" style={{ color: 'var(--brand-gold)' }}>
               服务条款
             </Link>
@@ -527,21 +464,6 @@ function LoginForm() {
               隐私政策
             </Link>
           </p>
-
-          {/* 开发模式提示 */}
-          {isDev && (
-            <div
-              className="w-full p-3 rounded-lg text-xs text-center"
-              style={{
-                backgroundColor: 'rgba(232, 168, 88, 0.1)',
-                border: '1px solid rgba(232, 168, 88, 0.2)',
-                color: 'var(--warning-orange)',
-              }}
-            >
-              <IconifyIcon icon="lucide:info" className="inline mr-1" />
-              当前处于开发模式，可使用"开发模式快速登录"
-            </div>
-          )}
         </CardFooter>
       </Card>
     </div>
@@ -552,7 +474,7 @@ function LoginForm() {
    加载中组件 Loading State
    ================================================== */
 
-function LoginLoading() {
+function RegisterLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--paper-bg)' }}>
       <div className="text-center">
@@ -571,10 +493,10 @@ function LoginLoading() {
    页面导出 Page Export
    ================================================== */
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
-    <Suspense fallback={<LoginLoading />}>
-      <LoginForm />
+    <Suspense fallback={<RegisterLoading />}>
+      <RegisterForm />
     </Suspense>
   );
 }

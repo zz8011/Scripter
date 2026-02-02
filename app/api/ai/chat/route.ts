@@ -50,6 +50,15 @@ export async function POST(request: NextRequest) {
       maxTokens: 2000,
     })
 
+    // Check if fallback response
+    if ('isFallback' in response) {
+      return NextResponse.json({
+        content: response.content,
+        isFallback: true,
+        error: response.error,
+      })
+    }
+
     // Deduct quota
     const actualTokens = response.usage.total_tokens
     await deductQuota(session.user.id, actualTokens)

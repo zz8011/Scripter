@@ -5,28 +5,12 @@
 
 import { Scene } from '@/lib/api/scenes';
 import { Project } from '@/lib/api/projects';
+import type { ScriptElement, ExportOptions, TipTapNode } from '@/lib/types';
 
 /* ==================================================
-   类型定义
+   类型重导出（保持向后兼容）
    ================================================== */
-
-export interface ScriptElement {
-  type: 'scene-heading' | 'character' | 'dialogue' | 'action' | 'parenthetical' | 'text';
-  content: string;
-}
-
-export interface ExportOptions {
-  includeTitlePage?: boolean;
-  includeSceneNumbers?: boolean;
-  pageSize?: 'A4' | 'US-Letter';
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface TipTapNode extends Record<string, any> {
-  type?: string;
-  text?: string;
-  content?: TipTapNode[];
-}
+export type { ScriptElement, ExportOptions } from '@/lib/types';
 
 /* ==================================================
    TipTap JSON 解析

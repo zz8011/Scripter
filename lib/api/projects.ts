@@ -4,6 +4,8 @@
  * API client for project-related operations
  */
 
+import type { ApiError } from '@/lib/types'
+
 export interface Project {
   id: string
   userId: string
@@ -40,18 +42,9 @@ export interface ProjectResponse {
 }
 
 /**
- * API error class
+ * API error class - 从 types.ts 重新导出
  */
-export class ApiError extends Error {
-  constructor(
-    public message: string,
-    public status: number,
-    public details?: unknown
-  ) {
-    super(message)
-    this.name = 'ApiError'
-  }
-}
+export { ApiError } from '@/lib/types'
 
 /**
  * Fetch wrapper with error handling

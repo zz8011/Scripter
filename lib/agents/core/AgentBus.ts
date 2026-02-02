@@ -546,6 +546,8 @@ export class AgentBus extends EventEmitter {
   }
 }
 
-// ==================== 默认导出 ====================
+// ==================== 单例导出 ====================
+
+export const agentBus = new AgentBus();
 
 export default AgentBus;

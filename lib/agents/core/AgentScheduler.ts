@@ -4,10 +4,17 @@
 
 import { AgentBus, AgentMessage, agentBus } from './AgentBus';
 
+export enum TaskPriority {
+  CRITICAL = 'CRITICAL',
+  HIGH = 'HIGH',
+  NORMAL = 'NORMAL',
+  LOW = 'LOW'
+}
+
 export interface Task {
   id: string;
   type: string;
-  priority: 'CRITICAL' | 'HIGH' | 'NORMAL' | 'LOW';
+  priority: TaskPriority;
   payload: any;
   agentId: string;
   timeout?: number;
@@ -228,6 +235,30 @@ export class AgentScheduler {
    */
   getActiveTimerCount(): number {
     return this.runningTasks.size;
+  }
+
+  /**
+   * 并行调度多个Agent执行任务
+   */
+  async scheduleParallel(agents: string[], context: any): Promise<any[]> {
+    const promises = agents.map(agentId => {
+      const taskId = this.submitTask({
+        type: 'PARALLEL_EXECUTION',
+        priority: TaskPriority.NORMAL,
+        payload: context,
+        agentId,
+        timeout: 30000
+      });
+      
+      return new Promise((resolve) => {
+        // 模拟任务完成处理
+        setTimeout(() => {
+          resolve({ agentId, taskId, status: 'completed' });
+        }, 100);
+      });
+    });
+    
+    return Promise.all(promises);
   }
 }
 

@@ -4,7 +4,7 @@ import { getUserById } from './db/queries/users'
 import { getProjectById } from './db/queries/projects'
 
 /**
- * 会话类型
+ * 会话类型 - 用于 API 路由认证
  */
 export interface Session {
   id: string
@@ -57,11 +57,28 @@ export function withAuth(
 }
 
 /**
+ * 将 CookieSession 转换为 AuthSession
+ * 注意: 这是为了兼容原有的不一致设计
+ */
+function convertToAuthSession(cookieSession: Awaited<ReturnType<typeof getSession>>): Session | null {
+  if (!cookieSession) return null
+  
+  return {
+    id: cookieSession.sessionId,
+    userId: cookieSession.user.id,
+    email: cookieSession.user.email,
+    name: cookieSession.user.name,
+    accessToken: cookieSession.accessToken,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+  }
+}
+
+/**
  * 检查并返回当前会话
  * 如果没有会话则抛出 AuthError
  */
 export async function requireAuth(req: NextRequest): Promise<Session> {
-  const session = await getSession(req)
+  const session = convertToAuthSession(await getSession(req))
   
   if (!session) {
     throw new AuthError('请先登录', 'UNAUTHORIZED', 401)
