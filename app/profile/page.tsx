@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ interface UserProfile {
   avatar?: string;
   plan: string;
   createdAt: string;
+  updatedAt: string;
   aiQuota: {
     monthlyLimit: number;
     used: number;
@@ -46,6 +47,7 @@ interface UserProfile {
    ================================================== */
 
 function ProfileForm() {
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,63 +59,95 @@ function ProfileForm() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        // TODO: 调用获取用户资料 API
-        // const response = await fetch('/api/auth/me');
-        // const data = await response.json();
+        setIsLoading(true);
+        setError(null);
 
-        // 模拟数据
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const mockProfile: UserProfile = {
-          id: 'user-123',
-          email: 'user@example.com',
-          name: '剧灵用户',
-          avatar: undefined,
-          plan: 'creator',
-          createdAt: '2024-01-15T00:00:00Z',
-          aiQuota: {
-            monthlyLimit: 2000000,
-            used: 450000,
-            resetAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.push('/login');
+            return;
+          }
+          throw new Error(data.message || '获取用户资料失败');
+        }
+
+        if (!data.user) {
+          throw new Error('用户数据为空');
+        }
+
+        const userData: UserProfile = {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          avatar: data.user.avatar,
+          plan: data.user.plan || 'free',
+          createdAt: data.user.createdAt,
+          updatedAt: data.user.updatedAt,
+          aiQuota: data.user.aiQuota || {
+            monthlyLimit: 500,
+            used: 0,
+            resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           },
         };
 
-        setProfile(mockProfile);
-        setNickname(mockProfile.name);
-      } catch {
-        setError('加载用户资料失败');
+        setProfile(userData);
+        setNickname(userData.name);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '加载用户资料失败';
+        setError(message);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadProfile();
-  }, []);
+  }, [router]);
 
   // 保存资料
   const handleSave = useCallback(async () => {
     if (!profile) return;
+
+    // 验证昵称
+    if (!nickname.trim()) {
+      setError('昵称不能为空');
+      return;
+    }
+
+    if (nickname.trim().length > 50) {
+      setError('昵称不能超过50个字符');
+      return;
+    }
+
+    if (nickname === profile.name) {
+      setSuccess('资料未更改');
+      return;
+    }
 
     setIsSaving(true);
     setError(null);
     setSuccess(null);
 
     try {
-      // TODO: 调用更新用户资料 API
-      // const response = await fetch('/api/auth/profile', {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ name: nickname }),
-      // });
+      const response = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nickname.trim() }),
+      });
 
-      // if (!response.ok) throw new Error('保存失败');
+      const data = await response.json();
 
-      // 模拟延迟
-      await new Promise(resolve => setTimeout(resolve, 800));
+      if (!response.ok) {
+        throw new Error(data.message || '保存失败');
+      }
 
-      setProfile(prev => prev ? { ...prev, name: nickname } : null);
+      // 更新本地状态
+      setProfile(prev => prev ? { ...prev, name: nickname.trim() } : null);
       setSuccess('资料已更新');
-    } catch {
-      setError('保存失败，请重试');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '保存失败，请重试';
+      setError(message);
     } finally {
       setIsSaving(false);
     }
@@ -138,6 +172,17 @@ function ProfileForm() {
     return num.toLocaleString('zh-CN');
   };
 
+  // 获取套餐显示名称
+  const getPlanName = (plan: string) => {
+    const planNames: Record<string, string> = {
+      free: '免费版',
+      creator: '创作者版',
+      pro: '专业版',
+      studio: '工作室版',
+    };
+    return planNames[plan] || plan;
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -147,6 +192,14 @@ function ProfileForm() {
           style={{ color: 'var(--brand-gold)' }}
         />
       </div>
+    );
+  }
+
+  if (!profile && error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
@@ -210,6 +263,8 @@ function ProfileForm() {
                 size="sm"
                 className="mt-2"
                 style={{ borderColor: 'var(--border-color)' }}
+                disabled
+                title="头像上传功能即将上线"
               >
                 <IconifyIcon icon="lucide:upload" className="mr-2" />
                 上传头像
@@ -241,7 +296,11 @@ function ProfileForm() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder="请输入昵称"
+                maxLength={50}
               />
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {nickname.length}/50 字符
+              </p>
             </div>
           </div>
 
@@ -288,11 +347,8 @@ function ProfileForm() {
               </div>
               <div>
                 <p className="font-medium">当前套餐</p>
-                <p className="text-sm capitalize" style={{ color: 'var(--text-muted)' }}>
-                  {profile.plan === 'free' && '免费版'}
-                  {profile.plan === 'creator' && '创作者版'}
-                  {profile.plan === 'pro' && '专业版'}
-                  {profile.plan === 'admin' && '管理员'}
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  {getPlanName(profile.plan)}
                 </p>
               </div>
             </div>
@@ -361,7 +417,7 @@ function ProfileForm() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" style={{ borderColor: 'var(--border-color)' }}>
+            <Button variant="outline" style={{ borderColor: 'var(--border-color)' }} disabled>
               修改
             </Button>
           </div>
@@ -383,7 +439,7 @@ function ProfileForm() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" style={{ borderColor: 'var(--border-color)' }}>
+            <Button variant="outline" style={{ borderColor: 'var(--border-color)' }} disabled>
               管理
             </Button>
           </div>

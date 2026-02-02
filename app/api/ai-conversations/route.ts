@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAIConversation, getAIConversationsByUserId, getAIConversationsByProjectId, addMessageToConversation } from '@/lib/db/queries/ai-conversations'
 import { getProjectById } from '@/lib/db/queries/projects'
 import { getSessionWithDev } from '@/lib/session'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/ai-conversations?projectId=xxx
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ conversations })
   } catch (error) {
-    console.error('Error fetching AI conversations:', error)
+    logger.error('Error fetching AI conversations:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to fetch AI conversations' }, { status: 500 })
   }
 }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     })
     return NextResponse.json({ conversation }, { status: 201 })
   } catch (error) {
-    console.error('Error creating AI conversation:', error)
+    logger.error('Error creating AI conversation:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to create AI conversation' }, { status: 500 })
   }
 }

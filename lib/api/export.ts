@@ -132,7 +132,7 @@ export async function exportToText(
 ): Promise<Blob> {
   onProgress?.({
     status: 'preparing',
-    progress: 10,
+    progress: 20,
     message: '准备导出数据...',
   });
 
@@ -150,7 +150,7 @@ export async function exportToText(
 
   onProgress?.({
     status: 'generating',
-    progress: 50,
+    progress: 70,
     message: '生成文本文件...',
   });
 
@@ -161,7 +161,7 @@ export async function exportToText(
 
   onProgress?.({
     status: 'downloading',
-    progress: 80,
+    progress: 90,
     message: '下载文件...',
   });
 

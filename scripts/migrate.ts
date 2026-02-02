@@ -12,6 +12,7 @@ import { sql } from 'drizzle-orm'
 
 const migrations = [
   '0000_init',
+  '0001_add_password_fields',
 ]
 
 async function main() {

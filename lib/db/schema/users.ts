@@ -5,6 +5,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
   avatar: text('avatar'),
+  password: text('password'), // 密码哈希，允许 null 用于 OAuth 用户
   plan: text('plan', {
     enum: ['free', 'creator', 'pro', 'studio']
   }).notNull().default('free'),

@@ -9,6 +9,7 @@ import { getProjectById } from '@/lib/db/queries/projects';
 import { getScenesByProjectId } from '@/lib/db/queries/scenes';
 import { toWordParagraphs } from '@/lib/utils/script-export';
 import { getSessionWithDev } from '@/lib/session';
+import { updateExportProgress } from '../progress/route';
 
 /* ==================================================
    POST /api/export/word
@@ -16,6 +17,8 @@ import { getSessionWithDev } from '@/lib/session';
    ================================================== */
 
 export async function POST(request: NextRequest) {
+  let projectId = '';
+  
   try {
     // 认证检查
     const session = await getSessionWithDev();
@@ -28,7 +31,8 @@ export async function POST(request: NextRequest) {
 
     // 解析请求体
     const body = await request.json();
-    const { projectId, options = {} } = body;
+    const { projectId: pid, options = {} } = body;
+    projectId = pid;
 
     if (!projectId) {
       return NextResponse.json(
@@ -37,9 +41,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 更新进度 - 准备中
+    updateExportProgress(projectId, session.user.id, {
+      status: 'preparing',
+      progress: 10,
+      message: '准备导出数据...',
+    });
+
     // 获取项目数据
     const project = await getProjectById(projectId);
     if (!project) {
+      updateExportProgress(projectId, session.user.id, {
+        status: 'error',
+        progress: 0,
+        message: '项目不存在',
+      });
       return NextResponse.json(
         { error: '项目不存在' },
         { status: 404 }
@@ -48,14 +64,33 @@ export async function POST(request: NextRequest) {
 
     // 权限检查
     if (project.userId !== session.user.id) {
+      updateExportProgress(projectId, session.user.id, {
+        status: 'error',
+        progress: 0,
+        message: '无权访问此项目',
+      });
       return NextResponse.json(
         { error: '无权访问此项目' },
         { status: 403 }
       );
     }
 
+    // 更新进度 - 获取数据中
+    updateExportProgress(projectId, session.user.id, {
+      status: 'preparing',
+      progress: 25,
+      message: '获取场景数据...',
+    });
+
     // 获取场景数据
     const scenes = await getScenesByProjectId(projectId);
+
+    // 更新进度 - 转换数据
+    updateExportProgress(projectId, session.user.id, {
+      status: 'preparing',
+      progress: 40,
+      message: '转换文档格式...',
+    });
 
     // 转换为 Word 段落结构
     const paragraphData = toWordParagraphs(
@@ -63,6 +98,13 @@ export async function POST(request: NextRequest) {
       scenes.map(s => ({ ...s, createdAt: s.createdAt.toISOString() })), {
       includeTitlePage: options.includeTitlePage ?? true,
       includeSceneNumbers: options.includeSceneNumbers ?? true,
+    });
+
+    // 更新进度 - 构建文档
+    updateExportProgress(projectId, session.user.id, {
+      status: 'generating',
+      progress: 60,
+      message: '构建 Word 文档...',
     });
 
     // 构建 Word 段落
@@ -190,6 +232,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 更新进度 - 生成文件
+    updateExportProgress(projectId, session.user.id, {
+      status: 'generating',
+      progress: 80,
+      message: '生成 Word 文件...',
+    });
+
     // 创建 Word 文档
     const doc = new Document({
       sections: [
@@ -212,6 +261,13 @@ export async function POST(request: NextRequest) {
     // 生成 Word 文件
     const buffer = await Packer.toBuffer(doc);
 
+    // 更新进度 - 完成
+    updateExportProgress(projectId, session.user.id, {
+      status: 'completed',
+      progress: 100,
+      message: '导出完成',
+    });
+
     // 生成文件名
     const fileName = `${project.name}-剧本.docx`;
     const encodedFileName = encodeURIComponent(fileName);
@@ -228,6 +284,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Word export error:', error);
+    
+    // 更新错误进度
+    if (projectId) {
+      updateExportProgress(projectId, '', {
+        status: 'error',
+        progress: 0,
+        message: 'Word导出失败',
+      });
+    }
     
     return NextResponse.json(
       { 

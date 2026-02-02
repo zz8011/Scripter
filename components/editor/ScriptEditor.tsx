@@ -47,6 +47,7 @@ interface ScriptEditorProps {
   content?: string;
   onChange?: (content: string) => void;
   onValidationChange?: (errors: FormatError[], warnings: FormatError[]) => void;
+  onExport?: () => void;
   editable?: boolean;
   className?: string;
   showValidation?: boolean;
@@ -104,6 +105,7 @@ export function ScriptEditor({
   content = '',
   onChange,
   onValidationChange,
+  onExport,
   editable = true,
   className,
   showValidation = true,
@@ -241,11 +243,17 @@ export function ScriptEditor({
         event.preventDefault();
         window.dispatchEvent(new CustomEvent('script-save'));
       }
+
+      // Ctrl/Cmd + E 导出
+      if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
+        event.preventDefault();
+        onExport?.();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editor, editable, setSceneHeading, setCharacter, setDialogue, setAction, setParenthetical]);
+  }, [editor, editable, onExport, setSceneHeading, setCharacter, setDialogue, setAction, setParenthetical]);
 
   /* ==================================================
      渲染 Render
@@ -345,6 +353,19 @@ export function ScriptEditor({
 
           {/* 分隔线 */}
           <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-2" />
+
+          {/* 导出按钮 */}
+          {onExport && (
+            <ToolbarButton
+              onClick={onExport}
+              icon="mdi:file-export"
+              label="导出"
+              shortcut="Ctrl+E"
+            />
+          )}
+
+          {/* 分隔线 */}
+          {onExport && <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-2" />}
 
           {/* 格式状态指示器 */}
           {showValidation && (

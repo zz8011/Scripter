@@ -11,6 +11,7 @@ import { getScenesByProjectId } from '@/lib/db/queries/scenes';
 import { toHTML } from '@/lib/utils/script-export';
 import { getSessionWithDev } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { updateExportProgress } from '../progress/route';
 
 /* ==================================================
    POST /api/export/pdf
@@ -18,6 +19,8 @@ import { logger } from '@/lib/logger';
    ================================================== */
 
 export async function POST(request: NextRequest) {
+  let projectId = '';
+  
   try {
     // 认证检查
     const session = await getSessionWithDev();
@@ -30,7 +33,8 @@ export async function POST(request: NextRequest) {
 
     // 解析请求体
     const body = await request.json();
-    const { projectId, options = {} } = body;
+    const { projectId: pid, options = {} } = body;
+    projectId = pid;
 
     if (!projectId) {
       return NextResponse.json(
@@ -39,9 +43,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 更新进度 - 准备中
+    updateExportProgress(projectId, session.user.id, {
+      status: 'preparing',
+      progress: 10,
+      message: '准备导出数据...',
+    });
+
     // 获取项目数据
     const project = await getProjectById(projectId);
     if (!project) {
+      updateExportProgress(projectId, session.user.id, {
+        status: 'error',
+        progress: 0,
+        message: '项目不存在',
+      });
       return NextResponse.json(
         { error: '项目不存在' },
         { status: 404 }
@@ -50,20 +66,46 @@ export async function POST(request: NextRequest) {
 
     // 权限检查
     if (project.userId !== session.user.id) {
+      updateExportProgress(projectId, session.user.id, {
+        status: 'error',
+        progress: 0,
+        message: '无权访问此项目',
+      });
       return NextResponse.json(
         { error: '无权访问此项目' },
         { status: 403 }
       );
     }
 
+    // 更新进度 - 获取数据中
+    updateExportProgress(projectId, session.user.id, {
+      status: 'preparing',
+      progress: 25,
+      message: '获取场景数据...',
+    });
+
     // 获取场景数据
     const scenes = await getScenesByProjectId(projectId);
+
+    // 更新进度 - 生成内容
+    updateExportProgress(projectId, session.user.id, {
+      status: 'generating',
+      progress: 40,
+      message: '生成 PDF 内容...',
+    });
 
     // 生成 HTML 内容
     const htmlContent = toHTML(project, scenes, {
       includeTitlePage: options.includeTitlePage ?? true,
       includeSceneNumbers: options.includeSceneNumbers ?? true,
       pageSize: options.pageSize ?? 'A4',
+    });
+
+    // 更新进度 - 启动浏览器
+    updateExportProgress(projectId, session.user.id, {
+      status: 'generating',
+      progress: 60,
+      message: '启动渲染引擎...',
     });
 
     // 启动 Puppeteer
@@ -85,6 +127,13 @@ export async function POST(request: NextRequest) {
       // 等待字体加载
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // 更新进度 - 生成 PDF
+      updateExportProgress(projectId, session.user.id, {
+        status: 'generating',
+        progress: 80,
+        message: '生成 PDF 文件...',
+      });
+
       // 生成 PDF
       const pdfBuffer = await page.pdf({
         format: options.pageSize === 'US-Letter' ? 'Letter' : 'A4',
@@ -95,6 +144,13 @@ export async function POST(request: NextRequest) {
           bottom: '2.5cm',
           left: '2cm',
         },
+      });
+
+      // 更新进度 - 完成
+      updateExportProgress(projectId, session.user.id, {
+        status: 'completed',
+        progress: 100,
+        message: '导出完成',
       });
 
       // 生成文件名
@@ -116,6 +172,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     logger.error('PDF export error:', error instanceof Error ? error : undefined);
+    
+    // 更新错误进度
+    if (projectId) {
+      updateExportProgress(projectId, '', {
+        status: 'error',
+        progress: 0,
+        message: 'PDF导出失败',
+      });
+    }
     
     return NextResponse.json(
       { 

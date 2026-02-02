@@ -25,6 +25,38 @@ export async function getUserByEmail(email: string) {
   return user
 }
 
+/**
+ * 更新用户信息
+ */
+export async function updateUser(userId: string, data: Partial<Omit<NewUser, 'id' | 'createdAt'>>) {
+  const db = getDb()
+  const [user] = await db
+    .update(users)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning()
+  return user
+}
+
+/**
+ * 更新用户密码
+ */
+export async function updateUserPassword(userId: string, passwordHash: string) {
+  const db = getDb()
+  const [user] = await db
+    .update(users)
+    .set({
+      password: passwordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning()
+  return user
+}
+
 export async function updateUserQuota(userId: string, used: number) {
   const db = getDb()
   const [user] = await db

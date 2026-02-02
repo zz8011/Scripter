@@ -74,6 +74,11 @@ export interface ExportOptions {
 export type ExportFormat = 'pdf' | 'word' | 'txt' | 'fountain'
 
 /**
+ * 导出进度状态
+ */
+export type ExportStatus = 'idle' | 'preparing' | 'generating' | 'downloading' | 'completed' | 'error'
+
+/**
  * 导出进度类型
  */
 export interface ExportProgress {

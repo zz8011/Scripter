@@ -365,6 +365,7 @@ function EditorContent() {
             <ScriptEditor
               content={plainText || ''}
               onChange={updatePlainText}
+              onExport={handleExport}
               className="h-full"
             />
           </div>
