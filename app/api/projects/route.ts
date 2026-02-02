@@ -1,52 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProjectsByUserId, createProject } from '@/lib/db/queries'
-import { getSessionWithDev } from '@/lib/session'
+import { withAuth } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
 const createProjectSchema = z.object({
-  name: z.string().min(1).max(200),
+  name: z.string().min(1).max(200, '项目名称不能超过 200 字符'),
   scriptType: z.enum(['movie', 'series', 'short-drama']),
   orientation: z.enum(['landscape', 'portrait']).default('landscape'),
   targetEpisodes: z.number().min(1).default(1),
   genre: z.array(z.string()).default([]),
 })
 
-export async function GET(_request: NextRequest) {
+/**
+ * 获取用户项目列表
+ * GET /api/projects
+ */
+export const GET = withAuth(async (_request: NextRequest, session) => {
   try {
-    const session = await getSessionWithDev()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const projects = await getProjectsByUserId(session.user.id)
-
+    const projects = await getProjectsByUserId(session.userId)
     return NextResponse.json({ projects })
   } catch (error) {
     console.error('Get projects error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'INTERNAL_ERROR', message: '获取项目列表失败' },
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(_request: NextRequest) {
+/**
+ * 创建新项目
+ * POST /api/projects
+ */
+export const POST = withAuth(async (request: NextRequest, session) => {
   try {
-    const session = await getSessionWithDev()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await _request.json()
+    const body = await request.json()
     const validatedData = createProjectSchema.parse(body)
 
     const project = await createProject({
       ...validatedData,
-      userId: session.user.id,
+      userId: session.userId,
       currentStage: 'worldview',
     })
 
@@ -54,17 +49,17 @@ export async function POST(_request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'VALIDATION_ERROR', message: '输入数据验证失败', details: error.errors },
         { status: 400 }
       )
     }
 
     console.error('Create project error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'INTERNAL_ERROR', message: '创建项目失败' },
       { status: 500 }
     )
   }
-}
+})
 
 
