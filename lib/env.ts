@@ -28,8 +28,24 @@ const envSchema = z.object({
 /**
  * 验证后的环境变量
  * 在应用启动时验证，如果验证失败会抛出错误
+ * 测试环境下使用 mock 值
  */
 export const env = (() => {
+  // 测试环境下使用 mock 值
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+    return envSchema.parse({
+      DATABASE_URL: process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test',
+      CASDOOR_ENDPOINT: process.env.CASDOOR_ENDPOINT || 'http://localhost:8000',
+      CASDOOR_CLIENT_ID: process.env.CASDOOR_CLIENT_ID || 'test-client-id',
+      CASDOOR_CLIENT_SECRET: process.env.CASDOOR_CLIENT_SECRET || 'test-client-secret',
+      CASDOOR_CALLBACK_URL: process.env.CASDOOR_CALLBACK_URL || 'http://localhost:3000/api/auth/callback',
+      ZHIPU_API_KEY: process.env.ZHIPU_API_KEY || 'test-api-key',
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      NODE_ENV: 'test',
+      BYPASS_AUTH: 'true',
+    })
+  }
+
   try {
     return envSchema.parse(process.env)
   } catch (error) {
