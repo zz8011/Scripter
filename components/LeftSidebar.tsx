@@ -4,12 +4,20 @@
    左侧导航栏组件 Left Sidebar Component
    ================================================== */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NavItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { IconifyIcon } from "@/components/IconifyIcon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /* 导航菜单配置 */
 const NAV_ITEMS: NavItem[] = [
@@ -26,6 +34,140 @@ interface LeftSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
+
+/* ==================================================
+   用户菜单组件 User Menu Component
+   ================================================== */
+
+function UserMenu() {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 模拟用户信息（实际应从 API 获取）
+  const user = {
+    name: '剧灵用户',
+    email: 'user@example.com',
+    avatar: undefined,
+  };
+
+  /**
+   * 处理登出
+   */
+  const handleLogout = useCallback(async () => {
+    setIsLoggingOut(true);
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        // 清除本地状态
+        localStorage.removeItem('scripter_remember_email');
+        sessionStorage.removeItem('scripter_redirect_after_login');
+        
+        // 跳转到登录页
+        router.push('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }, [router]);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="w-full p-4 border-t flex items-center gap-3 hover:bg-black/5 transition-colors outline-none"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
+          <Avatar className="w-9 h-9 shrink-0">
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback
+              className="text-sm"
+              style={{ backgroundColor: 'var(--brand-gold-light)', color: 'var(--brand-gold-dark)' }}
+            >
+              {user.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--sidebar-text)' }}>
+              {user.name}
+            </p>
+            <p className="text-xs truncate" style={{ color: 'var(--sidebar-text-muted)' }}>
+              {user.email}
+            </p>
+          </div>
+          <IconifyIcon
+            icon="lucide:chevrons-up-down"
+            className="text-sm shrink-0"
+            style={{ color: 'var(--sidebar-text-muted)' }}
+          />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align="start"
+        alignOffset={16}
+        sideOffset={8}
+        className="w-56"
+        style={{ backgroundColor: 'var(--white-bg)', borderColor: 'var(--border-color)' }}
+      >
+        <div className="px-3 py-2">
+          <p className="text-sm font-medium" style={{ color: 'var(--ink-black)' }}>
+            {user.name}
+          </p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+            {user.email}
+          </p>
+        </div>
+
+        <DropdownMenuSeparator style={{ backgroundColor: 'var(--border-color)' }} />
+
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/profile" className="flex items-center gap-2">
+            <IconifyIcon icon="lucide:user" className="text-sm" />
+            个人资料
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/profile" className="flex items-center gap-2">
+            <IconifyIcon icon="lucide:settings" className="text-sm" />
+            账户设置
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator style={{ backgroundColor: 'var(--border-color)' }} />
+
+        <DropdownMenuItem
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+        >
+          {isLoggingOut ? (
+            <>
+              <IconifyIcon icon="lucide:loader-2" className="text-sm animate-spin" />
+              登出中...
+            </>
+          ) : (
+            <>
+              <IconifyIcon icon="lucide:log-out" className="text-sm" />
+              退出登录
+            </>
+          )}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/* ==================================================
+   侧边栏组件 Sidebar Component
+   ================================================== */
 
 export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
   const pathname = usePathname();
@@ -126,16 +268,8 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
             })}
           </nav>
 
-          {/* 版本标识 */}
-          <div
-            className="p-4 border-t text-[10px] font-bold text-center uppercase tracking-widest bg-gradient-to-t from-black/5 to-transparent"
-            style={{
-              borderColor: 'var(--border-color)',
-              color: 'var(--sidebar-text-muted)'
-            }}
-          >
-            v4.7 DUAL-THEME EDITION
-          </div>
+          {/* 用户菜单 */}
+          <UserMenu />
         </div>
       </aside>
 
@@ -172,4 +306,3 @@ export function LeftSidebar({ collapsed, onToggle }: LeftSidebarProps) {
     </>
   );
 }
-
