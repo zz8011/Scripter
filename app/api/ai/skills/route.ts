@@ -1,173 +1,94 @@
-/* ==================================================
-   AI Skills API 路由
-   /api/ai/skills/route.ts
-   ================================================== */
+/**
+ * route.ts - AI Skills API路由 (简化版，用于测试)
+ */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getSessionWithDev } from '@/lib/session';
-import { checkUserQuota, deductQuota } from '@/lib/quota';
-import {
-  SkillRegistry,
-  FormatFixSkill,
-  DialoguePolishSkill,
-  SceneExpandSkill,
-} from '@/lib/agents/skills';
-import { Context } from '@/lib/agents/core/types';
+import { AgentManager } from '../../lib/agents/core/AgentManager';
+import { CodeSkill, ReviewSkill } from '../../lib/agents/skills/Skill';
+import { agentBus } from '../../lib/agents/core/AgentBus';
+
+const agentManager = new AgentManager(agentBus);
 
 /**
  * GET /api/ai/skills
- * 获取所有可用的 Skills
+ * 获取所有可用的技能
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_request: NextRequest) {
-  try {
-    const session = await getSessionWithDev();
-    if (!session) {
-      return NextResponse.json(
-        { error: '未授权', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+export async function getSkills(): Promise<{ skills: any[] }> {
+  const skills = [
+    {
+      id: 'code',
+      name: '代码生成',
+      description: '根据描述生成代码',
+      parameters: {
+        language: { type: 'string', required: true },
+        prompt: { type: 'string', required: true }
+      }
+    },
+    {
+      id: 'review',
+      name: '代码审查',
+      description: '审查代码并提供建议',
+      parameters: {
+        code: { type: 'string', required: true }
+      }
     }
+  ];
 
-    // 初始化 Skills
-    initializeSkills();
-
-    const registry = SkillRegistry.getInstance();
-    const skills = registry.getAllSkills().map((skill) => ({
-      id: skill.id,
-      name: skill.name,
-      description: skill.description,
-      category: skill.category,
-      tags: skill.tags,
-      confidence: skill.confidence,
-    }));
-
-    return NextResponse.json({ skills });
-  } catch (error) {
-    console.error('[API] 获取 Skills 失败:', error);
-    return NextResponse.json(
-      { error: '获取 Skills 失败', code: 'INTERNAL_ERROR' },
-      { status: 500 }
-    );
-  }
+  return { skills };
 }
 
 /**
  * POST /api/ai/skills
- * 执行指定的 Skill
+ * 执行技能
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function POST(_request: NextRequest) {
+export async function executeSkill(body: { skillId: string; params: any; agentId?: string }): Promise<{ success: boolean; result?: any; error?: string }> {
   try {
-    const session = await getSessionWithDev();
-    if (!session) {
-      return NextResponse.json(
-        { error: '未授权', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+    const { skillId, params, agentId = 'default' } = body;
+
+    if (!skillId) {
+      return { success: false, error: 'Skill ID is required' };
     }
 
-    // 检查配额
-    const quotaCheck = await checkUserQuota(session.user.id, 1);
-    if (!quotaCheck.hasQuota) {
-      return NextResponse.json(
-        {
-          error: 'AI 配额已用完',
-          code: 'QUOTA_EXCEEDED',
-          quota: quotaCheck,
-        },
-        { status: 429 }
-      );
+    // 初始化Agent（幂等）
+    agentManager.initializeDefaultAgents();
+
+    // 执行技能
+    let result: any;
+    switch (skillId) {
+      case 'code':
+        const codeSkill = new CodeSkill(agentId);
+        result = await codeSkill.execute(params);
+        break;
+      case 'review':
+        const reviewSkill = new ReviewSkill(agentId);
+        result = await reviewSkill.execute(params);
+        break;
+      default:
+        return { success: false, error: `Unknown skill: ${skillId}` };
     }
 
-    // 解析请求体
-    const body = await _request.json();
-    const { skillId, skillName, input, projectId } = body;
-
-    if (!skillId && !skillName) {
-      return NextResponse.json(
-        { error: '请提供 skillId 或 skillName', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
-    }
-
-    // 初始化 Skills
-    initializeSkills();
-
-    const registry = SkillRegistry.getInstance();
-    let skill;
-
-    if (skillId) {
-      skill = registry.getSkill(skillId);
-    } else if (skillName) {
-      const skills = registry.searchSkills({ name: skillName });
-      skill = skills[0];
-    }
-
-    if (!skill) {
-      return NextResponse.json(
-        { error: 'Skill 未找到', code: 'NOT_FOUND' },
-        { status: 404 }
-      );
-    }
-
-    // 构建上下文
-    const context: Context = {
-      userId: session.user.id,
-      projectId,
-      sessionId: session.sessionId,
-    } as Context;
-
-    // 执行 Skill
-    const result = await skill.execute(context, input);
-
-    // 扣除配额
-    await deductQuota(session.user.id, 1);
-
-    return NextResponse.json({
-      success: true,
-      skill: {
-        id: skill.id,
-        name: skill.name,
-      },
-      result,
-      quota: {
-        remaining: quotaCheck.remaining ? quotaCheck.remaining - 1 : 0,
-      },
-    });
+    return { success: true, result };
   } catch (error) {
-    console.error('[API] 执行 Skill 失败:', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : '执行 Skill 失败',
-        code: 'INTERNAL_ERROR',
-      },
-      { status: 500 }
-    );
+    console.error('Failed to execute skill:', error);
+    return { success: false, error: 'Failed to execute skill' };
   }
 }
 
 /**
- * 初始化 Skills（注册到 Registry）
+ * DELETE /api/ai/skills
+ * 取消正在执行的任务
  */
-let skillsInitialized = false;
+export async function cancelTask(taskId: string): Promise<{ success: boolean }> {
+  try {
+    if (!taskId) {
+      return { success: false };
+    }
 
-function initializeSkills() {
-  if (skillsInitialized) return;
+    const scheduler = agentManager.getScheduler();
+    const cancelled = scheduler.cancelTask(taskId);
 
-  const registry = SkillRegistry.getInstance();
-
-  // 注册格式修复 Skill
-  registry.register(new FormatFixSkill());
-
-  // 注册对白润色 Skill
-  registry.register(new DialoguePolishSkill());
-
-  // 注册场景扩展 Skill
-  registry.register(new SceneExpandSkill());
-
-  skillsInitialized = true;
-  console.log('[Skills API] Skills 初始化完成');
+    return { success: cancelled };
+  } catch (error) {
+    console.error('Failed to cancel task:', error);
+    return { success: false };
+  }
 }
-
-

@@ -1,69 +1,127 @@
-/* ==================================================
-   技能基类
-   Skill Base Class
-   ================================================== */
-
-import { v4 as uuidv4 } from 'uuid';
-import { Context } from '../core/types';
-
 /**
- * 技能基类
- * 所有技能都继承此类
+ * Skill.ts - 技能基类
  */
+
+import { agentBus, AgentMessage } from '../core/AgentBus';
+
+export interface SkillConfig {
+  id: string;
+  name: string;
+  description: string;
+  parameters?: Record<string, any>;
+}
+
 export abstract class Skill {
-  public readonly id: string;
-  public readonly name: string;
-  public readonly description: string;
-  public readonly category: string;
-  public readonly version: string;
-  public readonly author: string;
-  public readonly tags: string[];
-  public readonly confidence: number;
-  
-  constructor(
-    name: string,
-    description: string,
-    category: string,
-    options: {
-      version?: string;
-      author?: string;
-      tags?: string[];
-      confidence?: number;
-    } = {}
-  ) {
-    this.id = uuidv4();
-    this.name = name;
-    this.description = description;
-    this.category = category;
-    this.version = options.version || '1.0.0';
-    this.author = options.author || 'unknown';
-    this.tags = options.tags || [];
-    this.confidence = options.confidence ?? 0.8;
+  protected config: SkillConfig;
+  protected agentId: string;
+
+  constructor(agentId: string, config: SkillConfig) {
+    this.agentId = agentId;
+    this.config = config;
   }
-  
+
+  /**
+   * 获取技能ID
+   */
+  getId(): string {
+    return this.config.id;
+  }
+
+  /**
+   * 获取技能名称
+   */
+  getName(): string {
+    return this.config.name;
+  }
+
   /**
    * 执行技能
    */
-  public abstract execute(context: Context, input: any): Promise<any>;
-  
+  abstract execute(params: any): Promise<any>;
+
   /**
-   * 验证输入
+   * 发送消息
+   * BUG: 调用签名不匹配，agentBus.send期望1个或3个参数，但这里传了3个参数
+   * 而且消息结构不完整
    */
-  protected abstract validateInput(input: any): boolean;
-  
-  /**
-   * 获取元数据
-   */
-  public getMetadata() {
-    return {
-      id: this.id,
-      name: this.name,
-      description: this.description,
-      category: this.category,
-      version: this.version,
-      author: this.author,
-      tags: this.tags,
-      confidence: this.confidence,
+  protected sendMessage(to: string, type: string, payload: any): void {
+    // BUG: 调用方式不匹配agentBus.send的签名
+    // agentBus.send 定义为: send(message: AgentMessage): void 或 send(to, type, payload): void
+    // 但这样调用会导致第二个参数被当作type，第三个参数被当作payload
+    // 然而agentBus.send的第二个重载需要三个参数
+    
+    // 更好的方式是构建完整的AgentMessage对象
+    const message: AgentMessage = {
+      id: generateId(),
+      type,
+      priority: 'NORMAL',
+      payload,
+      from: this.agentId,
+      to,
+      timestamp: Date.now()
     };
+    
+    agentBus.send(message);
   }
+
+  /**
+   * 发送结果消息
+   */
+  protected sendResult(taskId: string, result: any): void {
+    this.sendMessage('scheduler', 'TASK_COMPLETE', { taskId, result });
+  }
+
+  /**
+   * 发送错误消息
+   */
+  protected sendError(taskId: string, error: string): void {
+    this.sendMessage('scheduler', 'TASK_FAILED', { taskId, error });
+  }
+}
+
+/**
+ * 代码技能
+ */
+export class CodeSkill extends Skill {
+  constructor(agentId: string) {
+    super(agentId, {
+      id: 'code',
+      name: '代码生成',
+      description: '生成代码',
+      parameters: {
+        language: 'string',
+        prompt: 'string'
+      }
+    });
+  }
+
+  async execute(params: { language: string; prompt: string }): Promise<any> {
+    console.log(`Generating ${params.language} code for: ${params.prompt}`);
+    return { code: `// Generated code\n// ${params.prompt}` };
+  }
+}
+
+/**
+ * 审查技能
+ */
+export class ReviewSkill extends Skill {
+  constructor(agentId: string) {
+    super(agentId, {
+      id: 'review',
+      name: '代码审查',
+      description: '审查代码质量',
+      parameters: {
+        code: 'string'
+      }
+    });
+  }
+
+  async execute(params: { code: string }): Promise<any> {
+    console.log(`Reviewing code: ${params.code.substring(0, 50)}...`);
+    return { issues: [] };
+  }
+}
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
