@@ -4,8 +4,32 @@
  * 提供智谱 GLM-4.7 API 调用功能
  */
 
-const ZHIPU_API_KEY = process.env.ZHIPU_API_KEY
+import { aiConfig } from './env'
+
 const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+
+/**
+ * AI 服务错误类型
+ */
+export class AIServiceError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode?: number
+  ) {
+    super(message)
+    this.name = 'AIServiceError'
+  }
+}
+
+/**
+ * AI 服务降级响应
+ */
+interface FallbackResponse {
+  content: string
+  isFallback: true
+  error: string
+}
 
 export interface ZhipuMessage {
   role: 'system' | 'user' | 'assistant'
@@ -33,6 +57,7 @@ export interface ZhipuResponse {
 
 /**
  * 调用智谱 AI API
+ * 支持自动降级策略
  */
 export async function callZhipuAI(
   messages: ZhipuMessage[],
@@ -41,17 +66,15 @@ export async function callZhipuAI(
     temperature?: number
     maxTokens?: number
     stream?: boolean
+    enableFallback?: boolean
   } = {}
-): Promise<ZhipuResponse> {
-  if (!ZHIPU_API_KEY) {
-    throw new Error('ZHIPU_API_KEY is not configured')
-  }
-
+): Promise<ZhipuResponse | FallbackResponse> {
   const {
     model = 'glm-4-plus',
     temperature = 0.7,
     maxTokens = 2000,
     stream = false,
+    enableFallback = true,
   } = options
 
   try {
@@ -59,7 +82,7 @@ export async function callZhipuAI(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ZHIPU_API_KEY}`,
+        'Authorization': `Bearer ${aiConfig.zhipuApiKey}`,
       },
       body: JSON.stringify({
         model,
@@ -71,20 +94,57 @@ export async function callZhipuAI(
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Zhipu AI API error: ${response.status} - ${error}`)
+      const errorText = await response.text()
+      throw new AIServiceError(
+        `AI API 错误: ${response.status} - ${errorText}`,
+        'AI_API_ERROR',
+        response.status
+      )
     }
 
     const data: ZhipuResponse = await response.json()
     return data
   } catch (error) {
     console.error('Error calling Zhipu AI:', error)
-    throw error
+    
+    // 降级策略
+    if (enableFallback) {
+      console.warn('AI 服务调用失败，启用降级响应')
+      return generateFallbackResponse(messages, error)
+    }
+    
+    throw error instanceof AIServiceError 
+      ? error 
+      : new AIServiceError(
+          error instanceof Error ? error.message : '未知错误',
+          'AI_SERVICE_ERROR'
+        )
+  }
+}
+
+/**
+ * 生成降级响应
+ */
+function generateFallbackResponse(
+  messages: ZhipuMessage[],
+  error: unknown
+): FallbackResponse {
+  const lastUserMessage = messages
+    .filter((m) => m.role === 'user')
+    .pop()?.content || ''
+  
+  const errorMessage = error instanceof Error ? error.message : '服务暂时不可用'
+  
+  return {
+    content: `抱歉，AI 服务暂时不可用。\n\n错误信息: ${errorMessage}\n\n请稍后重试，或联系管理员检查服务状态。`,
+    isFallback: true,
+    error: errorMessage,
   }
 }
 
 /**
  * 流式调用智谱 AI（用于 Server-Sent Events）
+ * 支持自动降级策略
  */
 export async function* callZhipuAIStream(
   messages: ZhipuMessage[],
@@ -92,16 +152,14 @@ export async function* callZhipuAIStream(
     model?: string
     temperature?: number
     maxTokens?: number
+    enableFallback?: boolean
   } = {}
 ): AsyncGenerator<string, void, unknown> {
-  if (!ZHIPU_API_KEY) {
-    throw new Error('ZHIPU_API_KEY is not configured')
-  }
-
   const {
     model = 'glm-4-plus',
     temperature = 0.7,
     maxTokens = 2000,
+    enableFallback = true,
   } = options
 
   try {
@@ -109,7 +167,7 @@ export async function* callZhipuAIStream(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ZHIPU_API_KEY}`,
+        'Authorization': `Bearer ${aiConfig.zhipuApiKey}`,
       },
       body: JSON.stringify({
         model,
@@ -121,22 +179,28 @@ export async function* callZhipuAIStream(
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Zhipu AI API error: ${response.status} - ${error}`)
+      const errorText = await response.text()
+      throw new AIServiceError(
+        `AI API 错误: ${response.status} - ${errorText}`,
+        'AI_API_ERROR',
+        response.status
+      )
     }
 
     const reader = response.body?.getReader()
     if (!reader) {
-      throw new Error('Response body is not readable')
+      throw new AIServiceError('响应体不可读', 'STREAM_ERROR')
     }
 
     const decoder = new TextDecoder()
     let buffer = ''
+    let hasReceivedContent = false
 
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
 
+      hasReceivedContent = true
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''
@@ -159,9 +223,27 @@ export async function* callZhipuAIStream(
         }
       }
     }
+
+    // 如果没有收到任何内容，可能是错误
+    if (!hasReceivedContent && enableFallback) {
+      yield '抱歉，AI 服务没有返回内容。请稍后重试。'
+    }
   } catch (error) {
     console.error('Error in Zhipu AI stream:', error)
-    throw error
+    
+    // 流式降级策略
+    if (enableFallback) {
+      const errorMessage = error instanceof Error ? error.message : '服务暂时不可用'
+      yield `\n\n[AI 服务错误: ${errorMessage}]`
+      return
+    }
+    
+    throw error instanceof AIServiceError
+      ? error
+      : new AIServiceError(
+          error instanceof Error ? error.message : '未知错误',
+          'AI_STREAM_ERROR'
+        )
   }
 }
 
