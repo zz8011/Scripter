@@ -46,6 +46,10 @@ services:
 
       # 日志配置
       LOG_LEVEL: "info"
+      
+      # 初始化应用配置
+      APP_NAME: "scripter"
+      ORGANIZATION_NAME: "scripter"
     ports:
       - "8000:8000"
     depends_on:
