@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { callZhipuAI, type ZhipuMessage } from '@/lib/zhipu'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/ai/test
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       model: response.model,
     })
   } catch (error) {
-    console.error('Error in AI test endpoint:', error)
+    logger.error('Error in AI test endpoint:', error instanceof Error ? error : undefined)
 
     // 返回详细错误信息
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

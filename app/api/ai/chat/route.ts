@@ -3,6 +3,7 @@ import { callZhipuAI, estimateTokens, type ZhipuMessage } from '@/lib/zhipu'
 import { checkUserQuota, deductQuota } from '@/lib/quota'
 import { createAIConversation, addMessageToConversation } from '@/lib/db/queries/ai-conversations'
 import { getSessionWithDev } from '@/lib/session'
+import { logger } from '@/lib/logger'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MessageMetadata = Record<string, any>
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       conversationId: conversation?.id,
     })
   } catch (error) {
-    console.error('Error in AI chat:', error)
+    logger.error('Error in AI chat:', error instanceof Error ? error : undefined)
     return NextResponse.json({ error: 'Failed to process AI request' }, { status: 500 })
   }
 }

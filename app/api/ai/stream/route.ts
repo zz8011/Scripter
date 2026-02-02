@@ -3,6 +3,7 @@ import { callZhipuAIStream, estimateTokens, type ZhipuMessage } from '@/lib/zhip
 import { checkUserQuota, deductQuota } from '@/lib/quota'
 import { createAIConversation } from '@/lib/db/queries/ai-conversations'
 import { auth } from '@/lib/session'
+import { logger } from '@/lib/logger'
 
 
 
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         } catch (error) {
-          console.error('Error in AI stream:', error)
+          logger.error('Error in AI stream:', error instanceof Error ? error : undefined)
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`)
           )
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error setting up AI stream:', error)
+    logger.error('Error setting up AI stream:', error instanceof Error ? error : undefined)
     return new Response('Failed to setup stream', { status: 500 })
   }
 }

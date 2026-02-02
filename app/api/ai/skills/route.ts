@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
 // 输入验证schema
@@ -34,7 +35,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     return NextResponse.json({ skills })
   } catch (error) {
-    console.error('Failed to get skills:', error)
+    logger.error('Failed to get skills:', error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: 'Failed to get skills' },
       { status: 500 }
@@ -64,7 +65,7 @@ export const POST = withAuth(async (req: NextRequest) => {
       result: { skillId, executed: true }
     })
   } catch (error) {
-    console.error('Failed to execute skill:', error)
+    logger.error('Failed to execute skill:', error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: 'Failed to execute skill' },
       { status: 500 }
@@ -88,7 +89,7 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     // TODO: 实现任务取消逻辑
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to cancel task:', error)
+    logger.error('Failed to cancel task:', error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: 'Failed to cancel task' },
       { status: 500 }
