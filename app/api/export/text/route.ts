@@ -8,7 +8,8 @@ import { getProjectById } from '@/lib/db/queries/projects';
 import { getScenesByProjectId } from '@/lib/db/queries/scenes';
 import { toPlainText, toFountain } from '@/lib/utils/script-export';
 import { getSessionWithDev } from '@/lib/session';
-import { updateExportProgress } from '../progress/route';
+import { updateExportProgress } from '@/lib/export-progress';
+import { ApiErrors, handleApiError } from '@/lib/errors/api-error';
 
 /* ==================================================
    POST /api/export/text
@@ -22,10 +23,7 @@ export async function POST(request: NextRequest) {
     // 认证检查
     const session = await getSessionWithDev();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: '未授权访问' },
-        { status: 401 }
-      );
+      throw ApiErrors.unauthorized('请先登录后再导出剧本');
     }
 
     // 解析请求体
@@ -34,10 +32,7 @@ export async function POST(request: NextRequest) {
     projectId = pid;
 
     if (!projectId) {
-      return NextResponse.json(
-        { error: '缺少项目ID' },
-        { status: 400 }
-      );
+      throw ApiErrors.badRequest('缺少项目ID参数');
     }
 
     // 更新进度 - 准备中
@@ -55,10 +50,7 @@ export async function POST(request: NextRequest) {
         progress: 0,
         message: '项目不存在',
       });
-      return NextResponse.json(
-        { error: '项目不存在' },
-        { status: 404 }
-      );
+      throw ApiErrors.notFound('项目不存在');
     }
 
     // 权限检查
@@ -68,10 +60,7 @@ export async function POST(request: NextRequest) {
         progress: 0,
         message: '无权访问此项目',
       });
-      return NextResponse.json(
-        { error: '无权访问此项目' },
-        { status: 403 }
-      );
+      throw ApiErrors.forbidden('无权访问此项目');
     }
 
     // 更新进度 - 获取数据中
@@ -132,7 +121,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Text export error:', error);
-    
+
     // 更新错误进度
     if (projectId) {
       updateExportProgress(projectId, '', {
@@ -141,14 +130,8 @@ export async function POST(request: NextRequest) {
         message: '文本导出失败',
       });
     }
-    
-    return NextResponse.json(
-      { 
-        error: '文本导出失败',
-        details: error instanceof Error ? error.message : '未知错误'
-      },
-      { status: 500 }
-    );
+
+    return handleApiError(error);
   }
 }
 
