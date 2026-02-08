@@ -18,43 +18,75 @@ import { IconifyIcon } from '@/components/IconifyIcon';
    Dashboard 页面组件 Dashboard Page Component
    ================================================== */
 
+// 统计数据类型
+interface DashboardStats {
+  projectCount: number;
+  totalWords: number;
+  todayWords: number;
+  sceneCount: number;
+  characterCount: number;
+}
+
+interface ProjectWithStats extends Project {
+  wordCount: number;
+  sceneCount: number;
+  characterCount: number;
+}
+
 export default function DashboardPage() {
   // 状态管理
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithStats[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    projectCount: 0,
+    totalWords: 0,
+    todayWords: 0,
+    sceneCount: 0,
+    characterCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // 路由
   const router = useRouter();
 
-  // 统计数据
-  const projectCount = projects.length;
-  const totalWordCount = projects.reduce((sum, p) => sum + (p.targetEpisodes || 0), 0);
-  const totalSceneCount = projects.reduce((sum, p) => sum + (p.targetEpisodes || 0), 0);
-
-  // 加载项目列表
-  const loadProjects = useCallback(async () => {
+  // 加载 Dashboard 数据
+  const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getProjects();
-      setProjects(data);
+
+      // 调用统计 API
+      const response = await fetch('/api/dashboard/stats');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '加载数据失败');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setStats(result.data.stats);
+        setProjects(result.data.recentProjects);
+      } else {
+        throw new Error('加载数据失败');
+      }
     } catch (err) {
-      console.error('Failed to load projects:', err);
-      if (err instanceof ApiError) {
+      console.error('Failed to load dashboard:', err);
+      if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('加载项目失败，请稍后重试');
+        setError('加载数据失败，请稍后重试');
       }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // 组件挂载时加载项目
+  // 组件挂载时加载数据
   useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    loadDashboard();
+  }, [loadDashboard]);
 
   /* ==================================================
      处理函数 Handlers
@@ -73,7 +105,9 @@ export default function DashboardPage() {
       };
 
       const newProject = await createProject(newProjectInput);
-      setProjects([newProject, ...projects]);
+
+      // 重新加载 Dashboard 数据
+      await loadDashboard();
     } catch (err) {
       console.error('Failed to create project:', err);
       if (err instanceof ApiError) {
@@ -87,7 +121,9 @@ export default function DashboardPage() {
   const handleDeleteProject = async (id: string) => {
     try {
       await deleteProject(id);
-      setProjects(projects.filter((p) => p.id !== id));
+
+      // 重新加载 Dashboard 数据
+      await loadDashboard();
     } catch (err) {
       console.error('Failed to delete project:', err);
       if (err instanceof ApiError) {
@@ -166,7 +202,7 @@ export default function DashboardPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={loadProjects}
+                onClick={loadDashboard}
                 className="ml-auto"
               >
                 重试
@@ -176,24 +212,30 @@ export default function DashboardPage() {
         )}
 
         {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard
             title="项目总数"
-            value={projectCount}
+            value={stats.projectCount}
             icon="mdi:folder-multiple"
             iconColor="var(--brand-gold)"
           />
           <StatCard
             title="总字数"
-            value={totalWordCount.toLocaleString()}
+            value={stats.totalWords.toLocaleString()}
             icon="mdi:text-box"
             iconColor="var(--info-blue)"
           />
           <StatCard
-            title="总场景数"
-            value={totalSceneCount}
-            icon="mdi:movie-open"
+            title="今日字数"
+            value={stats.todayWords.toLocaleString()}
+            icon="mdi:pencil"
             iconColor="var(--success-green)"
+          />
+          <StatCard
+            title="总场景数"
+            value={stats.sceneCount}
+            icon="mdi:movie-open"
+            iconColor="var(--warning-orange)"
           />
         </div>
 
@@ -204,7 +246,7 @@ export default function DashboardPage() {
               className="text-xl font-semibold"
               style={{ fontFamily: 'var(--font-display)' }}
             >
-              我的项目
+              最近编辑
             </h2>
             <div className="flex items-center gap-2">
               {/* 排序按钮 */}
@@ -233,12 +275,7 @@ export default function DashboardPage() {
               {projects.map((project) => (
                 <ProjectCardPoster
                   key={project.id}
-                  project={{
-                    ...project,
-                    wordCount: 0,
-                    sceneCount: 0,
-                    characterCount: 0,
-                  }}
+                  project={project}
                   onClick={() => handleProjectClick(project.id)}
                   onEdit={(e) => {
                     e.stopPropagation();
