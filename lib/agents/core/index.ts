@@ -14,10 +14,9 @@ export {
 } from './AgentBus';
 
 export type {
-  Message,
-  MessageType,
-  MessagePriority,
-  AgentRegistration,
+  AgentMessage,
+  Agent as AgentBusAgent,
+  AgentBusOptions,
 } from './AgentBus';
 
 export {
@@ -26,11 +25,9 @@ export {
 
 export type {
   Task,
-  TaskStatus,
-  TaskPriority,
-  ScheduleOptions,
-  AgentCapacity,
 } from './AgentScheduler';
+
+export { TaskPriority } from './AgentScheduler';
 
 export {
   IntentRouter,
@@ -59,3 +56,14 @@ export type {
   ContextSnapshot,
   ContextOptions,
 } from './ContextManager';
+
+export {
+  ContextAssembler,
+} from './ContextAssembler';
+
+export type {
+  AssembledContext,
+  CacheStats,
+  ContextAssemblerOptions,
+  AssemblerInput,
+} from './ContextAssembler';

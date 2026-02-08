@@ -68,7 +68,7 @@ async function fetchApi(url: string, options?: RequestInit): Promise<Response> {
 
   if (!response.ok) {
     let errorMessage = 'API request failed'
-    let details: unknown
+    let details: Record<string, unknown> | undefined
 
     try {
       const error = await response.json()

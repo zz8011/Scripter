@@ -1,137 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProjectById, updateProject, deleteProject } from '@/lib/db/queries'
-import { getSession, getDevSession } from '@/lib/session'
+import { withProjectAuth } from '@/lib/auth/middleware'
+import { updateProjectSchema } from '@/lib/validation/schemas'
+import { logger } from '@/lib/logger'
 import { z } from 'zod'
+import { aggregateCreativeIntent } from '@/lib/story-bible'
 
 export const dynamic = 'force-dynamic'
 
-const updateProjectSchema = z.object({
-  name: z.string().min(1).max(200).optional(),
-  genre: z.array(z.string()).optional(),
-  currentStage: z.enum(['worldview', 'character', 'script', 'optimize', 'production']).optional(),
-})
-
 /**
- * Helper to get session with dev mode fallback
+ * GET /api/projects/[id]
+ * Get a single project
  */
-async function getSessionWithDev() {
-  const session = await getSession()
-  if (session) return session
-
-  // Development mode: use test session
-  if (process.env.NODE_ENV === 'development') {
-    return await getDevSession()
-  }
-
-  return null
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withProjectAuth(async (_request, _session, projectId) => {
   try {
-    const { id } = await params
-    const session = await getSessionWithDev()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const project = await getProjectById(id)
+    const project = await getProjectById(projectId)
 
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
-    }
-
-    if (project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'NOT_FOUND', message: '项目不存在' },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json({ project })
   } catch (error) {
-    console.error('Get project error:', error)
+    logger.error('Get project error:', error instanceof Error ? error : undefined)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'INTERNAL_ERROR', message: '获取项目失败' },
       { status: 500 }
     )
   }
-}
+})
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+/**
+ * PATCH /api/projects/[id]
+ * Update a project
+ */
+export const PATCH = withProjectAuth(async (request, _session, projectId) => {
   try {
-    const { id } = await params
-    const session = await getSessionWithDev()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const validatedData = updateProjectSchema.parse(body)
 
-    const project = await getProjectById(id)
+    const updated = await updateProject(projectId, validatedData)
 
-    if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
-    }
-
-    if (project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const updated = await updateProject(id, validatedData)
+    // 异步聚合到 Story Bible（不阻塞响应）
+    aggregateCreativeIntent(projectId).catch(err => {
+      logger.error('Failed to aggregate creative intent:', err)
+    })
 
     return NextResponse.json({ project: updated })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'VALIDATION_ERROR', message: '输入数据验证失败', details: error.errors },
         { status: 400 }
       )
     }
 
-    console.error('Update project error:', error)
+    logger.error('Update project error:', error instanceof Error ? error : undefined)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'INTERNAL_ERROR', message: '更新项目失败' },
       { status: 500 }
     )
   }
-}
+})
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+/**
+ * DELETE /api/projects/[id]
+ * Delete a project
+ */
+export const DELETE = withProjectAuth(async (_request, session, projectId) => {
   try {
-    const { id } = await params
-    const session = await getSessionWithDev()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const project = await getProjectById(id)
-
-    if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
-    }
-
-    if (project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    await deleteProject(id, session.user.id)
+    await deleteProject(projectId, session.user.id)
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete project error:', error)
+    logger.error('Delete project error:', error instanceof Error ? error : undefined)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'INTERNAL_ERROR', message: '删除项目失败' },
       { status: 500 }
     )
   }
-}
+})

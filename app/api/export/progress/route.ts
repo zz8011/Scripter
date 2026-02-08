@@ -6,66 +6,7 @@
 import { NextRequest } from 'next/server';
 import { getSessionWithDev } from '@/lib/session';
 import { logger } from '@/lib/logger';
-
-/* ==================================================
-   全局进度存储（使用 Map）
-   在生产环境中应该使用 Redis 或其他共享存储
-   ================================================== */
-
-const progressStore = new Map<string, ExportProgressData>();
-
-interface ExportProgressData {
-  projectId: string;
-  userId: string;
-  status: 'idle' | 'preparing' | 'generating' | 'downloading' | 'completed' | 'error' | 'cancelled';
-  progress: number;
-  message: string;
-  timestamp: number;
-}
-
-/* ==================================================
-   进度管理函数
-   ================================================== */
-
-/**
- * 更新导出进度（供其他 API 路由调用）
- */
-export function updateExportProgress(
-  projectId: string,
-  userId: string,
-  data: Omit<ExportProgressData, 'projectId' | 'userId' | 'timestamp'>
-): void {
-  progressStore.set(projectId, {
-    projectId,
-    userId,
-    ...data,
-    timestamp: Date.now(),
-  });
-
-  // 清理过期数据（30分钟后）
-  cleanupOldProgress();
-}
-
-/**
- * 获取导出进度
- */
-export function getExportProgress(projectId: string): ExportProgressData | undefined {
-  return progressStore.get(projectId);
-}
-
-/**
- * 清理过期进度数据
- */
-function cleanupOldProgress(): void {
-  const now = Date.now();
-  const expireTime = 30 * 60 * 1000; // 30 分钟
-
-  for (const [key, data] of progressStore.entries()) {
-    if (now - data.timestamp > expireTime) {
-      progressStore.delete(key);
-    }
-  }
-}
+import { updateExportProgress, getExportProgress, type ExportProgressData } from '@/lib/export-progress';
 
 /* ==================================================
    GET /api/export/progress
@@ -109,7 +50,7 @@ export async function GET(request: NextRequest) {
         };
 
         // 立即发送当前状态
-        const currentProgress = progressStore.get(projectId);
+        const currentProgress = getExportProgress(projectId);
         if (currentProgress) {
           sendProgress(currentProgress);
 
@@ -134,7 +75,7 @@ export async function GET(request: NextRequest) {
 
         // 设置轮询检查进度
         const intervalId = setInterval(() => {
-          const progress = progressStore.get(projectId);
+          const progress = getExportProgress(projectId);
           
           if (progress) {
             sendProgress(progress);

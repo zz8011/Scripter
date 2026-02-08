@@ -1,65 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createCharacter, getCharactersByProjectId } from '@/lib/db/queries/characters'
-import { getProjectById } from '@/lib/db/queries/projects'
-import { getSessionWithDev } from '@/lib/session'
+import { withAuth, requireProjectAccess } from '@/lib/auth/middleware'
+import { createCharacterSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
+import { z } from 'zod'
 
 /**
  * GET /api/characters?projectId=xxx
  * Get all characters for a project
  */
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest) => {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const searchParams = request.nextUrl.searchParams
     const projectId = searchParams.get('projectId')
 
     if (!projectId) {
-      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'BAD_REQUEST', message: '项目 ID 不能为空' },
+        { status: 400 }
+      )
     }
 
-    // Verify project access
-    const project = await getProjectById(projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
-    }
+    // 验证项目访问权限
+    await requireProjectAccess(projectId)
 
     const characters = await getCharactersByProjectId(projectId)
     return NextResponse.json({ characters })
   } catch (error) {
     logger.error('Error fetching characters:', error instanceof Error ? error : undefined)
-    return NextResponse.json({ error: 'Failed to fetch characters' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '获取角色列表失败' },
+      { status: 500 }
+    )
   }
-}
+})
 
 /**
  * POST /api/characters
  * Create a new character
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
 
-    // Verify project access
-    const project = await getProjectById(body.projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
-    }
+    // 验证输入数据
+    const validatedData = createCharacterSchema.parse(body)
 
-    const character = await createCharacter(body)
+    // 验证项目访问权限
+    await requireProjectAccess(validatedData.projectId)
+
+    const character = await createCharacter(validatedData)
     return NextResponse.json({ character }, { status: 201 })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'VALIDATION_ERROR', message: '输入数据验证失败', details: error.errors },
+        { status: 400 }
+      )
+    }
+
     logger.error('Error creating character:', error instanceof Error ? error : undefined)
-    return NextResponse.json({ error: 'Failed to create character' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '创建角色失败' },
+      { status: 500 }
+    )
   }
-}
+})
 

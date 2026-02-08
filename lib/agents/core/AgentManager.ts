@@ -85,7 +85,7 @@ export class AgentManager {
     }
 
     this.agents.set(agent.id, agent);
-    this.agentBus.register(agent.id, agent);
+    this.agentBus.register({ id: agent.id, name: agent.name, handler: agent.sendMessage });
   }
 
   /**

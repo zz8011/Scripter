@@ -36,9 +36,8 @@ export class AgentScheduler {
     this.isRunning = false;
     this.processInterval = null;
 
-    // BUG: 这里尝试订阅消息，但"scheduler" agent还未注册
-    // 这会导致AgentBus.subscribe抛出错误
-    this.agentBus.subscribe(this.agentId, this.handleMessage.bind(this));
+    // 注册 scheduler agent 到 AgentBus
+    this.agentBus.register({ id: this.agentId, name: 'scheduler', handler: this.handleMessage.bind(this) });
   }
 
   /**
@@ -187,7 +186,6 @@ export class AgentScheduler {
     this.agentBus.send({
       id: generateId(),
       type: 'EXECUTE_TASK',
-      priority: task.priority,
       payload: { taskId: task.id, ...task.payload },
       from: this.agentId,
       to: task.agentId,

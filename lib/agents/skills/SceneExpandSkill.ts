@@ -3,8 +3,7 @@
    Scene Expand Skill
    ================================================== */
 
-import { Skill } from './Skill';
-import { Context } from '../core/types';
+import { Skill, Context, ContextRequirement } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -16,20 +15,52 @@ export type ExpandType = 'action' | 'description' | 'emotion' | 'dialogue';
  * 场景扩展技能
  * 根据现有场景内容扩展，增加动作描述、环境描写
  */
-export class SceneExpandSkill extends Skill {
-  constructor() {
-    super(
-      '场景扩展',
-      '根据现有场景内容扩展，增加动作描述、环境描写，保持情节连贯性',
-      'writing',
-      {
-        version: '1.0.0',
-        author: '剧灵',
-        tags: ['scene', 'expand', 'writing', 'description'],
-        confidence: 0.8,
-      }
-    );
-  }
+export class SceneExpandSkill implements Skill {
+  public readonly id = 'scene-expand';
+  public readonly name = '场景扩展';
+  public readonly description = '根据现有场景内容扩展，增加动作描述、环境描写，保持情节连贯性';
+  public readonly category = 'writing';
+  public readonly metadata = {
+    version: '1.0.0',
+    author: '剧灵',
+    tags: ['scene', 'expand', 'writing', 'description'],
+    confidence: 0.8,
+  };
+
+  // 上下文需求：需要当前场景、情节大纲、世界观规则、人物档案和相邻场景
+  public readonly requiredContext: ContextRequirement[] = [
+    { type: 'currentScene' },
+    { type: 'plotOutline' },
+    { type: 'worldRules' },
+    { type: 'allCharacters' },
+    { type: 'adjacentScenes', range: 2 }
+  ];
+
+  // 输入 Schema
+  public readonly inputSchema = {
+    sceneContent: { type: 'string', required: true },
+    sceneHeading: { type: 'string', required: false },
+    characters: { type: 'array', items: { type: 'string' }, required: false },
+    expandType: { type: 'string', enum: ['action', 'description', 'emotion', 'dialogue'], required: false },
+    targetLength: { type: 'string', enum: ['short', 'medium', 'long'], required: false },
+    focus: { type: 'string', required: false }
+  };
+
+  // 输出 Schema
+  public readonly outputSchema = {
+    original: { type: 'string' },
+    expanded: { type: 'string' },
+    additions: { type: 'array', items: { type: 'object' } },
+    explanation: { type: 'string' }
+  };
+
+  // 预估 token 消耗
+  public readonly estimatedTokens = (input: any) => {
+    const sceneLength = input.sceneContent?.length || 0;
+    const targetLength = input.targetLength || 'medium';
+    const multiplier = targetLength === 'long' ? 3 : targetLength === 'medium' ? 2 : 1.5;
+    return Math.ceil(sceneLength / 2 * multiplier) + 500; // 基础消耗 + 输入 * 扩展倍数
+  };
 
   /**
    * 执行场景扩展
@@ -117,7 +148,10 @@ export class SceneExpandSkill extends Skill {
         }
       );
 
-      const result = this.parseResponse(response.choices[0].message.content);
+      const aiContent = 'isFallback' in response
+        ? response.content
+        : response.choices[0].message.content;
+      const result = this.parseResponse(aiContent);
 
       return {
         original: sceneContent,

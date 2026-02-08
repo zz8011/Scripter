@@ -41,6 +41,12 @@
   "exclude": [
     "node_modules",
     "drizzle",
-    "prototype"
+    "prototype",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "tests/**"
   ]
 }

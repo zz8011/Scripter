@@ -1,32 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWorldviewItem, getWorldviewItemsByProjectId, getWorldviewItemsByCategory } from '@/lib/db/queries/worldview'
-import { getProjectById } from '@/lib/db/queries/projects'
-import { getSessionWithDev } from '@/lib/session'
+import { withAuth, requireProjectAccess } from '@/lib/auth/middleware'
+import { createWorldviewSchema } from '@/lib/validation/schemas'
+import { logger } from '@/lib/logger'
+import { z } from 'zod'
+import { aggregateWorldRules } from '@/lib/story-bible'
 
 /**
  * GET /api/worldview?projectId=xxx&category=era
  * Get worldview items for a project
  */
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest) => {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const searchParams = request.nextUrl.searchParams
     const projectId = searchParams.get('projectId')
     const category = searchParams.get('category')
 
     if (!projectId) {
-      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'BAD_REQUEST', message: '项目 ID 不能为空' },
+        { status: 400 }
+      )
     }
 
-    // Verify project access
-    const project = await getProjectById(projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
-    }
+    // 验证项目访问权限
+    await requireProjectAccess(projectId)
 
     let items
     if (category) {
@@ -37,35 +35,49 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ items })
   } catch (error) {
-    console.error('Error fetching worldview items:', error)
-    return NextResponse.json({ error: 'Failed to fetch worldview items' }, { status: 500 })
+    logger.error('Error fetching worldview items:', error instanceof Error ? error : undefined)
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '获取世界观列表失败' },
+      { status: 500 }
+    )
   }
-}
+})
 
 /**
  * POST /api/worldview
  * Create a new worldview item
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
 
-    // Verify project access
-    const project = await getProjectById(body.projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
-    }
+    // 验证输入数据
+    const validatedData = createWorldviewSchema.parse(body)
 
-    const item = await createWorldviewItem(body)
+    // 验证项目访问权限
+    await requireProjectAccess(validatedData.projectId)
+
+    const item = await createWorldviewItem(validatedData)
+
+    // 异步聚合到 Story Bible（不阻塞响应）
+    aggregateWorldRules(validatedData.projectId).catch(err => {
+      logger.error('Failed to aggregate world rules:', err)
+    })
+
     return NextResponse.json({ item }, { status: 201 })
   } catch (error) {
-    console.error('Error creating worldview item:', error)
-    return NextResponse.json({ error: 'Failed to create worldview item' }, { status: 500 })
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'VALIDATION_ERROR', message: '输入数据验证失败', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    logger.error('Error creating worldview item:', error instanceof Error ? error : undefined)
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '创建世界观失败' },
+      { status: 500 }
+    )
   }
-}
+})
 

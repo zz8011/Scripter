@@ -3,7 +3,7 @@
  * 负责解析用户输入，识别意图，并将任务分发给合适的 Agent
  */
 
-import { AgentBus, MessageType, MessagePriority } from './AgentBus';
+import { AgentBus } from './AgentBus';
 import { AgentScheduler, TaskPriority } from './AgentScheduler';
 
 export interface Intent {
@@ -175,20 +175,17 @@ export class IntentRouter {
       const intentDef = this.intents.get(bestIntent.name);
 
       for (const agentId of targetAgents) {
-        const task = await this.scheduler.submit(
-          `intent:${bestIntent.name}`,
-          {
+        const taskId = this.scheduler.submitTask({
+          type: `intent:${bestIntent.name}`,
+          payload: {
             intent: bestIntent,
             context,
             input,
           },
-          {
-            agentId,
-            priority: intentDef?.priority ?? TaskPriority.NORMAL,
-            tags: ['intent', bestIntent.name],
-          }
-        );
-        taskIds.push(task.id);
+          agentId,
+          priority: intentDef?.priority ?? TaskPriority.NORMAL,
+        });
+        taskIds.push(taskId);
       }
 
       // 5. 执行自定义处理器（如果有）
@@ -388,20 +385,17 @@ export class IntentRouter {
     console.warn(`No intent recognized for input: ${input}`);
 
     if (this.fallbackAgent) {
-      const task = await this.scheduler.submit(
-        'unknown_intent',
-        { input, context },
-        {
-          agentId: this.fallbackAgent,
-          priority: TaskPriority.LOW,
-          tags: ['fallback', 'unknown_intent'],
-        }
-      );
+      const taskId = this.scheduler.submitTask({
+        type: 'unknown_intent',
+        payload: { input, context },
+        agentId: this.fallbackAgent,
+        priority: TaskPriority.LOW,
+      });
 
       return {
         success: true,
         targetAgents: [this.fallbackAgent],
-        taskIds: [task.id],
+        taskIds: [taskId],
       };
     }
 

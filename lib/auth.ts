@@ -1,11 +1,30 @@
+/**
+ * 认证模块 - 向后兼容层
+ *
+ * 此文件保留用于向后兼容，所有函数都重定向到新的安全实现
+ * 新代码应直接使用 lib/auth/middleware.ts
+ *
+ * @deprecated 使用 lib/auth/middleware.ts 替代
+ */
+
+import {
+  withAuth as secureWithAuth,
+  withProjectAuth as secureWithProjectAuth,
+  requireAuth as secureRequireAuth,
+  optionalAuth as secureOptionalAuth,
+  requireProjectAccess as secureRequireProjectAccess,
+  requireValidUser as secureRequireValidUser,
+  requireAdmin as secureRequireAdmin,
+  AuthError as SecureAuthError,
+  unauthorizedResponse as secureUnauthorizedResponse,
+  forbiddenResponse as secureForbiddenResponse,
+} from '@/lib/auth/middleware'
+import { SessionData } from '@/lib/auth/session'
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from './session'
-import { getUserById } from './db/queries/users'
-import { getProjectById } from './db/queries/projects'
-import { logger } from './logger'
 
 /**
  * 会话类型 - 用于 API 路由认证
+ * @deprecated 使用 SessionData from lib/auth/session.ts
  */
 export interface Session {
   id: string
@@ -17,210 +36,108 @@ export interface Session {
 }
 
 /**
- * 认证错误类型
+ * 将 SessionData 转换为旧的 Session 格式
  */
-export class AuthError extends Error {
-  constructor(
-    message: string,
-    public code: string = 'UNAUTHORIZED',
-    public statusCode: number = 401
-  ) {
-    super(message)
-    this.name = 'AuthError'
+function convertToLegacySession(sessionData: SessionData): Session {
+  return {
+    id: sessionData.sessionId,
+    userId: sessionData.user.id,
+    email: sessionData.user.email,
+    name: sessionData.user.name,
+    accessToken: sessionData.accessToken,
+    expiresAt: new Date(sessionData.expiresAt),
   }
 }
 
 /**
+ * 认证错误类型
+ * @deprecated 使用 AuthError from lib/auth/middleware.ts
+ */
+export class AuthError extends SecureAuthError {}
+
+/**
  * 包装 API 路由处理函数，添加认证检查
- * 用法: export const GET = withAuth(async (req, session) => { ... })
+ * @deprecated 使用 lib/auth/middleware.ts 中的 withAuth
  */
 export function withAuth(
   handler: (req: NextRequest, session: Session) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest): Promise<NextResponse> => {
-    try {
-      const session = await requireAuth(req)
-      return await handler(req, session)
-    } catch (error) {
-      if (error instanceof AuthError) {
-        return NextResponse.json(
-          { error: error.code, message: error.message },
-          { status: error.statusCode }
-        )
-      }
-      logger.error('Auth middleware error:', error instanceof Error ? error : undefined)
-      return NextResponse.json(
-        { error: 'INTERNAL_ERROR', message: '服务器内部错误' },
-        { status: 500 }
-      )
-    }
-  }
-}
-
-/**
- * 将 CookieSession 转换为 AuthSession
- * 注意: 这是为了兼容原有的不一致设计
- */
-function convertToAuthSession(cookieSession: Awaited<ReturnType<typeof getSession>>): Session | null {
-  if (!cookieSession) return null
-  
-  return {
-    id: cookieSession.sessionId,
-    userId: cookieSession.user.id,
-    email: cookieSession.user.email,
-    name: cookieSession.user.name,
-    accessToken: cookieSession.accessToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-  }
+  return secureWithAuth(async (req: NextRequest, sessionData: SessionData) => {
+    const legacySession = convertToLegacySession(sessionData)
+    return await handler(req, legacySession)
+  })
 }
 
 /**
  * 检查并返回当前会话
- * 如果没有会话则抛出 AuthError
+ * @deprecated 使用 lib/auth/middleware.ts 中的 requireAuth
  */
-export async function requireAuth(req: NextRequest): Promise<Session> {
-  const session = convertToAuthSession(await getSession(req))
-  
-  if (!session) {
-    throw new AuthError('请先登录', 'UNAUTHORIZED', 401)
-  }
-  
-  // 检查会话是否过期
-  if (session.expiresAt && new Date(session.expiresAt) < new Date()) {
-    throw new AuthError('会话已过期，请重新登录', 'SESSION_EXPIRED', 401)
-  }
-  
-  return session
+export async function requireAuth(req?: NextRequest): Promise<Session> {
+  const sessionData = await secureRequireAuth()
+  return convertToLegacySession(sessionData)
 }
 
 /**
  * 可选认证 - 返回会话或 null
- * 用于公开但需要识别用户的端点
+ * @deprecated 使用 lib/auth/middleware.ts 中的 optionalAuth
  */
-export async function optionalAuth(req: NextRequest): Promise<Session | null> {
-  try {
-    return await requireAuth(req)
-  } catch {
-    return null
-  }
+export async function optionalAuth(req?: NextRequest): Promise<Session | null> {
+  const sessionData = await secureOptionalAuth()
+  return sessionData ? convertToLegacySession(sessionData) : null
 }
 
 /**
  * 检查项目访问权限
- * 验证用户是否是项目所有者或有权限访问
+ * @deprecated 使用 lib/auth/middleware.ts 中的 requireProjectAccess
  */
 export async function requireProjectAccess(
   req: NextRequest,
   projectId: string
 ): Promise<Session> {
-  const session = await requireAuth(req)
-  
-  // 获取项目信息
-  const project = await getProjectById(projectId)
-  
-  if (!project) {
-    throw new AuthError('项目不存在', 'PROJECT_NOT_FOUND', 404)
-  }
-  
-  // 检查是否是项目所有者
-  if (project.userId !== session.userId) {
-    throw new AuthError('无权访问此项目', 'FORBIDDEN', 403)
-  }
-  
-  return session
+  const sessionData = await secureRequireProjectAccess(projectId)
+  return convertToLegacySession(sessionData)
 }
 
 /**
  * 检查用户是否存在且有效
+ * @deprecated 使用 lib/auth/middleware.ts 中的 requireValidUser
  */
-export async function requireValidUser(
-  req: NextRequest
-): Promise<Session> {
-  const session = await requireAuth(req)
-  
-  // 验证用户是否仍然存在于数据库
-  const user = await getUserById(session.userId)
-  
-  if (!user) {
-    throw new AuthError('用户不存在或已被删除', 'USER_NOT_FOUND', 401)
-  }
-  
-  return session
+export async function requireValidUser(req?: NextRequest): Promise<Session> {
+  const sessionData = await secureRequireValidUser()
+  return convertToLegacySession(sessionData)
 }
 
 /**
  * 管理员权限检查
- * 检查用户是否具有管理员权限
+ * @deprecated 使用 lib/auth/middleware.ts 中的 requireAdmin
  */
-export async function requireAdmin(
-  req: NextRequest
-): Promise<Session> {
-  const session = await requireAuth(req)
-  
-  // TODO: 实现管理员权限检查
-  // 目前简单检查，后续可添加 roles 字段
-  const user = await getUserById(session.userId)
-  
-  // 临时：检查是否是特定管理员邮箱
-  const ADMIN_EMAILS = ['admin@scripter.art', 'dev@scripter.art']
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
-    throw new AuthError('需要管理员权限', 'ADMIN_REQUIRED', 403)
-  }
-  
-  return session
+export async function requireAdmin(req?: NextRequest): Promise<Session> {
+  const sessionData = await secureRequireAdmin()
+  return convertToLegacySession(sessionData)
 }
 
 /**
  * API 路由包装器 - 带项目权限检查
- * 用法: export const GET = withProjectAuth(async (req, session, projectId) => { ... })
+ * @deprecated 使用 lib/auth/middleware.ts 中的 withProjectAuth
  */
 export function withProjectAuth(
   handler: (req: NextRequest, session: Session, projectId: string) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> => {
-    try {
-      const projectId = params.id
-      if (!projectId) {
-        return NextResponse.json(
-          { error: 'BAD_REQUEST', message: '项目 ID 不能为空' },
-          { status: 400 }
-        )
-      }
-      
-      const session = await requireProjectAccess(req, projectId)
-      return await handler(req, session, projectId)
-    } catch (error) {
-      if (error instanceof AuthError) {
-        return NextResponse.json(
-          { error: error.code, message: error.message },
-          { status: error.statusCode }
-        )
-      }
-      logger.error('Project auth middleware error:', error instanceof Error ? error : undefined)
-      return NextResponse.json(
-        { error: 'INTERNAL_ERROR', message: '服务器内部错误' },
-        { status: 500 }
-      )
-    }
-  }
+  return secureWithProjectAuth(async (req: NextRequest, sessionData: SessionData, projectId: string) => {
+    const legacySession = convertToLegacySession(sessionData)
+    return await handler(req, legacySession, projectId)
+  })
 }
 
 /**
  * 生成 401 未授权响应
+ * @deprecated 使用 lib/auth/middleware.ts 中的 unauthorizedResponse
  */
-export function unauthorizedResponse(message: string = '请先登录'): NextResponse {
-  return NextResponse.json(
-    { error: 'UNAUTHORIZED', message },
-    { status: 401 }
-  )
-}
+export const unauthorizedResponse = secureUnauthorizedResponse
 
 /**
  * 生成 403 禁止访问响应
+ * @deprecated 使用 lib/auth/middleware.ts 中的 forbiddenResponse
  */
-export function forbiddenResponse(message: string = '无权访问'): NextResponse {
-  return NextResponse.json(
-    { error: 'FORBIDDEN', message },
-    { status: 403 }
-  )
-}
+export const forbiddenResponse = secureForbiddenResponse
+

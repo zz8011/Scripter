@@ -10,17 +10,17 @@
 
 ### 1. PRD 是开发的唯一权威来源
 
-**Scripter 项目以 PRD v2.5 为核心指导文档**。
+**Scripter 项目以 PRD v2.7 为核心指导文档**。
 
 在执行任何开发任务前:
-1. **优先阅读** `docs/prd/prd-v2.5.md` 了解功能需求
+1. **优先阅读** `docs/prd/prd-v2.7.md` 了解功能需求
 2. **引用而非复制** - PRD 中的技术/设计/商业部分引用独立文档
 3. **遵循单一真相来源** - 不在多处重复定义同一内容
 
 ### 2. 文档引用关系
 
 ```
-PRD v2.5 (功能需求)
+PRD v2.6 (功能需求)
     ├─→ 产品定位: docs/product-positioning.md (仅引用)
     ├─→ 商业模式: docs/business-model.md (仅引用)
     ├─→ 风险分析: docs/risk-analysis.md (仅引用)
@@ -305,7 +305,7 @@ grep -r "关键词" docs/reports/
 ### 文档操作
 ```bash
 # 读取 PRD
-"请阅读 docs/prd/prd-v2.5.md"
+"请阅读 docs/prd/prd-v2.7.md"
 
 # 读取特定章节
 "请阅读 PRD 中关于[功能]的部分"
@@ -320,7 +320,7 @@ grep -r "关键词" docs/reports/
 
 ```
 docs/
-├── prd/prd-v2.5.md              # ⭐ 核心指导文档
+├── prd/prd-v2.7.md              # ⭐ 核心指导文档
 ├── product-positioning.md       # 产品定位(权威)
 ├── business-model.md            # 商业模式(权威)
 ├── risk-analysis.md             # 风险分析(权威)

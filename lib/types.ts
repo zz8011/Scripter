@@ -37,11 +37,6 @@ export interface AuthSession {
 }
 
 /**
- * 从 types.ts 重新导出 AuthError
- */
-export { AuthError } from '@/lib/auth'
-
-/**
  * @deprecated 使用 CookieSession 或 AuthSession
  * 保留此别名以向后兼容
  */

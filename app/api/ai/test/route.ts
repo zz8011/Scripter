@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
       maxTokens: 1000,
     })
 
+    if ('isFallback' in response) {
+      return NextResponse.json({
+        content: response.content,
+        usage: null,
+        model: null,
+      })
+    }
+
     const assistantMessage = response.choices[0].message
 
     return NextResponse.json({

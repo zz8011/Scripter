@@ -3,11 +3,16 @@
    Skill Registry
    ================================================== */
 
-import { Skill } from './Skill';
+import { Skill, ContextRequirement } from '../core/types';
 
 /**
  * 技能注册中心
  * 管理所有技能的注册和查找
+ *
+ * 新增功能：
+ * - 查询技能的上下文需求
+ * - 检查技能是否需要特定上下文
+ * - 按上下文需求筛选技能
  */
 export class SkillRegistry {
   private static instance: SkillRegistry;
@@ -97,8 +102,8 @@ export class SkillRegistry {
     return this.getAllSkills().filter(skill => {
       if (query.name && !skill.name.includes(query.name)) return false;
       if (query.category && skill.category !== query.category) return false;
-      if (query.tag && !skill.tags.includes(query.tag)) return false;
-      if (query.author && skill.author !== query.author) return false;
+      if (query.tag && !skill.metadata.tags.includes(query.tag)) return false;
+      if (query.author && skill.metadata.author !== query.author) return false;
       return true;
     });
   }
@@ -114,5 +119,37 @@ export class SkillRegistry {
         count: skillIds.size,
       })),
     };
+  }
+
+  /**
+   * 获取技能的上下文需求
+   * @param skillId 技能 ID
+   * @returns 上下文需求数组，如果技能不存在或没有声明需求则返回空数组
+   */
+  public getContextRequirements(skillId: string) {
+    const skill = this.skills.get(skillId);
+    return skill?.requiredContext || [];
+  }
+
+  /**
+   * 检查技能是否需要特定类型的上下文
+   * @param skillId 技能 ID
+   * @param contextType 上下文类型
+   * @returns 是否需要该类型的上下文
+   */
+  public requiresContext(skillId: string, contextType: string): boolean {
+    const requirements = this.getContextRequirements(skillId);
+    return requirements.some(req => req.type === contextType);
+  }
+
+  /**
+   * 获取所有需要特定上下文类型的技能
+   * @param contextType 上下文类型
+   * @returns 需要该上下文的技能列表
+   */
+  public getSkillsByContextRequirement(contextType: string): Skill[] {
+    return this.getAllSkills().filter(skill =>
+      skill.requiredContext?.some(req => req.type === contextType)
+    );
   }
 }

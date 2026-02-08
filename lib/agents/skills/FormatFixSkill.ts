@@ -3,8 +3,7 @@
    Format Fix Skill
    ================================================== */
 
-import { Skill } from './Skill';
-import { Context } from '../core/types';
+import { Skill, Context, ContextRequirement } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -21,20 +20,43 @@ export interface FormatError {
  * 格式修复技能
  * 检查并修复剧本格式问题
  */
-export class FormatFixSkill extends Skill {
-  constructor() {
-    super(
-      '格式修复',
-      '检查剧本格式是否符合规范，自动修复格式错误',
-      'editing',
-      {
-        version: '1.0.0',
-        author: '剧灵',
-        tags: ['format', 'fix', 'script', 'editing'],
-        confidence: 0.9,
-      }
-    );
-  }
+export class FormatFixSkill implements Skill {
+  public readonly id = 'format-fix';
+  public readonly name = '格式修复';
+  public readonly description = '检查剧本格式是否符合规范，自动修复格式错误';
+  public readonly category = 'editing';
+  public readonly metadata = {
+    version: '1.0.0',
+    author: '剧灵',
+    tags: ['format', 'fix', 'script', 'editing'],
+    confidence: 0.9,
+  };
+
+  // 上下文需求：只需要选中的文本或当前场景
+  public readonly requiredContext: ContextRequirement[] = [
+    { type: 'selectedText' },
+    { type: 'currentScene' }
+  ];
+
+  // 输入 Schema
+  public readonly inputSchema = {
+    content: { type: 'string', required: true },
+    format: { type: 'string', enum: ['standard', 'short-drama'], required: false }
+  };
+
+  // 输出 Schema
+  public readonly outputSchema = {
+    fixed: { type: 'boolean' },
+    content: { type: 'string' },
+    errors: { type: 'array', items: { type: 'object' } },
+    changes: { type: 'array', items: { type: 'string' } }
+  };
+
+  // 预估 token 消耗
+  public readonly estimatedTokens = (input: any) => {
+    const contentLength = input.content?.length || 0;
+    return Math.ceil(contentLength / 2) + 300; // 基础消耗 + 输入
+  };
 
   /**
    * 执行格式修复
@@ -102,8 +124,11 @@ export class FormatFixSkill extends Skill {
       );
 
       // 解析 AI 响应
-      const result = this.parseResponse(response.choices[0].message.content);
-      
+      const aiContent = 'isFallback' in response
+        ? response.content
+        : response.choices[0].message.content;
+      const result = this.parseResponse(aiContent);
+
       return {
         fixed: result.errors.length > 0,
         content: result.fixedContent || content,

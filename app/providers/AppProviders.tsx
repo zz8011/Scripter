@@ -8,6 +8,7 @@
 import { ReactNode } from 'react';
 import { ThemeProvider } from './theme-provider';
 import { TokenRefreshProvider } from '@/components/providers/TokenRefreshProvider';
+import { Toaster } from '@/components/ui/toaster';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     >
       <TokenRefreshProvider intervalMinutes={5} enabled={true}>
         {children}
+        <Toaster />
       </TokenRefreshProvider>
     </ThemeProvider>
   );

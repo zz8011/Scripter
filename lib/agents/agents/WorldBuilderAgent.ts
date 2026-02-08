@@ -45,7 +45,9 @@ export class WorldBuilderAgent extends Agent {
       },
     ]);
 
-    const analysis = response.choices[0].message.content;
+    const analysis = 'isFallback' in response
+      ? response.content
+      : response.choices[0].message.content;
 
     // 解析分析结果
     const { insights, suggestions, confidence } = this.parseAnalysis(analysis);

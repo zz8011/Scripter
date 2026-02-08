@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateCharacter, deleteCharacter } from '@/lib/db/queries/characters'
-import { getProjectById } from '@/lib/db/queries/projects'
-import { getSessionWithDev } from '@/lib/session'
+import { withAuth, requireProjectAccess } from '@/lib/auth/middleware'
+import { updateCharacterSchema } from '@/lib/validation/schemas'
+import { logger } from '@/lib/logger'
+import { z } from 'zod'
+import { aggregateCharacterProfile, removeCharacterFromStoryBible } from '@/lib/story-bible'
 
 /**
  * PUT /api/characters/[id]
@@ -9,33 +12,58 @@ import { getSessionWithDev } from '@/lib/session'
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const session = await withAuth(async () => {
+      return { success: true } as any
+    })(request)
 
-    const { id } = await params
+    const params = await Promise.resolve(context.params)
+    const { id } = params
     const body = await request.json()
-    const { projectId } = body
 
-    // Verify project access
-    const project = await getProjectById(projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
+    // 验证输入数据
+    const validatedData = updateCharacterSchema.parse(body)
+
+    // projectId 必须在 body 中提供
+    if (!body.projectId) {
+      return NextResponse.json(
+        { error: 'BAD_REQUEST', message: '项目 ID 不能为空' },
+        { status: 400 }
+      )
     }
 
-    const character = await updateCharacter(id, projectId, body)
+    // 验证项目访问权限
+    await requireProjectAccess(body.projectId)
+
+    const character = await updateCharacter(id, body.projectId, validatedData as any)
     if (!character) {
-      return NextResponse.json({ error: 'Character not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'NOT_FOUND', message: '角色不存在' },
+        { status: 404 }
+      )
     }
+
+    // 异步聚合到 Story Bible（不阻塞响应）
+    aggregateCharacterProfile(body.projectId, id).catch(err => {
+      logger.error('Failed to aggregate character profile:', err)
+    })
 
     return NextResponse.json({ character })
   } catch (error) {
-    console.error('Error updating character:', error)
-    return NextResponse.json({ error: 'Failed to update character' }, { status: 500 })
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'VALIDATION_ERROR', message: '输入数据验证失败', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    logger.error('Error updating character:', error instanceof Error ? error : undefined)
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '更新角色失败' },
+      { status: 500 }
+    )
   }
 }
 
@@ -45,32 +73,41 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const session = await getSessionWithDev()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    await withAuth(async () => {
+      return { success: true } as any
+    })(request)
 
-    const { id } = await params
+    const params = await Promise.resolve(context.params)
+    const { id } = params
     const searchParams = request.nextUrl.searchParams
     const projectId = searchParams.get('projectId')
 
     if (!projectId) {
-      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'BAD_REQUEST', message: '项目 ID 不能为空' },
+        { status: 400 }
+      )
     }
 
-    // Verify project access
-    const project = await getProjectById(projectId)
-    if (!project || project.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
-    }
+    // 验证项目访问权限
+    await requireProjectAccess(projectId)
 
     await deleteCharacter(id, projectId)
+
+    // 异步从 Story Bible 中删除（不阻塞响应）
+    removeCharacterFromStoryBible(projectId, id).catch(err => {
+      logger.error('Failed to remove character from Story Bible:', err)
+    })
+
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting character:', error)
-    return NextResponse.json({ error: 'Failed to delete character' }, { status: 500 })
+    logger.error('Error deleting character:', error instanceof Error ? error : undefined)
+    return NextResponse.json(
+      { error: 'INTERNAL_ERROR', message: '删除角色失败' },
+      { status: 500 }
+    )
   }
 }

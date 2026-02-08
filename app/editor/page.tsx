@@ -12,10 +12,11 @@ import { IconifyIcon } from '@/components/IconifyIcon';
 import { useEditorStore } from '@/lib/stores/editorStore';
 import { getProject, type Project } from '@/lib/api/projects';
 import { getScenes, type Scene } from '@/lib/api/scenes';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from '@/components/export/ExportDialog';
+import { useToast } from '@/components/ui/use-toast';
 
 /* ==================================================
    Editor 页面组件 Editor Page Component
@@ -60,19 +61,38 @@ function EditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('projectId');
+  const { toast } = useToast();
   // const mode = searchParams.get('mode'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   // 编辑器状态
-  const { plainText, wordCount, sceneCount, dialogueCount, updatePlainText, isDirty, setPlainText } = useEditorStore();
+  const {
+    plainText,
+    wordCount,
+    sceneCount,
+    dialogueCount,
+    updatePlainText,
+    isDirty,
+    setPlainText,
+    startSaving,
+    finishSaving,
+    clearDirty
+  } = useEditorStore();
+
   const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   // 项目状态
   const [project, setProject] = useState<Project | null>(null);
+  const [scenes, setScenes] = useState<Scene[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // 导出对话框状态
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+
+  // 保存定时器引用
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   /* ==================================================
      加载项目数据 Load Project Data
@@ -96,6 +116,7 @@ function EditorContent() {
         // 加载场景数据（如果有的话）
         try {
           const scenesData = await getScenes(projectId);
+          setScenes(scenesData);
 
           // 将 TipTap JSON 内容转换为纯文本显示
           // 如果场景有 content（TipTap JSON），提取文本内容
@@ -125,34 +146,140 @@ function EditorContent() {
     };
 
     loadProject();
-  }, [projectId]);
+  }, [projectId, setPlainText]);
 
   /* ==================================================
      自动保存 Auto Save
      ================================================== */
 
+  // 保存到服务端的函数
+  const saveToServer = useCallback(async () => {
+    if (!scenes || scenes.length === 0) {
+      console.warn('No scenes to save');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setSaveStatus('saving');
+      startSaving();
+
+      // 将纯文本转换为 TipTap JSON 格式
+      // 简化版本：将文本包装为段落节点
+      const content = {
+        type: 'doc',
+        content: plainText.split('\n').map(line => ({
+          type: 'paragraph',
+          content: line ? [{ type: 'text', text: line }] : []
+        }))
+      };
+
+      // 保存到第一个场景（简化实现）
+      // TODO: 未来支持多场景编辑
+      const sceneId = scenes[0].id;
+
+      const response = await fetch(`/api/scenes/${sceneId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save');
+      }
+
+      const data = await response.json();
+
+      // 保存成功
+      setLastSavedAt(new Date(data.savedAt));
+      setSaveStatus('saved');
+      finishSaving();
+      clearDirty();
+
+      // 显示成功提示
+      toast({
+        title: '保存成功',
+        description: `已保存到云端 · ${new Date(data.savedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`,
+        variant: 'default',
+      });
+
+      // 3秒后清除保存状态提示
+      setTimeout(() => {
+        setSaveStatus(null);
+      }, 3000);
+
+    } catch (err) {
+      console.error('Failed to save:', err);
+      setSaveStatus('error');
+
+      // 根据错误类型提供更详细的提示
+      let errorTitle = '保存失败';
+      let errorDescription = '无法保存到服务器，请稍后重试';
+
+      if (err instanceof Error) {
+        if (err.message.includes('Unauthorized') || err.message.includes('401')) {
+          errorTitle = '未授权';
+          errorDescription = '登录已过期，请重新登录';
+        } else if (err.message.includes('Forbidden') || err.message.includes('403')) {
+          errorTitle = '权限不足';
+          errorDescription = '您没有权限编辑此项目';
+        } else if (err.message.includes('Not Found') || err.message.includes('404')) {
+          errorTitle = '场景不存在';
+          errorDescription = '无法找到要保存的场景';
+        } else if (err.message.includes('Network') || err.message.includes('Failed to fetch')) {
+          errorTitle = '网络错误';
+          errorDescription = '网络连接失败，请检查网络后重试';
+        } else {
+          errorDescription = err.message;
+        }
+      }
+
+      toast({
+        title: errorTitle,
+        description: errorDescription,
+        variant: 'destructive',
+      });
+
+      // 5秒后清除错误状态
+      setTimeout(() => {
+        setSaveStatus(null);
+      }, 5000);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [scenes, plainText, startSaving, finishSaving, clearDirty, toast]);
+
+  // Debounced 自动保存
   useEffect(() => {
-    if (!isDirty || !project) return;
+    if (!isDirty || !project || !scenes || scenes.length === 0) return;
 
-    const timer = setTimeout(() => {
-      handleSave();
-    }, 2000); // 2秒后自动保存
+    // 清除之前的定时器
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
 
-    return () => clearTimeout(timer);
-  }, [isDirty, project]);
+    // 设置新的定时器（2秒延迟）
+    saveTimerRef.current = setTimeout(() => {
+      saveToServer();
+    }, 2000);
+
+    // 清理函数
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [isDirty, project, scenes, saveToServer]);
 
   /* ==================================================
      处理函数 Handlers
      ================================================== */
 
   const handleSave = async () => {
-    if (!project) return;
-
-    setIsSaving(true);
-    // TODO: 保存到服务器
-    // await updateProject(projectId, { script: plainText });
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsSaving(false);
+    await saveToServer();
   };
 
   const handleExport = () => {
@@ -162,6 +289,41 @@ function EditorContent() {
   const handlePrint = () => {
     window.print();
   };
+
+  /* ==================================================
+     快捷键监听 Keyboard Shortcuts
+     ================================================== */
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+S 或 Cmd+S 保存
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+
+        // 如果有未保存的更改，立即保存
+        if (isDirty && !isSaving) {
+          handleSave();
+
+          // 显示快捷键反馈
+          toast({
+            title: '正在保存...',
+            description: '使用 Ctrl+S 快捷键保存',
+            variant: 'default',
+          });
+        } else if (!isDirty) {
+          // 没有未保存的更改
+          toast({
+            title: '无需保存',
+            description: '当前没有未保存的更改',
+            variant: 'default',
+          });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDirty, isSaving, handleSave, toast]);
 
   /* ==================================================
      渲染头部 Render Header
@@ -222,20 +384,44 @@ function EditorContent() {
 
       <div className="flex items-center gap-2">
         {/* 状态指示 */}
-        {isDirty && !isSaving && (
+        {saveStatus === 'saved' && (
+          <div
+            className="flex items-center gap-1 text-sm animate-in fade-in slide-in-from-right-2 duration-300"
+            style={{ color: 'var(--success-green)' }}
+          >
+            <IconifyIcon icon="lucide:check-circle-2" className="text-base" />
+            <span className="font-medium">已保存</span>
+            {lastSavedAt && (
+              <span style={{ color: 'var(--text-muted)' }} className="ml-1 text-xs">
+                {lastSavedAt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
+        )}
+        {saveStatus === 'saving' && (
+          <div
+            className="flex items-center gap-1 text-sm animate-in fade-in duration-200"
+            style={{ color: 'var(--info-blue)' }}
+          >
+            <IconifyIcon icon="lucide:loader-2" className="text-base animate-spin" />
+            <span>保存中...</span>
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div
+            className="flex items-center gap-1 text-sm animate-in fade-in shake duration-300"
+            style={{ color: 'var(--error-red)' }}
+          >
+            <IconifyIcon icon="lucide:alert-circle" className="text-base" />
+            <span className="font-medium">保存失败</span>
+          </div>
+        )}
+        {!saveStatus && isDirty && !isSaving && (
           <span
-            className="text-xs mr-2"
+            className="text-xs animate-in fade-in duration-200"
             style={{ color: 'var(--text-muted)' }}
           >
             有未保存的更改
-          </span>
-        )}
-        {isSaving && (
-          <span
-            className="text-xs mr-2"
-            style={{ color: 'var(--info-blue)' }}
-          >
-            保存中...
           </span>
         )}
 
@@ -251,9 +437,11 @@ function EditorContent() {
         <Button
           onClick={handleSave}
           size="sm"
+          disabled={isSaving || !isDirty}
           style={{
             backgroundColor: 'var(--brand-gold)',
             color: 'var(--button-text-on-dark)',
+            opacity: isSaving || !isDirty ? 0.5 : 1,
           }}
         >
           <IconifyIcon icon="lucide:save" className="mr-2" />

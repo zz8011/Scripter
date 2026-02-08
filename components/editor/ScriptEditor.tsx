@@ -19,6 +19,9 @@ import {
   Parenthetical,
 } from '@/lib/extensions/script-nodes';
 import { validateScript, FormatError } from '@/lib/utils/script-validator';
+import { FloatingAIToolbar } from '@/components/editor/FloatingAIToolbar';
+import { AIResultPreview } from '@/components/editor/AIResultPreview';
+import { useEditorAI } from '@/hooks/useEditorAI';
 
 /* ==================================================
    客户端检查 - 避免 SSR 警告
@@ -120,6 +123,16 @@ export function ScriptEditor({
   // 格式检查状态
   const [formatErrors, setFormatErrors] = useState<FormatError[]>([]);
   const [formatWarnings, setFormatWarnings] = useState<FormatError[]>([]);
+
+  // AI 功能状态
+  const { isLoading: isAILoading, polishDialogue, expandScene, fixFormat } = useEditorAI();
+  const [aiPreview, setAiPreview] = useState<{
+    type: 'polish' | 'expand' | 'fix';
+    original: string;
+    result: string;
+    alternatives?: string[];
+    explanation?: string;
+  } | null>(null);
 
   // 只在客户端初始化编辑器
   const editor = useEditor({
@@ -254,6 +267,86 @@ export function ScriptEditor({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [editor, editable, onExport, setSceneHeading, setCharacter, setDialogue, setAction, setParenthetical]);
+
+  /* ==================================================
+     AI 功能处理 AI Handlers
+     ================================================== */
+
+  // 处理润色对白
+  const handlePolish = useCallback(async () => {
+    if (!editor) return;
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, ' ');
+
+    if (!selectedText) return;
+
+    const result = await polishDialogue(selectedText, '未知角色');
+    if (result) {
+      setAiPreview({
+        type: 'polish',
+        original: result.original,
+        result: result.polished,
+        alternatives: result.alternatives,
+        explanation: result.explanation,
+      });
+    }
+  }, [editor, polishDialogue]);
+
+  // 处理扩展场景
+  const handleExpand = useCallback(async () => {
+    if (!editor) return;
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, ' ');
+
+    if (!selectedText) return;
+
+    const result = await expandScene(selectedText);
+    if (result) {
+      setAiPreview({
+        type: 'expand',
+        original: result.original,
+        result: result.expanded,
+        explanation: result.explanation,
+      });
+    }
+  }, [editor, expandScene]);
+
+  // 处理修复格式
+  const handleFix = useCallback(async () => {
+    if (!editor) return;
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, ' ');
+
+    if (!selectedText) return;
+
+    const result = await fixFormat(selectedText);
+    if (result) {
+      setAiPreview({
+        type: 'fix',
+        original: selectedText,
+        result: result.content,
+        explanation: result.changes.join('\n'),
+      });
+    }
+  }, [editor, fixFormat]);
+
+  // 接受 AI 结果
+  const handleAcceptAI = useCallback((selectedResult: string) => {
+    if (!editor || !aiPreview) return;
+
+    const { from, to } = editor.state.selection;
+    editor.chain().focus().deleteRange({ from, to }).insertContent(selectedResult).run();
+
+    setAiPreview(null);
+  }, [editor, aiPreview]);
+
+  // 拒绝 AI 结果
+  const handleRejectAI = useCallback(() => {
+    setAiPreview(null);
+  }, []);
 
   /* ==================================================
      渲染 Render
@@ -407,8 +500,32 @@ export function ScriptEditor({
       >
         <div className="max-w-3xl mx-auto py-8">
           <EditorContent editor={editor} />
+
+          {/* 浮动 AI 工具栏 */}
+          {editable && (
+            <FloatingAIToolbar
+              editor={editor}
+              onPolish={handlePolish}
+              onExpand={handleExpand}
+              onFix={handleFix}
+              isLoading={isAILoading}
+            />
+          )}
         </div>
       </div>
+
+      {/* AI 结果预览 */}
+      {aiPreview && (
+        <AIResultPreview
+          original={aiPreview.original}
+          result={aiPreview.result}
+          alternatives={aiPreview.alternatives}
+          explanation={aiPreview.explanation}
+          onAccept={handleAcceptAI}
+          onReject={handleRejectAI}
+          type={aiPreview.type}
+        />
+      )}
 
       {/* 格式检查面板（底部） */}
       {showValidation && editable && (formatErrors.length > 0 || formatWarnings.length > 0) && (

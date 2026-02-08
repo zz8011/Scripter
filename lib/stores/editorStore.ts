@@ -109,6 +109,7 @@ interface EditorState {
   startSaving: () => void;
 
   // 完成保存
+  finishSaving: () => void;
 
   // 重置编辑器
   resetEditor: () => void;

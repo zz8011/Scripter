@@ -60,15 +60,14 @@ export class AgentManager {
    */
   public registerAgent(agent: any): void {
     this.agents.set(agent.id, agent);
-    this.agentBus.registerAgent({
+    this.agentBus.register({
       id: agent.id,
       name: agent.name,
-      capabilities: agent.getAllSkills?.().map((s: any) => s.id) || [],
-      maxConcurrentTasks: 3,
+      handler: agent.receiveMessage?.bind(agent),
     });
     console.log('[AgentManager] Agent 注册:', agent.name);
   }
-  
+
   /**
    * 注销 Agent
    */
@@ -76,7 +75,7 @@ export class AgentManager {
     const agent = this.agents.get(agentId);
     if (agent) {
       this.agents.delete(agentId);
-      this.agentBus.unregisterAgent(agentId);
+      this.agentBus.unregister(agentId);
       console.log('[AgentManager] Agent 注销:', agent.name);
     }
   }
@@ -128,7 +127,7 @@ export class AgentManager {
         role: agent.role,
         state: agent.getState(),
       })),
-      busStats: this.agentBus.getQueueStatus(),
+      busStats: this.agentBus.getStats(),
     };
   }
   

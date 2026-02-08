@@ -3,8 +3,7 @@
    Dialogue Polish Skill
    ================================================== */
 
-import { Skill } from './Skill';
-import { Context } from '../core/types';
+import { Skill, Context, ContextRequirement } from '../core/types';
 import { callZhipuAI } from '@/lib/zhipu';
 
 /**
@@ -21,20 +20,48 @@ export interface PolishOption {
  * 对白润色技能
  * 优化对白表达，保持人物性格一致性
  */
-export class DialoguePolishSkill extends Skill {
-  constructor() {
-    super(
-      '对白润色',
-      '优化对白表达，保持人物性格一致性，提供多个润色选项',
-      'writing',
-      {
-        version: '1.0.0',
-        author: '剧灵',
-        tags: ['dialogue', 'polish', 'writing', 'style'],
-        confidence: 0.85,
-      }
-    );
-  }
+export class DialoguePolishSkill implements Skill {
+  public readonly id = 'dialogue-polish';
+  public readonly name = '对白润色';
+  public readonly description = '优化对白表达，保持人物性格一致性，提供多个润色选项';
+  public readonly category = 'writing';
+  public readonly metadata = {
+    version: '1.0.0',
+    author: '剧灵',
+    tags: ['dialogue', 'polish', 'writing', 'style'],
+    confidence: 0.85,
+  };
+
+  // 上下文需求：需要当前场景、人物档案和相邻场景（用于理解对话上下文）
+  public readonly requiredContext: ContextRequirement[] = [
+    { type: 'currentScene' },
+    { type: 'characterProfile' },
+    { type: 'adjacentScenes', range: 1 }
+  ];
+
+  // 输入 Schema
+  public readonly inputSchema = {
+    dialogue: { type: 'string', required: true },
+    characterName: { type: 'string', required: true },
+    characterProfile: { type: 'object', required: false },
+    sceneContext: { type: 'string', required: false },
+    style: { type: 'string', enum: ['natural', 'dramatic', 'concise', 'poetic'], required: false }
+  };
+
+  // 输出 Schema
+  public readonly outputSchema = {
+    original: { type: 'string' },
+    polished: { type: 'string' },
+    alternatives: { type: 'array', items: { type: 'string' } },
+    explanation: { type: 'string' }
+  };
+
+  // 预估 token 消耗
+  public readonly estimatedTokens = (input: any) => {
+    const dialogueLength = input.dialogue?.length || 0;
+    const profileLength = JSON.stringify(input.characterProfile || {}).length;
+    return Math.ceil((dialogueLength + profileLength) / 2) + 500; // 基础消耗 + 输入
+  };
 
   /**
    * 执行对白润色
@@ -119,7 +146,10 @@ ${characterDesc}
       );
 
       // 解析 AI 响应
-      const result = this.parseResponse(response.choices[0].message.content);
+      const aiContent = 'isFallback' in response
+        ? response.content
+        : response.choices[0].message.content;
+      const result = this.parseResponse(aiContent);
 
       return {
         original: dialogue,
@@ -144,7 +174,7 @@ ${characterDesc}
   protected validateInput(input: any): boolean {
     return (
       input &&
-typeof input.dialogue === 'string' &&
+      typeof input.dialogue === 'string' &&
       input.dialogue.length > 0 &&
       typeof input.characterName === 'string' &&
       input.characterName.length > 0

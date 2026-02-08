@@ -54,14 +54,13 @@ export abstract class Skill {
     const message: AgentMessage = {
       id: generateId(),
       type,
-      priority: 'NORMAL',
       payload,
       from: this.agentId,
       to,
       timestamp: Date.now()
     };
     
-    agentBus.send(message);
+    agentBus.send({ ...message, to: to } as Required<Pick<AgentMessage, 'to'>> & AgentMessage);
   }
 
   /**
