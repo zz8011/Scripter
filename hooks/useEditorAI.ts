@@ -65,35 +65,35 @@ export function useEditorAI() {
       setIsLoading(true);
 
       try {
-        // TODO: 替换为真实 API 调用
-        // const response = await fetch('/api/ai/skills', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({
-        //     skillId: 'dialogue-polish',
-        //     input: {
-        //       dialogue,
-        //       characterName,
-        //       style: options?.style || 'natural',
-        //     },
-        //     editorState: {
-        //       projectId: options?.projectId || 'unknown',
-        //     },
-        //   }),
-        // });
+        const response = await fetch('/api/ai/skills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skillId: 'dialogue-polish',
+            input: {
+              dialogue,
+              characterName,
+              style: options?.style || 'natural',
+            },
+            editorState: {
+              projectId: options?.projectId || 'unknown',
+            },
+          }),
+        });
 
-        // Mock 数据（用于 UI 测试）
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `API 请求失败: ${response.status}`);
+        }
 
-        const mockResult: PolishResult = {
+        const data = await response.json();
+
+        // 转换 API 响应为 PolishResult 格式
+        const result: PolishResult = {
           original: dialogue,
-          polished: `${dialogue}（已润色）`,
-          alternatives: [
-            `${dialogue}（备选方案1）`,
-            `${dialogue}（备选方案2）`,
-            `${dialogue}（备选方案3）`,
-          ],
-          explanation: '这是一个 Mock 润色结果，等待真实 API 接入。',
+          polished: data.result.polished || dialogue,
+          alternatives: data.result.alternatives || [],
+          explanation: data.result.explanation || '',
         };
 
         toast({
@@ -102,7 +102,7 @@ export function useEditorAI() {
           variant: 'default',
         });
 
-        return mockResult;
+        return result;
       } catch (error) {
         console.error('Polish dialogue failed:', error);
         toast({
@@ -133,42 +133,35 @@ export function useEditorAI() {
       setIsLoading(true);
 
       try {
-        // TODO: 替换为真实 API 调用
-        // const response = await fetch('/api/ai/skills', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({
-        //     skillId: 'scene-expand',
-        //     input: {
-        //       sceneContent,
-        //       expandType: options?.expandType || 'action',
-        //       targetLength: options?.targetLength || 'medium',
-        //     },
-        //     editorState: {
-        //       projectId: options?.projectId || 'unknown',
-        //     },
-        //   }),
-        // });
+        const response = await fetch('/api/ai/skills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skillId: 'scene-expand',
+            input: {
+              sceneContent,
+              expandType: options?.expandType || 'action',
+              targetLength: options?.targetLength || 'medium',
+            },
+            editorState: {
+              projectId: options?.projectId || 'unknown',
+            },
+          }),
+        });
 
-        // Mock 数据（用于 UI 测试）
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `API 请求失败: ${response.status}`);
+        }
 
-        const mockResult: ExpandResult = {
+        const data = await response.json();
+
+        // 转换 API 响应为 ExpandResult 格式
+        const result: ExpandResult = {
           original: sceneContent,
-          expanded: `${sceneContent}\n\n（这里是扩展的内容，增加了动作描写和环境细节）`,
-          additions: [
-            {
-              type: 'action',
-              content: '李明缓缓走进咖啡厅，目光扫过每一个角落。',
-              position: 'after',
-            },
-            {
-              type: 'description',
-              content: '咖啡厅里弥漫着淡淡的咖啡香气，柔和的爵士乐在空气中流淌。',
-              position: 'inline',
-            },
-          ],
-          explanation: '这是一个 Mock 扩展结果，等待真实 API 接入。',
+          expanded: data.result.expanded || sceneContent,
+          additions: data.result.additions || [],
+          explanation: data.result.explanation || '',
         };
 
         toast({
@@ -177,7 +170,7 @@ export function useEditorAI() {
           variant: 'default',
         });
 
-        return mockResult;
+        return result;
       } catch (error) {
         console.error('Expand scene failed:', error);
         toast({
@@ -207,46 +200,43 @@ export function useEditorAI() {
       setIsLoading(true);
 
       try {
-        // TODO: 替换为真实 API 调用
-        // const response = await fetch('/api/ai/skills', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({
-        //     skillId: 'format-fix',
-        //     input: {
-        //       content,
-        //       format: options?.format || 'standard',
-        //     },
-        //     editorState: {
-        //       projectId: options?.projectId || 'unknown',
-        //     },
-        //   }),
-        // });
-
-        // Mock 数据（用于 UI 测试）
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const mockResult: FixResult = {
-          fixed: true,
-          content: content,
-          errors: [
-            {
-              type: 'scene-heading',
-              line: 1,
-              message: '场景标题格式不规范',
-              suggestion: '建议使用：场1-1 日/内 咖啡厅 李明、张华',
+        const response = await fetch('/api/ai/skills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skillId: 'format-fix',
+            input: {
+              content,
+              format: options?.format || 'standard',
             },
-          ],
-          changes: ['修复了场景标题格式', '调整了人物名称格式'],
+            editorState: {
+              projectId: options?.projectId || 'unknown',
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `API 请求失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 转换 API 响应为 FixResult 格式
+        const result: FixResult = {
+          fixed: data.result.fixed || false,
+          content: data.result.content || content,
+          errors: data.result.errors || [],
+          changes: data.result.changes || [],
         };
 
         toast({
           title: '格式检查完成',
-          description: `发现 ${mockResult.errors.length} 个问题`,
-          variant: mockResult.errors.length > 0 ? 'default' : 'default',
+          description: `发现 ${result.errors.length} 个问题`,
+          variant: result.errors.length > 0 ? 'default' : 'default',
         });
 
-        return mockResult;
+        return result;
       } catch (error) {
         console.error('Fix format failed:', error);
         toast({

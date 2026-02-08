@@ -555,6 +555,7 @@ function EditorContent() {
               onChange={updatePlainText}
               onExport={handleExport}
               className="h-full"
+              projectId={projectId || undefined}
             />
           </div>
 

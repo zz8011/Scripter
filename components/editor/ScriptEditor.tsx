@@ -54,6 +54,7 @@ interface ScriptEditorProps {
   editable?: boolean;
   className?: string;
   showValidation?: boolean;
+  projectId?: string;
 }
 
 /* ==================================================
@@ -112,6 +113,7 @@ export function ScriptEditor({
   editable = true,
   className,
   showValidation = true,
+  projectId,
 }: ScriptEditorProps) {
   // 客户端检查 - 避免 TipTap SSR 警告
   const isClient = useIsClient();
@@ -281,7 +283,9 @@ export function ScriptEditor({
 
     if (!selectedText) return;
 
-    const result = await polishDialogue(selectedText, '未知角色');
+    const result = await polishDialogue(selectedText, '未知角色', {
+      projectId,
+    });
     if (result) {
       setAiPreview({
         type: 'polish',
@@ -291,7 +295,7 @@ export function ScriptEditor({
         explanation: result.explanation,
       });
     }
-  }, [editor, polishDialogue]);
+  }, [editor, polishDialogue, projectId]);
 
   // 处理扩展场景
   const handleExpand = useCallback(async () => {
@@ -302,7 +306,9 @@ export function ScriptEditor({
 
     if (!selectedText) return;
 
-    const result = await expandScene(selectedText);
+    const result = await expandScene(selectedText, {
+      projectId,
+    });
     if (result) {
       setAiPreview({
         type: 'expand',
@@ -311,7 +317,7 @@ export function ScriptEditor({
         explanation: result.explanation,
       });
     }
-  }, [editor, expandScene]);
+  }, [editor, expandScene, projectId]);
 
   // 处理修复格式
   const handleFix = useCallback(async () => {
@@ -322,7 +328,9 @@ export function ScriptEditor({
 
     if (!selectedText) return;
 
-    const result = await fixFormat(selectedText);
+    const result = await fixFormat(selectedText, {
+      projectId,
+    });
     if (result) {
       setAiPreview({
         type: 'fix',
@@ -331,7 +339,7 @@ export function ScriptEditor({
         explanation: result.changes.join('\n'),
       });
     }
-  }, [editor, fixFormat]);
+  }, [editor, fixFormat, projectId]);
 
   // 接受 AI 结果
   const handleAcceptAI = useCallback((selectedResult: string) => {
